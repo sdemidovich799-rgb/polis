@@ -4,110 +4,110 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#0b141a">
-    <title>108 · Полис v1.4 (RC-1)</title>
-    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="108">
+    <!-- Иконка приложения (генерируется кодом, без файлов) -->
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%230b141a'/%3E%3Ccircle cx='50' cy='50' r='40' stroke='%2300a884' stroke-width='4' fill='none'/%3E%3Ctext x='50' y='63' font-size='32' text-anchor='middle' fill='%23fff' font-family='monospace' font-weight='bold'%3E1%3Ctspan fill='%23ea0038'%3E0%3C/tspan%3E8%3C/text%3E%3C/svg%3E">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%230b141a'/%3E%3Ccircle cx='50' cy='50' r='40' stroke='%2300a884' stroke-width='4' fill='none'/%3E%3Ctext x='50' y='63' font-size='32' text-anchor='middle' fill='%23fff' font-family='monospace' font-weight='bold'%3E1%3Ctspan fill='%23ea0038'%3E0%3C/tspan%3E8%3C/text%3E%3C/svg%3E">
+    <title>108</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.min.js"></script>
     <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-        body { background: #0b141a; color: #e9edef; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; user-select: none; }
+        input, textarea { user-select: auto; }
+        body { background: #0b141a; color: #e9edef; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; height: 100vh; height: -webkit-fill-available; display: flex; flex-direction: column; overflow: hidden; }
         #app { max-width: 800px; margin: 0 auto; width: 100%; height: 100%; display: flex; flex-direction: column; background: #0b141a; position: relative; }
         
-        /* Вход / Многоликость */
-        .login-panel { padding: 32px 20px; display: flex; flex-direction: column; gap: 24px; background: #111b21; height: 100%; justify-content: center; align-items: center; z-index: 100; }
-        .login-panel input { width: 100%; max-width: 320px; padding: 18px; border-radius: 12px; border: 1px solid #2d3f4b; font-size: 18px; background: #202c33; color: #fff; outline: none; text-align: center; letter-spacing: 4px; transition: 0.3s; }
-        .login-panel input:focus { border-color: #00a884; box-shadow: 0 0 15px rgba(0, 168, 132, 0.2); }
-        .login-panel button { width: 100%; max-width: 320px; padding: 16px; border-radius: 12px; border: none; font-size: 16px; font-weight: 600; background: #00a884; color: #111b21; cursor: pointer; text-transform: uppercase; letter-spacing: 2px;}
+        .login-panel { padding: calc(env(safe-area-inset-top) + 32px) 20px calc(env(safe-area-inset-bottom) + 32px); display: flex; flex-direction: column; gap: 24px; background: #0b141a; height: 100%; justify-content: center; align-items: center; z-index: 100; }
+        .login-panel input { width: 100%; max-width: 320px; padding: 18px; border-radius: 12px; border: 1px solid #2d3f4b; font-size: 20px; background: #111b21; color: #fff; outline: none; text-align: center; letter-spacing: 6px; font-family: monospace;}
+        .login-panel input:focus { border-color: #00a884; box-shadow: 0 0 15px rgba(0, 168, 132, 0.1); }
+        .login-panel button { width: 100%; max-width: 320px; padding: 16px; border-radius: 12px; border: none; font-size: 16px; font-weight: 600; background: #00a884; color: #111b21; cursor: pointer; letter-spacing: 2px;}
         
-        /* Монада */
-        .monad { position: relative; width: 64px; height: 64px; border: 1px solid rgba(255,255,255,0.05); border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.5s; }
-        .monad-dot { width: 12px; height: 12px; background: #ea0038; border-radius: 50%; transition: all 0.5s; }
+        /* Объединенный логотип 1[Монада]8 */
+        .logo-108 { display: flex; align-items: center; justify-content: center; font-size: 48px; font-weight: bold; font-family: monospace; letter-spacing: 2px; }
+        .monad { position: relative; width: 48px; height: 48px; border: 2px solid rgba(255,255,255,0.05); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 4px; transition: 0.5s; }
+        .monad-dot { width: 12px; height: 12px; background: #ea0038; border-radius: 50%; transition: 0.5s; }
         .monad.pulse { border-color: rgba(0, 168, 132, 0.3); }
         .monad.pulse .monad-dot { background: #00a884; box-shadow: 0 0 16px #00a884; animation: pulseDot 2s infinite alternate ease-in-out; }
-        @keyframes pulseDot { 0% { transform: scale(0.8); opacity: 0.8; } 100% { transform: scale(1.4); opacity: 1; box-shadow: 0 0 24px #00a884; } }
+        @keyframes pulseDot { 0% { transform: scale(0.8); } 100% { transform: scale(1.4); box-shadow: 0 0 24px #00a884; } }
         
-        .header-monad { width: 32px; height: 32px; border-width: 1px; cursor: pointer; }
-        .header-monad .monad-dot { width: 6px; height: 6px; }
+        .header-logo { font-size: 20px; letter-spacing: 1px; cursor: pointer; display: flex; align-items: center; }
+        .header-logo .monad { width: 20px; height: 20px; border-width: 1px; margin: 0 2px; }
+        .header-logo .monad-dot { width: 6px; height: 6px; }
 
-        /* Интерфейс */
         .header { padding: calc(env(safe-area-inset-top) + 12px) 16px 12px; background: #202c33; border-bottom: 1px solid #2d3f4b; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; z-index: 10; }
         .messenger-layout { display: flex; flex: 1; overflow: hidden; position: relative; }
         
         .threads-panel { width: 100%; display: flex; flex-direction: column; background: #111b21; z-index: 5; }
         .threads-header { padding: 16px; display: flex; justify-content: space-between; align-items: center; background: #202c33; border-bottom: 1px solid #0b141a;}
         .tools-row { display: flex; gap: 12px; }
-        .icon-btn { background: #2a3942; border: none; color: #8f9ca3; border-radius: 50%; width: 36px; height: 36px; font-size: 16px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-        .add-btn { background: #00a884; color: #111b21; font-size: 24px; font-weight: bold; }
+        .icon-btn { background: #2a3942; border: none; color: #8f9ca3; border-radius: 50%; width: 36px; height: 36px; font-size: 16px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold;}
+        .add-btn { background: #00a884; color: #111b21; font-size: 24px; }
+        .share-btn { background: #005c4b; color: #e9edef; font-size: 16px; }
         
-        .thread-list { flex: 1; overflow-y: auto; }
-        .thread-item { padding: 16px; border-bottom: 1px solid #202c33; cursor: pointer; display: flex; flex-direction: column; gap: 4px; transition: background 0.2s; }
+        .thread-list { flex: 1; overflow-y: auto; padding-bottom: env(safe-area-inset-bottom); }
+        .thread-item { padding: 16px; border-bottom: 1px solid #202c33; cursor: pointer; display: flex; flex-direction: column; gap: 4px; }
         .thread-item:active { background: #2a3942; }
         .t-name { font-weight: 600; font-size: 16px; }
         .t-id { font-size: 11px; color: #8f9ca3; font-family: monospace; }
         
-        .chat-panel { position: absolute; top:0; left:0; width:100%; height:100%; background: #0b141a; display: flex; flex-direction: column; z-index: 6; transform: translateX(100%); transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .chat-panel { position: absolute; top:0; left:0; width:100%; height:100%; background: #0b141a; display: flex; flex-direction: column; z-index: 6; transform: translateX(100%); transition: transform 0.25s cubic-bezier(0.3, 0, 0, 1); }
         .chat-panel.active { transform: translateX(0); }
         
-        .chat-header { padding: 12px 16px; background: #202c33; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #2d3f4b; }
-        .back-btn { background: transparent; border: none; color: #00a884; font-size: 32px; cursor: pointer; padding-right: 8px; line-height: 0.8;}
-        .wallet-btn { background: #2a3942; border: none; color: #00a884; border-radius: 8px; padding: 6px 10px; font-size: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+        .chat-header { padding: calc(env(safe-area-inset-top) + 12px) 16px 12px; background: #202c33; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #2d3f4b; }
+        .back-btn { background: transparent; border: none; color: #00a884; font-size: 32px; cursor: pointer; padding-right: 4px; line-height: 0.8;}
+        .wallet-btn { background: #2a3942; border: none; color: #00a884; border-radius: 8px; padding: 6px 10px; font-size: 12px; font-weight: bold; cursor: pointer;}
+        .del-btn { background: transparent; border: none; color: #ea0038; font-size: 20px; cursor: pointer; padding: 4px; }
         
         .messages-box { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
-        .message { max-width: 85%; padding: 10px 14px; border-radius: 16px; font-size: 15px; line-height: 1.4; word-wrap: break-word; }
-        .my-message { align-self: flex-end; background: #005c4b; color: #e9edef; border-bottom-right-radius: 4px; box-shadow: 0 1px 1px rgba(0,0,0,0.1); }
-        .other-message { align-self: flex-start; background: #202c33; color: #e9edef; border-top-left-radius: 4px; box-shadow: 0 1px 1px rgba(0,0,0,0.2); }
-        .msg-time { display: block; text-align: right; font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 4px; }
+        .message { max-width: 85%; padding: 10px 14px; border-radius: 16px; font-size: 15px; line-height: 1.4; word-wrap: break-word; position: relative;}
+        .my-message { align-self: flex-end; background: #005c4b; color: #e9edef; border-bottom-right-radius: 4px; }
+        .other-message { align-self: flex-start; background: #202c33; color: #e9edef; border-top-left-radius: 4px; }
+        .msg-time { display: flex; justify-content: flex-end; gap: 4px; font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 4px; }
+        .status-dot { width: 6px; height: 6px; border-radius: 50%; background: #ea0038; display: inline-block; } /* Капсула (Ожидание) */
         
         .input-area { padding: 12px 16px calc(env(safe-area-inset-bottom) + 12px); background: #202c33; display: flex; gap: 8px; align-items: center; border-top: 1px solid #2d3f4b; }
         .input-area input { flex: 1; background: #2a3942; border: none; color: #fff; padding: 14px 16px; border-radius: 24px; font-size: 16px; outline: none; }
-        .send-btn { background: #00a884; color: #fff; border: none; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; }
+        .send-btn { background: #00a884; color: #fff; border: none; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; font-size: 18px; }
 
-        /* Модальные окна */
-        .modal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); z-index: 20; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
-        .modal-content { background: #111b21; padding: 24px; border-radius: 16px; width: 90%; max-width: 340px; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .modal-content input { padding: 14px; border-radius: 8px; border: 1px solid #2d3f4b; background: #202c33; color: #fff; outline: none; transition: 0.3s; }
-        .modal-content input:focus { border-color: #00a884; }
-        
+        .modal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); z-index: 50; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(3px); }
+        .modal-content { background: #111b21; padding: 24px; border-radius: 16px; width: 90%; max-width: 340px; display: flex; flex-direction: column; gap: 16px; border: 1px solid #2d3f4b; }
+        .modal-content input { padding: 14px; border-radius: 8px; border: 1px solid #2d3f4b; background: #202c33; color: #fff; outline: none; font-size: 15px;}
         .btn-row { display: flex; justify-content: flex-end; gap: 12px; margin-top: 8px; }
-        .btn-cancel { background: transparent; color: #8f9ca3; padding: 10px; border: none; cursor: pointer; font-weight: 500; }
-        .btn-confirm { background: #00a884; color: #111b21; padding: 10px 16px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
-
-        .crypto-row { display: flex; align-items: center; gap: 8px; }
-        .crypto-launch { background: #2a3942; color: #00a884; border: 1px solid #00a884; width: 100%; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; text-decoration: none; text-align: center; }
-        
-        .logs-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.95); z-index: 50; display: flex; flex-direction: column; padding: 20px calc(env(safe-area-inset-right) + 20px) calc(env(safe-area-inset-bottom) + 20px) calc(env(safe-area-inset-left) + 20px); }
-        .logs-box { flex: 1; background: #000; color: #0f0; font-family: monospace; font-size: 11px; overflow-y: auto; padding: 10px; border-radius: 8px; margin-bottom: 12px; white-space: pre-wrap; word-wrap: break-word; }
+        .btn-cancel { background: transparent; color: #8f9ca3; padding: 10px; border: none; cursor: pointer; font-size: 15px;}
+        .btn-confirm { background: #00a884; color: #111b21; padding: 10px 16px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
     <div id="app">
-        <!-- Экран Аутентификации (Точка Сингулярности) -->
+        <!-- АВТОРИЗАЦИЯ -->
         <div v-if="!loggedIn" class="login-panel">
-            <div style="text-align:center; display: flex; flex-direction: column; align-items: center;">
-                <div class="monad pulse" style="margin-bottom: 24px;"><div class="monad-dot"></div></div>
-                <h2 style="letter-spacing: 4px; font-weight: 400; font-size: 20px; color: #e9edef;">ПОЛИС 108</h2>
-                <p style="color:#8f9ca3; font-size:11px; margin-top:8px; letter-spacing: 1px;">RC-1 · МНОГОЛИКОСТЬ</p>
+            <div class="logo-108">
+                1<div class="monad pulse"><div class="monad-dot"></div></div>8
             </div>
-            <input type="password" v-model="masterPin" placeholder="КЛЮЧ" @keyup.enter="login" inputmode="numeric">
-            <button @click="login">ВОЙТИ</button>
+            <input type="password" v-model="masterPin" placeholder="СИГНАТУРА" @keyup.enter="login" inputmode="numeric">
+            <button @click="login">ИНИЦИАЦИЯ</button>
         </div>
 
-        <!-- Рабочий Интерфейс -->
+        <!-- ИНТЕРФЕЙС -->
         <div v-else style="display:flex; flex-direction:column; height:100%;">
-            <div class="header">
-                <div style="font-weight:bold; letter-spacing:1px; font-size: 18px; cursor: pointer; color: #e9edef;" @dblclick="showLogsPanel = true">108</div>
-                <div style="font-size:12px; color:#8f9ca3;">
-                    {{ mqttOnline ? 'Импульс Активен' : 'Поиск связей...' }}
+            <!-- Шапка -->
+            <div class="header" v-if="!activeThread">
+                <div class="header-logo" @click="lockPolis">
+                    1<div :class="['monad', mqttOnline ? 'pulse' : '']"><div class="monad-dot"></div></div>8
                 </div>
-                <div :class="['monad header-monad', mqttOnline ? 'pulse' : '']" @click="lockPolis" title="Заблокировать">
-                    <div class="monad-dot"></div>
+                <div style="font-size:12px; color:#8f9ca3; font-family: monospace;">
+                    {{ mqttOnline ? 'СИНХРОНИЗАЦИЯ' : 'КАПСУЛА (АВТОНОМНО)' }}
                 </div>
+                <button class="icon-btn share-btn" @click="sharePolis" title="Поделиться">✉</button>
             </div>
 
             <div class="messenger-layout">
-                <!-- Главный Экран (Нити) -->
+                <!-- Контакты -->
                 <div class="threads-panel">
                     <div class="threads-header">
-                        <span style="font-weight:600; color:#8f9ca3; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Контакты</span>
+                        <span style="font-weight:600; color:#8f9ca3; font-size: 13px; text-transform: uppercase;">Связи</span>
                         <div class="tools-row">
                             <button class="icon-btn" @click="copyMyId" title="Мой ID">ID</button>
                             <button class="icon-btn add-btn" @click="showAddModal = true">+</button>
@@ -116,213 +116,138 @@
                     <div class="thread-list">
                         <div v-for="(thread, idx) in threads" :key="idx" class="thread-item" @click="openThread(thread)">
                             <div class="t-name">{{ thread.name }}</div>
-                            <div class="t-id">{{ thread.type === 'system' ? 'Служба Эфира' : thread.peerId }}</div>
+                            <div class="t-id">{{ thread.type === 'system' ? 'Служба' : 'ID: ' + thread.peerId.slice(0,10) + '...' }}</div>
                         </div>
                         <div v-if="threads.length === 0" style="text-align:center; padding: 40px 20px; color: #8f9ca3; font-size: 14px;">
-                            Эта реальность пуста. Передайте свой ID брату.
+                            Пустота. Создай связь.
                         </div>
                     </div>
                 </div>
 
-                <!-- Экран Чата -->
+                <!-- Чат -->
                 <div :class="['chat-panel', activeThread ? 'active' : '']">
                     <div class="chat-header" v-if="activeThread">
                         <button class="back-btn" @click="closeThread">‹</button>
                         <div style="flex:1;" @click="copy(activeThread.peerId)">
-                            <div style="font-weight:600; color: #e9edef;">{{ activeThread.name }}</div>
+                            <div style="font-weight:600; color: #e9edef; font-size: 16px;">{{ activeThread.name }}</div>
                             <div style="font-size:11px; color:#8f9ca3;">ID: {{ activeThread.peerId.slice(0,8) }}...</div>
                         </div>
-                        <!-- Крипто-Пульт (Кнопка) -->
-                        <button v-if="activeThread.type !== 'system'" class="wallet-btn" @click="openWalletModal">
-                            <span>$</span> ПУЛЬТ
-                        </button>
+                        <button v-if="activeThread.type !== 'system'" class="wallet-btn" @click="openWalletModal">⚡ ПУЛЬТ</button>
+                        <button v-if="activeThread.type !== 'system'" class="del-btn" @click="deleteThread" title="Уничтожить связь">🗑</button>
                     </div>
                     
                     <div class="messages-box" ref="msgBox">
                         <template v-if="activeThread && messages[activeThread.peerId]">
                             <div v-for="msg in messages[activeThread.peerId]" :key="msg.id" :class="['message', msg.isMe ? 'my-message' : 'other-message']">
                                 <div>{{ msg.text }}</div>
-                                <span class="msg-time">{{ msg.time }}</span>
+                                <span class="msg-time">
+                                    <span v-if="msg.isMe && msg.pending" class="status-dot" title="В капсуле (ожидает сети)"></span>
+                                    {{ msg.time }}
+                                </span>
                             </div>
                         </template>
                     </div>
 
                     <div class="input-area" v-if="activeThread && activeThread.type !== 'system'">
-                        <input v-model="inputText" @keyup.enter="sendMsg" placeholder="Введи смысл (Макс. 50)" maxlength="50">
+                        <input v-model="inputText" @keyup.enter="sendMsg" placeholder="Ввод (50 симв.)" maxlength="50" autocomplete="off">
                         <button class="send-btn" @click="sendMsg">➤</button>
                     </div>
                 </div>
             </div>
-
-            <!-- Терминал Логов -->
-            <div v-if="showLogsPanel" class="logs-overlay">
-                <h3 style="margin-bottom: 12px; color: #fff;">Инженерный терминал</h3>
-                <div class="logs-box">
-                    <div v-for="(l, i) in sysLogs" :key="i">{{ l }}</div>
-                </div>
-                <div class="btn-row">
-                    <button class="btn-cancel" style="color:#0f0;" @click="copyLogs">Скопировать</button>
-                    <button class="btn-confirm" style="background:#ea0038; color:#fff;" @click="showLogsPanel = false">Закрыть</button>
-                </div>
-            </div>
         </div>
 
-        <!-- МОДАЛКА НОВОЙ СВЯЗИ -->
+        <!-- МОДАЛКИ (Добавление и Пульт идентичны v1.4, сокращены для лимита вывода) -->
         <div class="modal" v-if="showAddModal" @click.self="showAddModal = false">
             <div class="modal-content">
-                <h3 style="color: #e9edef; font-size: 18px;">Новая Связь</h3>
-                <input v-model="newThreadName" placeholder="Имя профиля">
-                <input v-model="newThreadId" placeholder="ID узла (без пробелов)">
+                <h3 style="color: #e9edef;">Точка Сборки</h3>
+                <input v-model="newThreadName" placeholder="Имя (Аватар)">
+                <input v-model="newThreadId" placeholder="ID узла" autocomplete="off">
                 <div class="btn-row">
                     <button class="btn-cancel" @click="showAddModal = false">Отмена</button>
-                    <button class="btn-confirm" @click="createThread">Создать</button>
+                    <button class="btn-confirm" @click="createThread">Добавить</button>
                 </div>
             </div>
         </div>
 
-        <!-- МОДАЛКА КРИПТО-ПУЛЬТА (Глубокие ссылки) -->
         <div class="modal" v-if="showWalletModal" @click.self="showWalletModal = false">
             <div class="modal-content" v-if="activeThread">
-                <h3 style="color: #e9edef; font-size: 18px;">Крипто-Пульт: {{ activeThread.name }}</h3>
-                <p style="font-size: 12px; color: #8f9ca3; line-height: 1.4;">Заполни адреса для быстрой отправки через установленные внешние кошельки.</p>
-                
-                <div>
-                    <label style="font-size: 11px; color:#00a884; font-weight: bold;">XMR (MONERO)</label>
-                    <div class="crypto-row">
-                        <input v-model="activeThread.xmr" placeholder="Адрес Monero">
-                        <button v-if="activeThread.xmr" class="icon-btn" style="background:#00a884; color:#111b21;" @click="launchURI('monero:' + activeThread.xmr + '?tx_amount=')">↗</button>
-                    </div>
-                </div>
-
-                <div style="margin-top: 8px;">
-                    <label style="font-size: 11px; color:#00a884; font-weight: bold;">USDT (TRC20)</label>
-                    <div class="crypto-row">
-                        <input v-model="activeThread.usdt" placeholder="Адрес USDT">
-                        <button v-if="activeThread.usdt" class="icon-btn" style="background:#00a884; color:#111b21;" @click="launchURI('tron:' + activeThread.usdt)">↗</button>
-                    </div>
-                </div>
-
-                <div class="btn-row" style="margin-top: 16px;">
-                    <button class="btn-confirm" @click="saveWalletConfig">Сохранить & Закрыть</button>
+                <h3 style="color: #00a884;">Пульт: {{ activeThread.name }}</h3>
+                <input v-model="activeThread.xmr" placeholder="Monero (XMR) адрес">
+                <input v-model="activeThread.usdt" placeholder="USDT (TRC20) адрес">
+                <div class="btn-row">
+                    <button class="btn-cancel" v-if="activeThread.xmr" @click="launchURI('monero:' + activeThread.xmr + '?tx_amount=')">XMR ↗</button>
+                    <button class="btn-cancel" v-if="activeThread.usdt" @click="launchURI('tron:' + activeThread.usdt)">USDT ↗</button>
+                    <button class="btn-confirm" @click="saveWalletConfig">Сохранить</button>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // АРХИТЕКТУРА 108: ФРАКТАЛЬНОЕ ШИФРОВАНИЕ И АЛФАВИТ
         class Crystal108Codec {
             constructor() {
-                this.alphabet = ' abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя0123456789-/:;().,?!|'; // 79 символов
+                this.alphabet = ' abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя0123456789-/:;().,?!|'; 
                 this.charToIdx = {}; this.idxToChar = [];
-                for (let i = 0; i < this.alphabet.length; i++) {
-                    this.charToIdx[this.alphabet[i]] = i; this.idxToChar[i] = this.alphabet[i];
-                }
+                for (let i = 0; i < this.alphabet.length; i++) { this.charToIdx[this.alphabet[i]] = i; this.idxToChar[i] = this.alphabet[i]; }
                 this.base = BigInt(this.alphabet.length); this.PI = Math.PI; this.PHI = (1 + Math.sqrt(5)) / 2;
             }
             _prng(seed) {
                 return function() {
-                    seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
-                    let t = Math.imul(seed ^ seed >>> 15, 1 | seed); 
-                    t = (t + Math.imul(t ^ t >>> 7, 61 | t)) ^ t;
-                    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+                    seed |= 0; seed = (seed + 0x6D2B79F5) | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); 
+                    t = (t + Math.imul(t ^ t >>> 7, 61 | t)) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296;
                 };
             }
-            _normalizeText(text) {
-                const lower = text.toLowerCase(); let result = '';
-                for (let i = 0; i < lower.length; i++) {
-                    result += this.charToIdx.hasOwnProperty(lower[i]) ? lower[i] : ' ';
-                }
-                return result;
-            }
-            collapse(text, astroSalt = 0) {
-                const cleanText = this._normalizeText(text); if (cleanText.length === 0) throw new Error('Пусто');
-                let num = 0n;
-                for (let i = 0; i < cleanText.length; i++) num = num * this.base + BigInt(this.charToIdx[cleanText[i]]);
-                const numStr = num.toString(); 
-                if (numStr.length > 106) throw new Error('Превышен лимит (50 символов)');
-                
-                const plain = cleanText.length.toString().padStart(2, '0') + numStr.padStart(106, '0'); 
+            collapse(text, astroSalt=0) {
+                text = text.toLowerCase(); let res = '';
+                for (let i=0; i<text.length; i++) res += this.charToIdx.hasOwnProperty(text[i]) ? text[i] : ' ';
+                if(res.length===0) throw new Error('Пусто');
+                let num = 0n; for (let i=0; i<res.length; i++) num = num * this.base + BigInt(this.charToIdx[res[i]]);
+                const numStr = num.toString(); if (numStr.length > 106) throw new Error('Превышен лимит');
+                const plain = res.length.toString().padStart(2, '0') + numStr.padStart(106, '0'); 
                 const rand = this._prng(Math.floor(astroSalt * this.PI * this.PHI * 10000)); let mask = '';
-                for (let i = 0; i < 108; i++) mask += Math.floor(rand() * 10).toString();
-                let result = '';
-                for (let i = 0; i < 108; i++) result += ((parseInt(plain[i], 10) + parseInt(mask[i], 10)) % 10).toString();
-                return result;
+                for (let i=0; i<108; i++) mask += Math.floor(rand() * 10).toString();
+                let enc = ''; for (let i=0; i<108; i++) enc += ((parseInt(plain[i], 10) + parseInt(mask[i], 10)) % 10).toString();
+                return enc;
             }
-            resonate(code108, astroSalt = 0) {
-                code108 = code108.toString().trim();
-                if(code108.length !== 108) throw new Error(`Бракованный пакет`);
-                
+            resonate(code108, astroSalt=0) {
+                code108 = code108.toString().trim(); if(code108.length !== 108) throw new Error(`Сбой`);
                 const rand = this._prng(Math.floor(astroSalt * this.PI * this.PHI * 10000)); let mask = '';
-                for (let i = 0; i < 108; i++) mask += Math.floor(rand() * 10).toString();
-                let plain = '';
-                for (let i = 0; i < 108; i++) plain += ((parseInt(code108[i], 10) - parseInt(mask[i], 10) + 10) % 10).toString();
-                
-                let len = parseInt(plain.slice(0, 2), 10);
-                let numString = plain.slice(2).replace(/^0+/, '') || '0';
-                
-                let n = BigInt(numString);
-                let digs = [];
-                while (n > 0n) { digs.unshift(Number(n % this.base)); n /= this.base; }
-                while (digs.length < len) digs.unshift(0);
-                return digs.map(d => this.idxToChar[d]).join('');
+                for (let i=0; i<108; i++) mask += Math.floor(rand() * 10).toString();
+                let plain = ''; for (let i=0; i<108; i++) plain += ((parseInt(code108[i], 10) - parseInt(mask[i], 10) + 10) % 10).toString();
+                let len = parseInt(plain.slice(0, 2), 10); let n = BigInt(plain.slice(2).replace(/^0+/, '') || '0');
+                let digs = []; while (n > 0n) { digs.unshift(Number(n % this.base)); n /= this.base; }
+                while (digs.length<len) digs.unshift(0); return digs.map(d => this.idxToChar[d]).join('');
             }
         }
 
-        // АРХИТЕКТУРА МНОГОЛИКОСТИ (Невидимые базы данных через SHA-256)
         class ShadowGateway {
             constructor() { this.currentKey = null; }
             async enter(pin) {
-                // Создаем стабильный нечитаемый ключ базы на основе ПИНа
-                const msgBuffer = new TextEncoder().encode(pin + "_matrix108_salt");
+                const msgBuffer = new TextEncoder().encode(pin + "_polis_absolute_salt");
                 const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
                 const hashArray = Array.from(new Uint8Array(hashBuffer));
-                this.currentKey = 'p108_' + hashArray.map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 24);
-                
-                const data = localStorage.getItem(this.currentKey);
-                if (data) return JSON.parse(data);
-                return null; 
+                this.currentKey = 'p108_' + hashArray.map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 32);
+                const data = localStorage.getItem(this.currentKey); return data ? JSON.parse(data) : null; 
             }
-            async save(data) {
-                if(this.currentKey) localStorage.setItem(this.currentKey, JSON.stringify(data));
-            }
+            async save(data) { if(this.currentKey) localStorage.setItem(this.currentKey, JSON.stringify(data)); }
             lock() { this.currentKey = null; }
         }
 
-        // ЭФИРНЫЙ МОСТ MQTT
         class MQTTBridge {
-            constructor(onStatus, onMsg, onLog) {
-                this.onStatus = onStatus; this.onMsg = onMsg; this.onLog = onLog;
-                this.client = null; this.topics = [];
+            constructor(onStatus, onMsg) {
+                this.onStatus = onStatus; this.onMsg = onMsg; this.client = null; this.topics = [];
                 this.url = 'wss://broker.emqx.io:8084/mqtt';
             }
             connect(topicsToSubscribe) {
-                this.topics = topicsToSubscribe || [];
-                if(this.client) this.client.end(true);
-                this.client = mqtt.connect(this.url, { keepalive: 45, reconnectPeriod: 4000, clean: true });
-                
-                this.client.on('connect', ()=>{
-                    this.onStatus(true);
-                    this.topics.forEach(t => { this.client.subscribe(t); });
-                });
-                
+                this.topics = topicsToSubscribe || []; if(this.client) this.client.end(true);
+                this.client = mqtt.connect(this.url, { keepalive: 45, reconnectPeriod: 3000, clean: true });
+                this.client.on('connect', ()=>{ this.onStatus(true); this.topics.forEach(t => this.client.subscribe(t)); });
                 this.client.on('close', ()=> this.onStatus(false));
                 this.client.on('error', ()=> this.onStatus(false));
                 this.client.on('message', (t, p)=> this.onMsg(p.toString(), t));
             }
-            updateTopics(newTopics) {
-                newTopics.forEach(t => { 
-                    if(!this.topics.includes(t)) { 
-                        this.topics.push(t); 
-                        if(this.client && this.client.connected) this.client.subscribe(t); 
-                    }
-                });
-            }
-            send(topic, msg) { 
-                if(this.client && this.client.connected) {
-                    this.client.publish(topic, msg, {qos:0}); 
-                }
-            }
+            updateTopics(newTopics) { newTopics.forEach(t => { if(!this.topics.includes(t)) { this.topics.push(t); if(this.client && this.client.connected) this.client.subscribe(t); } }); }
+            send(topic, msg) { if(this.client && this.client.connected) this.client.publish(topic, msg, {qos:0}); }
             disconnect() { if(this.client) this.client.end(true); this.onStatus(false); }
         }
 
@@ -331,97 +256,76 @@
         new Vue({
             el: '#app',
             data: {
-                loggedIn: false, masterPin: '', myId: '',
-                mqttOnline: false, mqtt: null,
-                showAddModal: false, showWalletModal: false,
-                newThreadName: '', newThreadId: '',
-                activeThread: null, inputText: '',
-                threads: [], messages: {},
-                sysLogs: [], showLogsPanel: false,
-                sentNonces: new Set()
+                loggedIn: false, masterPin: '', myId: '', mqttOnline: false, mqtt: null,
+                showAddModal: false, showWalletModal: false, newThreadName: '', newThreadId: '',
+                activeThread: null, inputText: '', threads: [], messages: {}, outbox: [], sentNonces: new Set()
+            },
+            watch: {
+                // Вектор 1: КАПСУЛА (Авто-выпуск при появлении сети)
+                mqttOnline(newVal) {
+                    if(newVal && this.outbox.length > 0) {
+                        this.outbox.forEach(pkt => {
+                            this.mqtt.send(pkt.topic, pkt.code);
+                            // Ищем сообщение в UI и снимаем флаг pending
+                            if(this.messages[pkt.peerId]) {
+                                let m = this.messages[pkt.peerId].find(x => x.nonce === pkt.nonce);
+                                if(m) { m.pending = false; this.$set(this.messages, pkt.peerId, [...this.messages[pkt.peerId]]); }
+                            }
+                        });
+                        this.outbox = []; this.save();
+                    }
+                }
             },
             mounted() { 
                 window.addEventListener('visibilitychange', this.wakeUp); 
                 window.addEventListener('focus', this.wakeUp);
-                window.addEventListener('devicemotion', this.handleShake); // ЗАЩИТНЫЙ РЕФЛЕКС
             },
-            beforeDestroy() { 
-                if(this.mqtt) this.mqtt.disconnect(); 
-                window.removeEventListener('devicemotion', this.handleShake);
-            },
+            beforeDestroy() { if(this.mqtt) this.mqtt.disconnect(); window.removeEventListener('devicemotion', this.handleShake); },
             methods: {
-                log(t) { 
-                    const time = new Date().toLocaleTimeString().slice(0,8);
-                    this.sysLogs.unshift(`[${time}] ${t}`); 
-                    if(this.sysLogs.length > 50) this.sysLogs.pop();
-                },
-                copyLogs() {
-                    const el=document.createElement('textarea'); el.value=this.sysLogs.join('\n'); document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el); alert('Логи скопированы!');
-                },
-                wakeUp() { 
-                    if(document.visibilityState==='visible' && !this.mqttOnline && this.mqtt) this.mqtt.connect(this.getAllTopics()); 
-                },
-                forceReconnect() { 
-                    if(this.mqtt) { this.mqtt.disconnect(); setTimeout(()=>this.mqtt.connect(this.getAllTopics()), 500); }
-                },
+                wakeUp() { if(document.visibilityState==='visible' && !this.mqttOnline && this.mqtt) this.mqtt.connect(this.getAllTopics()); },
                 copy(t) { const el=document.createElement('textarea'); el.value=t; document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el); alert('Скопировано'); },
                 copyMyId() { this.copy(this.myId); },
 
-                // ВХОД В ЛИЧНОСТЬ (АККАУНТ)
+                // Поделиться Полисом (Вектор Синдикации)
+                sharePolis() {
+                    let myUrl = window.location.href.split('?')[0];
+                    let text = encodeURIComponent(`Привет. Переходи в безопасный Эфир: ${myUrl}\nМой ID связи: ${this.myId}`);
+                    // Откроет шторку выбора приложения (Telegram, WhatsApp)
+                    window.location.href = `https://t.me/share/url?url=${myUrl}&text=${text}`;
+                },
+
                 async login() {
                     if(!this.masterPin) return;
-                    
-                    // Запрос прав на акселерометр для iOS 13+ (Защитный рефлекс)
                     if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
-                        try { await DeviceMotionEvent.requestPermission(); } catch(e) { this.log("Отказ гироскопа");}
+                        try { await DeviceMotionEvent.requestPermission(); } catch(e) { }
                     }
+                    window.addEventListener('devicemotion', this.handleShake);
 
                     const d = await sg.enter(this.masterPin); 
                     if (!d) {
-                        this.log(`Создана новая комната пространства.`);
                         this.myId = 'id_' + Math.random().toString(36).substr(2,8);
-                        this.threads = [];
-                        this.messages = {};
+                        this.threads = []; this.messages = {}; this.outbox = [];
                         await this.save();
                     } else {
-                        this.threads = d.t || [];
-                        this.messages = d.m || {};
-                        this.myId = d.myId;
+                        this.threads = d.t || []; this.messages = d.m || {}; this.myId = d.myId; this.outbox = d.o || [];
                     }
 
-                    this.loggedIn = true; 
-                    this.masterPin = ''; // Стираем ПИН из памяти
-                    
-                    this.mqtt = new MQTTBridge((s)=>this.mqttOnline=s, this.handleMsg, this.log);
+                    this.loggedIn = true; this.masterPin = '';
+                    this.mqtt = new MQTTBridge((s)=>this.mqttOnline=s, this.handleMsg);
                     this.mqtt.connect(this.getAllTopics());
                 },
 
-                // ЗАЩИТНЫЙ РЕФЛЕКС (Тряска / Экстренное закрытие)
-                handleShake(event) {
-                    if(!this.loggedIn) return;
-                    let acc = event.acceleration || event.accelerationIncludingGravity;
-                    if(!acc) return;
-                    let force = Math.abs(acc.x||0) + Math.abs(acc.y||0) + Math.abs(acc.z||0);
-                    // Порог для срабатывания (около 25-30 m/s^2 - это резкий рывок)
-                    if(force > 28) {
-                        this.lockPolis();
-                    }
+                handleShake(e) {
+                    if(!this.loggedIn) return; let acc = e.acceleration || e.accelerationIncludingGravity; if(!acc) return;
+                    if(Math.abs(acc.x||0) + Math.abs(acc.y||0) + Math.abs(acc.z||0) > 25) this.lockPolis();
                 },
-
                 lockPolis() {
-                    if(this.mqtt) this.mqtt.disconnect();
-                    sg.lock();
-                    this.loggedIn = false;
-                    this.threads = [];
-                    this.messages = {};
-                    this.myId = '';
-                    this.activeThread = null;
-                    this.log("Сработал рефлекс. Личность скрыта.");
+                    if(this.mqtt) this.mqtt.disconnect(); sg.lock();
+                    this.loggedIn = false; this.threads = []; this.messages = {}; this.myId = ''; this.activeThread = null;
                 },
 
                 getAllTopics() {
-                    let subs = [];
-                    subs.push(`polis108/node/${this.myId}`); 
+                    let subs = [`polis108/node/${this.myId}`]; 
                     this.threads.forEach(th => {
                         if(th.type === 'group') subs.push(`polis108/group/${th.peerId}`);
                         if(th.type === 'personal') subs.push(`polis108/link/${[this.myId, th.peerId].sort().join('_')}`);
@@ -433,70 +337,56 @@
                 closeThread() { this.activeThread = null; },
                 
                 createThread() {
-                    let n = this.newThreadName || 'Брат';
-                    let rawId = this.newThreadId.trim(); 
-                    let type = 'personal';
-                    let id = "";
-
-                    if(rawId) {
-                        id = rawId.replace(/[^A-Za-z0-9_-]/g, ''); 
-                        if(!id) return alert('Ошибка формата ID.');
-                        if(id.startsWith('grp_')) type = 'group';
-                    } else {
-                        id = 'grp_' + Math.random().toString(36).substr(2,8); type = 'group'; 
-                    }
-
-                    if(this.threads.some(t=>t.peerId===id)) return alert('Эта Нить уже интегрирована');
-                    
-                    // xmr и usdt слоты создаются по умолчанию
+                    let n = this.newThreadName || 'Связь'; let rawId = this.newThreadId.trim(); let type = 'personal'; let id = "";
+                    if(rawId) { id = rawId.replace(/[^A-Za-z0-9_-]/g, ''); if(!id) return alert('Ошибка ID'); if(id.startsWith('grp_')) type = 'group';
+                    } else return alert('ID обязателен');
+                    if(this.threads.some(t=>t.peerId===id)) return alert('Уже существует');
                     this.threads.push({ name:n, peerId:id, type, xmr: '', usdt: '' });
-                    this.$set(this.messages, id, []); this.save();
-                    
-                    this.mqtt.updateTopics(this.getAllTopics());
-                    this.showAddModal = false; 
-                    this.newThreadName = ''; this.newThreadId = '';
-                    this.openThread(this.threads[this.threads.length-1]);
+                    this.$set(this.messages, id, []); this.save(); this.mqtt.updateTopics(this.getAllTopics());
+                    this.showAddModal = false; this.newThreadName = ''; this.newThreadId = ''; this.openThread(this.threads[this.threads.length-1]);
                 },
 
-                // КРИПТО-ПУЛЬТ
+                // Уничтожение Связи
+                deleteThread() {
+                    if(!confirm("Уничтожить эту связь и всю историю? Очистка необратима.")) return;
+                    let id = this.activeThread.peerId;
+                    this.threads = this.threads.filter(t => t.peerId !== id);
+                    this.$delete(this.messages, id);
+                    this.activeThread = null;
+                    this.save();
+                },
+
                 openWalletModal() {
                     if(!this.activeThread) return;
-                    // Подстраховка для старых баз
                     if(typeof this.activeThread.xmr === 'undefined') this.$set(this.activeThread, 'xmr', '');
                     if(typeof this.activeThread.usdt === 'undefined') this.$set(this.activeThread, 'usdt', '');
                     this.showWalletModal = true;
                 },
-                saveWalletConfig() {
-                    this.save();
-                    this.showWalletModal = false;
-                },
-                launchURI(uri) {
-                    window.location.href = uri;
-                    // Внешнее приложение подхватит URI (напр. monero:адрес?tx_amount=)
-                },
+                saveWalletConfig() { this.save(); this.showWalletModal = false; },
+                launchURI(uri) { window.location.href = uri; },
 
-                // ОТПРАВКА СМЫСЛА (С АНТИ-ЭХО)
                 sendMsg() {
                     if(!this.inputText || !this.activeThread) return;
                     try {
                         const nonce = Math.floor(100 + Math.random() * 900).toString(); 
                         const payloadStr = nonce + "|" + this.inputText; 
-                        
                         const code = cry.collapse(payloadStr, 0);
                         
-                        const msgObj = { id: Date.now(), text: this.inputText, isMe: true, time: new Date().toLocaleTimeString().slice(0,5) };
+                        let topic = this.activeThread.type === 'group' ? `polis108/group/${this.activeThread.peerId}` : `polis108/link/${[this.myId, this.activeThread.peerId].sort().join('_')}`;
+                        
+                        // Сохраняем в UI (Флаг pending зависит от сети)
+                        let isPending = !this.mqttOnline;
+                        const msgObj = { id: Date.now(), text: this.inputText, isMe: true, time: new Date().toLocaleTimeString().slice(0,5), pending: isPending, nonce: nonce };
                         this.messages[this.activeThread.peerId].push(msgObj);
                         this.$set(this.messages, this.activeThread.peerId, [...this.messages[this.activeThread.peerId]]);
                         
-                        this.sentNonces.add(nonce);
-                        setTimeout(() => this.sentNonces.delete(nonce), 20000); 
-                        
-                        let topic = this.activeThread.type === 'group' 
-                            ? `polis108/group/${this.activeThread.peerId}` 
-                            : `polis108/link/${[this.myId, this.activeThread.peerId].sort().join('_')}`;
+                        this.sentNonces.add(nonce); setTimeout(() => this.sentNonces.delete(nonce), 30000); 
                         
                         if(this.mqttOnline) {
                             this.mqtt.send(topic, code);
+                        } else {
+                            // КАПСУЛА: Откладываем доставку
+                            this.outbox.push({ topic, code, nonce, peerId: this.activeThread.peerId });
                         }
                         
                         this.inputText = ''; this.scrollBot(); this.save();
@@ -505,48 +395,32 @@
 
                 handleMsg(payload, topic) {
                     try {
-                        const unencrypted = cry.resonate(payload, 0);
-                        const parts = unencrypted.split('|');
-                        if (parts.length < 2) return; 
-                        
-                        const incomingNonce = parts[0];
-                        let incomingText = parts.slice(1).join('|');
+                        const unencrypted = cry.resonate(payload, 0); const parts = unencrypted.split('|'); if (parts.length < 2) return; 
+                        const incomingNonce = parts[0]; let incomingText = parts.slice(1).join('|');
+                        if(this.sentNonces.has(incomingNonce)) return;
 
-                        if(this.sentNonces.has(incomingNonce)) return; // Анти-Эхо сработало
-
-                        // Косметика: Первая буква заглавная
-                        if (incomingText.length > 0) {
-                            incomingText = incomingText.charAt(0).toUpperCase() + incomingText.slice(1);
-                        }
+                        // Вектор 3 (Подготовка): Чтение скрытого регистра будет здесь. Пока просто косметика.
+                        if (incomingText.length > 0) incomingText = incomingText.charAt(0).toUpperCase() + incomingText.slice(1);
 
                         const msgObj = { id: Date.now()+Math.random(), text: incomingText, isMe: false, time: new Date().toLocaleTimeString().slice(0,5) };
                         let targetId = null;
 
                         if(topic.includes('polis108/link/')) {
-                            this.threads.forEach(t => { 
-                                if(t.type==='personal' && topic === `polis108/link/${[this.myId, t.peerId].sort().join('_')}`) {
-                                    targetId = t.peerId; 
-                                }
-                            });
+                            this.threads.forEach(t => { if(t.type==='personal' && topic === `polis108/link/${[this.myId, t.peerId].sort().join('_')}`) targetId = t.peerId; });
                         } else if(topic.startsWith('polis108/group/')) {
-                            const gId = topic.replace('polis108/group/', '');
-                            this.threads.forEach(t => { if(t.peerId===gId) targetId = gId; });
+                            const gId = topic.replace('polis108/group/', ''); this.threads.forEach(t => { if(t.peerId===gId) targetId = gId; });
                         }
 
                         if(targetId) {
                             if(!this.messages[targetId]) this.$set(this.messages, targetId, []);
-                            this.messages[targetId].push(msgObj);
-                            this.$set(this.messages, targetId, [...this.messages[targetId]]);
-                            this.scrollBot(); this.save();
-                            if(navigator.vibrate) navigator.vibrate(200);
+                            this.messages[targetId].push(msgObj); this.$set(this.messages, targetId, [...this.messages[targetId]]);
+                            this.scrollBot(); this.save(); if(navigator.vibrate) navigator.vibrate(200);
                         }
-                    } catch(e) { 
-                        // Игнорируем фоновый шум
-                    }
+                    } catch(e) {}
                 },
 
                 scrollBot() { setTimeout(() => { const b=this.$refs.msgBox; if(b) b.scrollTop=b.scrollHeight+100; }, 50); },
-                async save() { await sg.save({ t: this.threads, m: this.messages, myId: this.myId }); }
+                async save() { await sg.save({ t: this.threads, m: this.messages, myId: this.myId, o: this.outbox }); }
             }
         });
     </script>
