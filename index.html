@@ -8,7 +8,6 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="108">
     
-    <!-- [УЗЕЛ 01: ЖЕСТКАЯ ИКОНКА] Черный квадрат, зеленый круг, зеленая точка -->
     <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23000'/%3E%3Ccircle cx='50' cy='50' r='35' stroke='%2300a884' stroke-width='6' fill='none'/%3E%3Ccircle cx='50' cy='50' r='10' fill='%2300a884'/%3E%3C/svg%3E">
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23000'/%3E%3Ccircle cx='50' cy='50' r='35' stroke='%2300a884' stroke-width='6' fill='none'/%3E%3Ccircle cx='50' cy='50' r='10' fill='%2300a884'/%3E%3C/svg%3E">
     <title>108</title>
@@ -17,18 +16,15 @@
     <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
     
     <style>
-        /* [БАЗА] */
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; user-select: none; }
         input { user-select: auto; }
         html, body { position: fixed; inset: 0; width: 100%; height: 100%; height: -webkit-fill-available; height: 100dvh; background: #0b141a; color: #e9edef; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; overflow: hidden; }
         #app { width: 100%; max-width: 800px; margin: 0 auto; height: 100%; height: -webkit-fill-available; height: 100dvh; display: flex; flex-direction: column; background: #0b141a; position: relative; }
         
-        /* [ВРАТА] */
         .pwa-gate { position: absolute; inset:0; z-index: 9999; background: #0b141a; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center; }
         .gate-card { background: #111b21; padding: 32px 24px; border-radius: 16px; border: 1px solid #2d3f4b; max-width: 320px; width: 100%; display: flex; flex-direction: column; gap: 16px;}
         .instruct-row { display: flex; align-items: center; gap: 12px; text-align: left; background: #202c33; padding: 12px; border-radius: 8px; font-size: 14px; color: #e9edef; line-height: 1.4;}
         
-        /* [СЕЙФОВЫЙ ПИН-КОД] */
         .login-panel { padding: calc(env(safe-area-inset-top) + 32px) 20px calc(env(safe-area-inset-bottom) + 32px); display: flex; flex-direction: column; gap: 32px; height: 100%; justify-content: center; align-items: center; z-index: 100; }
         .pin-grid { display: flex; gap: 8px; justify-content: center; }
         .pin-slot { width: 44px; height: 56px; background: #111b21; border: 2px solid #2d3f4b; border-radius: 8px; font-size: 28px; color: #00a884; text-align: center; font-family: monospace; font-weight: bold; outline: none; transition: 0.3s; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);}
@@ -36,14 +32,11 @@
         .pin-slot.error { border-color: #ea0038; color: #ea0038; }
         .login-panel button { width: 100%; max-width: 280px; padding: 16px; border-radius: 12px; border: none; font-size: 16px; font-weight: 600; background: #00a884; color: #111b21; cursor: pointer; letter-spacing: 1px; transition: 0.3s;}
         
-        /* [МОНАДА] */
         .color-on { color: #00a884; } .color-off { color: #ea0038; }
         .monad { position: relative; width: 32px; height: 32px; border: 2px solid rgba(255,255,255,0.05); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0; transition: 0.5s; }
         .monad-dot { width: 8px; height: 8px; background: #ea0038; border-radius: 50%; transition: 0.5s; }
         .monad.pulse { border-color: rgba(0, 168, 132, 0.3); } .monad.pulse .monad-dot { background: #00a884; box-shadow: 0 0 12px #00a884; animation: pulseDot 2s infinite alternate ease-in-out; }
         @keyframes pulseDot { 0% { transform: scale(0.8); } 100% { transform: scale(1.4); box-shadow: 0 0 18px #00a884; } }
-
-        /* [ШАПКА И МАКЕТ] */
         .header { padding: calc(env(safe-area-inset-top) + 12px) 16px 12px; background: #202c33; border-bottom: 1px solid #2d3f4b; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; z-index: 20;}
         .header-btn { background: transparent; border: none; color: #00a884; font-size: 24px; cursor: pointer; padding: 4px; display: flex; align-items: center;}
         
@@ -62,33 +55,24 @@
         .onboarding { padding: 32px 20px; color: #8f9ca3; }
         .obs-step { background: #202c33; border-radius: 12px; padding: 16px; margin-bottom: 12px; font-size: 14px; line-height: 1.5; color: #e9edef;}
         
-        /* [ЧАТ] */
         .chat-panel { position: absolute; top:0; left:0; width:100%; height:100%; background: #0b141a; display: flex; flex-direction: column; z-index: 6; transform: translateX(100%); transition: transform 0.25s cubic-bezier(0.3, 0, 0, 1); }
         .chat-panel.active { transform: translateX(0); }
         .chat-header { padding: calc(env(safe-area-inset-top) + 8px) 16px 8px; background: #202c33; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #2d3f4b; flex-shrink: 0;}
         
+        /* ОТКАТ CSS СООБЩЕНИЙ (Версия 2.0) - Чистый, плотный код без лишних отступов */
         .messages-box { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; -webkit-overflow-scrolling: touch; }
-        .message-row { display: flex; flex-direction: column; max-width: 85%; }
-        .msg-sender { font-size: 10px; color: #00a884; margin-bottom: 2px; margin-left: 4px; opacity: 0.8;}
-        .message { padding: 10px 14px; border-radius: 16px; font-size: 15px; line-height: 1.4; word-wrap: break-word; white-space: pre-wrap; }
-        .my-message-row { align-self: flex-end; }
-        .other-message-row { align-self: flex-start; }
-        .my-message { background: #005c4b; color: #e9edef; border-bottom-right-radius: 4px; }
-        .other-message { background: #202c33; color: #e9edef; border-top-left-radius: 4px; }
-        
-        /* Жесткое исправление отступов времени */
-        .msg-time { display: flex; justify-content: flex-end; align-items: center; gap: 4px; font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 2px; line-height: 1; }
+        .message { max-width: 85%; padding: 10px 14px; border-radius: 16px; font-size: 15px; line-height: 1.4; word-wrap: break-word; }
+        .my-message { align-self: flex-end; background: #005c4b; color: #e9edef; border-bottom-right-radius: 4px; }
+        .other-message { align-self: flex-start; background: #202c33; color: #e9edef; border-top-left-radius: 4px; }
+        .msg-time { display: flex; justify-content: flex-end; align-items: center; gap: 4px; font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 4px; line-height: 1;}
         .status-dot { width: 6px; height: 6px; border-radius: 50%; background: #ea0038; display: inline-block; }
         
-        /* [ПОЛЕ 108] */
         .input-area { padding: 12px 16px calc(env(safe-area-inset-bottom) + 12px); background: #202c33; display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
         .input-wrapper { flex: 1; position: relative; display: flex; align-items: center; }
         .input-wrapper input { width: 100%; background: #2a3942; border: none; color: #fff; padding: 0 46px 0 16px; border-radius: 24px; font-size: 16px; outline: none; height: 48px; line-height: normal; box-sizing: border-box; margin: 0;}
         .char-count { position: absolute; right: 14px; font-size: 10px; color: #8f9ca3; font-family: monospace; pointer-events: none; transition: 0.3s;}
         .char-count.max { color: #ea0038; font-weight: bold;}
         .send-btn { background: #00a884; color: #fff; border: none; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;}
-
-        /* [МОДАЛКИ] */
         .modal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); z-index: 50; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(3px); padding: 20px;}
         .modal-content { background: #111b21; padding: 24px; border-radius: 16px; width: 100%; max-width: 340px; display: flex; flex-direction: column; gap: 16px; border: 1px solid #2d3f4b; }
         .modal-content input { padding: 14px; border-radius: 8px; border: 1px solid #2d3f4b; background: #202c33; color: #fff; outline: none; font-size: 15px;}
@@ -100,7 +84,7 @@
 </head>
 <body>
     <div id="app">
-        <!-- [ВРАТА PWA] -->
+        <!-- БЛОК: ВРАТА -->
         <div v-if="!isPWAInstalled" class="pwa-gate">
             <div class="gate-card">
                 <div style="display:flex; justify-content:center; margin-bottom:16px;">
@@ -125,15 +109,14 @@
                     <div class="instruct-row"><span style="background: #e9edef; color: #111b21; padding: 2px 6px; border-radius: 4px; font-weight: bold;">+</span><div>Выбери <b>Добавить на экран</b><br><span style="font-size:11px; color:#8f9ca3;">Затем запусти Полис с экрана телефона</span></div></div>
                 </template>
             </div>
+            <!-- Нет кнопки закрыть. Жесткая стена. -->
         </div>
-
-        <!-- [СЕЙФ АВТОРИЗАЦИИ] -->
+        <!-- БЛОК: СЕЙФ ВХОДА -->
         <div v-else-if="!loggedIn" class="login-panel">
             <div style="display: flex; align-items:center; margin-bottom: 0px;">
                 <div style="width:64px;height:64px;border-radius:50%;border:4px solid #00a884;display:flex;align-items:center;justify-content:center;"><div style="width:16px;height:16px;background:#00a884;border-radius:50%;"></div></div>
             </div>
             
-            <!-- Интерактивный 6-значный ПИН -->
             <div style="text-align: center;">
                 <div class="pin-grid">
                     <input v-for="(digit, index) in 6" :key="index" :ref="'pin' + index" type="tel" maxlength="1" class="pin-slot" :class="{'error': pinError}" v-model="pinArray[index]" @input="onPinInput(index, $event)" @keydown.delete="onPinDelete(index, $event)">
@@ -145,8 +128,7 @@
             </p>
             <button @click="login">ИНИЦИАЦИЯ</button>
         </div>
-
-        <!-- [ЯДРО] -->
+        <!-- ЯДРО -->
         <div v-else style="display:flex; flex-direction:column; height:100%;">
             <div class="header" v-if="!activeThread">
                 <div style="display:flex; align-items:center; cursor:pointer;" :class="mqttOnline?'color-on':'color-off'" @dblclick="clickSound(); showLogsPanel = true">
@@ -154,22 +136,20 @@
                 </div>
                 <div style="display: flex; gap: 16px; align-items: center;">
                     <button class="header-btn" style="color: #00a884;" @click="clickSound(); showSettings = true">⚙️</button>
+                    <button class="header-btn" style="color: #00a884;" @click="sharePolis()">✉</button>
                 </div>
             </div>
-
             <div class="messenger-layout">
                 <div class="threads-panel">
                     <div class="threads-header">
                         <span style="font-weight:600; color:#8f9ca3; font-size: 13px; text-transform: uppercase;">Связи</span>
                         <div class="tools-row">
-                            <!-- Слитая кнопка Узла -->
                             <button style="background:#2a3942; color:#00a884; border:1px solid #00a884; padding: 6px 12px; border-radius: 12px; font-weight:bold; font-size:12px; cursor:pointer; display:flex; align-items:center; gap:4px;" @click="clickSound(); showIdCopyModal = true">ID ➦</button>
                             <button style="background:#00a884; color:#111b21; border:none; border-radius:50%; width:36px; height:36px; font-size:24px; display:flex; align-items:center; justify-content:center; cursor:pointer;" @click="clickSound(); showAddModal = true">+</button>
                         </div>
                     </div>
                     
                     <div class="thread-list">
-                        <!-- Простой Онбординг -->
                         <div v-if="threads.length === 0" class="onboarding">
                             <h3 style="color:#e9edef;">Ждешь Друга?</h3>
                             <div class="obs-step">
@@ -179,7 +159,6 @@
                                 Или нажми пульсирующий <span class="obs-hl">+</span> и вставь его ID, чтобы открыть Тет-а-Тет.
                             </div>
                         </div>
-
                         <div v-else v-for="thread in threads" :key="thread.peerId" class="thread-item" @click="openThread(thread)">
                             <div>
                                 <div class="t-name">{{ thread.name }}</div>
@@ -189,7 +168,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div :class="['chat-panel', activeThread ? 'active' : '']">
                     <div class="chat-header" v-if="activeThread">
                         <button style="background:transparent; border:none; color:#00a884; font-size:32px; padding-right:12px; cursor:pointer;" @click="closeThread">‹</button>
@@ -200,23 +178,29 @@
                     </div>
                     
                     <div class="messages-box" ref="msgBox">
+                        <div v-if="activeThread && (!messages[activeThread.peerId] || messages[activeThread.peerId].length === 0)" style="text-align: center; padding: 40px 20px; color: #8f9ca3; line-height: 1.5; font-size: 14px;">
+                           <template v-if="activeThread.type === 'personal'">
+                             <p style="color:#00a884; font-weight:bold; margin-bottom:8px;">Тет-а-Тет открыт.</p>
+                             <p>Сжимай свою мысль до 108 символов. Импульс дойдет, если Друг уже добавил твой ID.</p>
+                           </template>
+                           <template v-else>
+                             <p style="color:#00a884; font-weight:bold; margin-bottom:8px;">Ближний круг сформирован.</p>
+                             <p style="margin-bottom: 16px;">Добавь друзей. Все, кто знает ID этой группы, смогут связаться здесь.</p>
+                             <button style="background:transparent; border:1px solid #00a884; color:#00a884; padding:8px 16px; border-radius:8px; font-weight:bold;" @click="sharePolis(true)">✉ Отправить ID группы</button>
+                           </template>
+                        </div>
+                        <!-- ОРИГИНАЛЬНАЯ, ЧИСТАЯ ВЕРСТКА СООБЩЕНИЙ (БЕЗ ОТСТУПОВ) -->
                         <template v-if="activeThread && messages[activeThread.peerId]">
-                            <div v-for="msg in messages[activeThread.peerId]" :key="msg.id" :class="['message-row', msg.isMe ? 'my-message-row' : 'other-message-row']">
-                                <!-- Имя в группе -->
-                                <div v-if="!msg.isMe && activeThread.type === 'system' && msg.senderName" class="msg-sender">{{ msg.senderName }}</div>
-                                
-                                <div :class="['message', msg.isMe ? 'my-message' : 'other-message']">
-                                    {{ msg.text }}
-                                </div>
-                                <span class="msg-time">
-                                    <span v-if="msg.isMe && msg.pending" class="status-dot" title="Ожидает сети"></span>
+                            <div v-for="msg in messages[activeThread.peerId]" :key="msg.id" :class="['message', msg.isMe ? 'my-message' : 'other-message']">
+                                <div v-if="!msg.isMe && activeThread.type === 'system' && msg.senderName" style="font-size:10px; color:#00a884; opacity:0.8; margin-bottom:4px;">{{ msg.senderName }}</div>
+                                {{ msg.text }}
+                                <div class="msg-time">
+                                    <span v-if="msg.isMe && msg.pending" class="status-dot"></span>
                                     {{ msg.time }}
-                                </span>
+                                </div>
                             </div>
                         </template>
                     </div>
-
-                    <!-- ОГРАНИЧИТЕЛЬ 108 -->
                     <div class="input-area" v-if="activeThread">
                         <div class="input-wrapper">
                             <input v-model="inputText" @keyup.enter.prevent="sendMsg" placeholder="Сжимай мысль..." autocomplete="off" type="text" maxlength="108">
@@ -228,29 +212,25 @@
             </div>
             
             <div v-if="showLogsPanel" style="position: absolute; inset:0; background: rgba(0,0,0,0.95); z-index: 200; display: flex; flex-direction: column; padding: 40px 20px;">
-                <h3 style="margin-bottom: 12px; color: #fff;">ТЕРМИНАЛ ОФЛАЙН-ОЧЕРЕДИ</h3>
+                <h3 style="margin-bottom: 12px; color: #fff;">ТЕРМИНАЛ ЛОГОВ</h3>
                 <div style="flex: 1; background: #000; color: #00a884; font-family: monospace; font-size: 11px; overflow-y: auto; padding: 10px; border-radius: 8px;">
                     <div v-for="(l, i) in sysLogs" :key="i">{{ l }}</div>
                 </div>
                 <button style="background: transparent; color: #00a884; border: 1px solid #00a884; padding: 12px; margin-top: 12px; border-radius: 8px;" @click="clickSound(); showLogsPanel = false">Закрыть</button>
             </div>
         </div>
-
-        <!-- МОДАЛКИ ПЕРЕНЕСЕНЫ ВНИЗ -->
         <div class="modal" v-if="showAddModal" @click.self="clickSound(); showAddModal = false">
             <div class="modal-content">
                 <h3 style="color: #e9edef;">Создание Связи</h3>
                 <input v-model="newThreadName" placeholder="Имя (Аватар)">
                 <input v-model="newThreadId" placeholder="Вставь ID узла" autocomplete="off">
-                <p style="font-size:11px; color:#8f9ca3; line-height: 1.4;">Оставь поле ID пустым, чтобы создать пустой Ближний круг (Группу).</p>
+                <p style="font-size:11px; color:#8f9ca3; line-height: 1.4;">Чтобы создать общую открытую группу, оставь поле ID пустым.</p>
                 <div class="btn-row">
                     <button class="btn-cancel" @click="clickSound(); showAddModal = false">Отмена</button>
                     <button class="btn-confirm" @click="createThread">Готово</button>
                 </div>
             </div>
         </div>
-
-        <!-- СЛИЯНИЕ ID И ШЕРИНГА -->
         <div class="modal" v-if="showIdCopyModal" @click.self="clickSound(); showIdCopyModal = false">
             <div class="modal-content">
                 <h3 style="color: #00a884; margin-bottom: 8px;">Моя Координата</h3>
@@ -263,7 +243,6 @@
                 <button class="btn-cancel" style="margin-top: 8px;" @click="clickSound(); showIdCopyModal = false">Отмена</button>
             </div>
         </div>
-
         <div class="modal" v-if="showSettings" @click.self="clickSound(); showSettings = false">
             <div class="modal-content">
                 <h3 style="color: #00a884; margin-bottom: 16px;">Щит (Настройки)</h3>
@@ -272,16 +251,13 @@
                     <label style="color:#8f9ca3; font-size:12px; margin-bottom:4px; display:block;">Моё имя (Видно в Группах):</label>
                     <input v-model="myName" placeholder="Аноним" @blur="save" style="width:100%; box-sizing:border-box;">
                 </div>
-
-                <button class="settings-btn" @click="reqGyro"><span>🧭 Гироскоп (Защита рывком)</span> <span style="color:#00a884;">Акт</span></button>
+                <button class="settings-btn" @click="reqGyro"><span>🧭 Гироскоп (Сброс рывком)</span> <span style="color:#00a884;">Акт</span></button>
                 <button class="settings-btn" @click="reqNotif"><span>🔔 Уведомления в фоне</span> <span style="color:#00a884;">Акт</span></button>
                 
-                <!-- Заглушка Донатов -->
                 <button style="background: #111b21; font-size: 14px; padding: 12px; border-radius: 8px; border: 1px solid #b38b5a; text-align: center; margin-top: 12px; cursor: pointer; width: 100%;" @click="donate">
                     <span style="color:#b38b5a; font-weight:bold;">💰 Поддержать Исток</span>
                 </button>
                 
-                <!-- Очистка (Смена ПИНа) -->
                 <button style="background: #111b21; font-size: 14px; padding: 12px; border-radius: 8px; border: 1px solid #ea0038; text-align: center; cursor: pointer; width: 100%; margin-top: 8px;" @click="wipeIdentity">
                     <span style="color:#ea0038; font-weight:bold;">🗑 Сжечь Личность (Удалить)</span>
                 </button>
@@ -292,14 +268,16 @@
     </div>
     <script>
         // =====================================================================
-        // [УЗЕЛ 11/108: КРИПТОГРАФИЯ (Пифагор - Расширенный)]
+        // БЛОК 01: CRYSTAL108CODEC (ОСНОВНОЙ ШИФРАТОР)
         // =====================================================================
         class Crystal108Codec {
             constructor() {
-                // Расширенный алфавит для сохранения регистра (124 символа)
-                this.alphabet = ' abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZабвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ0123456789-/:;().,?!|\n'; 
+                // Расширенный алфавит (включая заглавные буквы)
+                this.alphabet = ' abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZабвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ0123456789-/:;().,?!|\n';
                 this.charToIdx = {}; this.idxToChar = [];
-                for (let i = 0; i < this.alphabet.length; i++) { this.charToIdx[this.alphabet[i]] = i; this.idxToChar[i] = this.alphabet[i]; }
+                for (let i = 0; i < this.alphabet.length; i++) {
+                    this.charToIdx[this.alphabet[i]] = i; this.idxToChar[i] = this.alphabet[i];
+                }
                 this.base = BigInt(this.alphabet.length); this.PI = Math.PI; this.PHI = (1 + Math.sqrt(5)) / 2;
             }
             _prng(seed) {
@@ -318,21 +296,20 @@
                 if (cleanText.length === 0) throw new Error('Пусто');
                 let num = 0n;
                 for (let i = 0; i < cleanText.length; i++) { num = num * this.base + BigInt(this.charToIdx[cleanText[i]]); }
-                const plain = cleanText.length.toString().padStart(2, '0') + num.toString().padStart(106, '0');
-                if (plain.length > 108) throw new Error('Превышен предел базы (108)');
+                // Ограничитель расширен, так как пакет не дробится. Длина математического блока будет около 210 символов
+                const plain = cleanText.length.toString().padStart(3, '0') + num.toString().padStart(207, '0');
                 
                 const rand = this._prng(Math.floor(astroSalt * this.PI * this.PHI * 10000));
-                let mask = ''; for (let i = 0; i < 108; i++) mask += Math.floor(rand() * 10).toString();
-                let enc = ''; for (let i = 0; i < 108; i++) { enc += ((parseInt(plain[i], 10) + parseInt(mask[i], 10)) % 10).toString(); }
+                let mask = ''; for (let i = 0; i < 210; i++) mask += Math.floor(rand() * 10).toString();
+                let enc = ''; for (let i = 0; i < 210; i++) { enc += ((parseInt(plain[i], 10) + parseInt(mask[i], 10)) % 10).toString(); }
                 return enc;
             }
-            resonate(code108, astroSalt = 0) {
-                code108 = code108.toString().trim();
-                if (code108.length !== 108) throw new Error(`Сбой длины`);
+            resonate(code, astroSalt = 0) {
+                code = code.toString().trim();
                 const rand = this._prng(Math.floor(astroSalt * this.PI * this.PHI * 10000));
-                let mask = ''; for (let i = 0; i < 108; i++) mask += Math.floor(rand() * 10).toString();
-                let plain = ''; for (let i = 0; i < 108; i++) { plain += ((parseInt(code108[i], 10) - parseInt(mask[i], 10) + 10) % 10).toString(); }
-                const len = parseInt(plain.slice(0, 2), 10); const numStr = plain.slice(2).replace(/^0+/, '') || '0';
+                let mask = ''; for (let i = 0; i < 210; i++) mask += Math.floor(rand() * 10).toString();
+                let plain = ''; for (let i = 0; i < 210; i++) { plain += ((parseInt(code[i], 10) - parseInt(mask[i], 10) + 10) % 10).toString(); }
+                const len = parseInt(plain.slice(0, 3), 10); const numStr = plain.slice(3).replace(/^0+/, '') || '0';
                 let n = BigInt(numStr); let digs = [];
                 while (n > 0n) { digs.unshift(Number(n % this.base)); n /= this.base; }
                 while (digs.length < len) digs.unshift(0);
@@ -340,37 +317,36 @@
             }
         }
         // =====================================================================
-        // [УЗЕЛ 12/108: БАЗА ПАМЯТИ]
+        // БЛОК 02: БАЗА ПАМЯТИ
         // =====================================================================
         class ShadowGateway {
-            constructor() { this.currentKey = null; this.rawKey = null; }
+            constructor() { this.currentKey = null; }
             async enter(pin) {
-                const msgBuffer = new TextEncoder().encode(pin + "_polis_absolute_salt"); const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-                const hashArray = Array.from(new Uint8Array(hashBuffer)); 
+                const msgBuffer = new TextEncoder().encode(pin + "_polis_absolute_salt");
+                const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+                const hashArray = Array.from(new Uint8Array(hashBuffer));
                 this.currentKey = 'p108_' + hashArray.map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 32);
-                this.rawKey = this.currentKey;
-                const data = localStorage.getItem(this.currentKey); return data ? JSON.parse(data) : null; 
+                const data = localStorage.getItem(this.currentKey);
+                return data ? JSON.parse(data) : null;
             }
             async save(data) { if (this.currentKey) localStorage.setItem(this.currentKey, JSON.stringify(data)); }
             wipe() { if (this.currentKey) localStorage.removeItem(this.currentKey); this.currentKey = null; }
             lock() { this.currentKey = null; }
         }
         // =====================================================================
-        // [УЗЕЛ 13/108: MQTT БРОКЕР (С ПАМЯТЬЮ ОФЛАЙНА)]
+        // БЛОК 03: ВРАТА СВЯЗИ (MQTT)
         // =====================================================================
         class MQTTBridge {
-            constructor(onStatus, onMsg, id) { 
+            constructor(onStatus, onMsg, id) {
                 this.onStatus = onStatus; this.onMsg = onMsg; this.client = null; this.topics = []; this.url = 'wss://broker.emqx.io:8084/mqtt'; this.clientId = 'node108_' + id;
             }
             connect(topicsToSubscribe) {
                 this.topics = topicsToSubscribe || []; if (this.client) this.client.end(true);
-                // ВАЖНО: clean: false заставляет брокер запоминать пакеты, когда ты офлайн
+                // clean: false - позволяет Брокеру запоминать пакеты для нас, пока мы оффлайн
                 this.client = mqtt.connect(this.url, { clientId: this.clientId, keepalive: 45, reconnectPeriod: 3000, clean: false });
-                this.client.on('connect', () => { 
-                    this.onStatus(true); 
-                    this.topics.forEach(t => this.client.subscribe(t, {qos: 1})); // QoS 1 гарантирует доставку
-                });
-                this.client.on('close', () => this.onStatus(false)); this.client.on('error', () => this.onStatus(false));
+                this.client.on('connect', () => { this.onStatus(true); this.topics.forEach(t => this.client.subscribe(t, {qos: 1})); });
+                this.client.on('close', () => this.onStatus(false));
+                this.client.on('error', () => this.onStatus(false));
                 this.client.on('message', (t, p) => this.onMsg(p.toString(), t));
             }
             updateTopics(newTopics) { newTopics.forEach(t => { if (!this.topics.includes(t)) { this.topics.push(t); if (this.client && this.client.connected) this.client.subscribe(t, {qos: 1}); } }); }
@@ -380,7 +356,7 @@
         const cry = new Crystal108Codec(); const sg = new ShadowGateway();
         const checkPWA = () => { return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone || document.referrer.includes('android-app://'); };
         // =====================================================================
-        // [УЗЕЛ 14/108: ЯДРО (VUE)]
+        // БЛОК 04: ВНЕШНЯЯ ЛОГИКА (VUE)
         // =====================================================================
         new Vue({
             el: '#app',
@@ -389,7 +365,7 @@
                 pinArray: ['', '', '', '', '', ''], pinError: false, 
                 myId: '', myName: '', mqttOnline: false, mqtt: null,
                 showAddModal: false, showWalletModal: false, showSettings: false, showIdCopyModal: false, newThreadName: '', newThreadId: '',
-                activeThread: null, inputText: '', threads: [], messages: {}, outbox: [], sentNonces: new Set(),
+                activeThread: null, inputText: '', threads: [], messages: {}, outbox: [],
                 sysLogs: [], showLogsPanel: false, settings: { sound: true, notifs: true }
             },
             computed: { 
@@ -404,17 +380,17 @@
                 mqttOnline(newVal) {
                     if (newVal && this.outbox.length > 0) {
                         let delay = 0;
-                        this.log(`Капсула открыта: ${this.outbox.length} пакетов`);
+                        this.log(`Выпуск Капсулы: ${this.outbox.length} пакетов`);
                         this.outbox.forEach(pkt => {
                             setTimeout(() => {
                                 this.mqtt.send(pkt.topic, pkt.code);
-                                // Снимаем pending (красную точку)
+                                // Снимаем pending
                                 if (this.messages[pkt.peerId] && pkt.uiMsgId) {
                                     let m = this.messages[pkt.peerId].find(x => x.id === pkt.uiMsgId);
                                     if (m) { m.pending = false; this.$set(this.messages, pkt.peerId, [...this.messages[pkt.peerId]]); }
                                 }
                             }, delay);
-                            delay += 2000; // Пауза 2 секунды, чтобы брокер не захлебнулся
+                            delay += 500; // Пауза полсекунды
                         });
                         this.outbox = []; this.save();
                     }
@@ -422,8 +398,7 @@
             },
             mounted() {
                 setTimeout(() => { this.isPWAInstalled = checkPWA() || (window.innerHeight === screen.height); }, 100);
-                window.addEventListener('visibilitychange', this.wakeUp); 
-                window.addEventListener('focus', this.wakeUp);
+                window.addEventListener('visibilitychange', this.wakeUp); window.addEventListener('focus', this.wakeUp);
             },
             beforeDestroy() { if (this.mqtt) this.mqtt.disconnect(); window.removeEventListener('devicemotion', this.handleShake); },
             methods: {
@@ -443,8 +418,7 @@
                 },
                 // Управление 6-значным ПИН-сейфом
                 onPinInput(idx, event) {
-                    this.clickSound();
-                    let val = event.target.value;
+                    this.clickSound(); let val = event.target.value;
                     if (!/^\d$/.test(val)) { this.pinArray.splice(idx, 1, ''); return; }
                     if (idx < 5) { this.$refs['pin' + (idx + 1)][0].focus(); }
                     else if (idx === 5) { this.login(); }
@@ -458,11 +432,13 @@
                     const el = document.createElement('textarea'); el.value = t; document.body.appendChild(el);
                     el.select(); document.execCommand('copy'); document.body.removeChild(el); alert(alertText); this.clickSound();
                 },
-                copyMyId() { this.showIdCopyModal = true; },
-                sharePolis() {
+                
+                sharePolis(isGroup = false, onlyId = false) {
                     this.clickSound();
-                    const url = window.location.href.split('?')[0]; 
-                    const text = `Жду тебя в Полисе.\nМой ID: ${this.myId}\n\n(Скопируй ссылку и открой строго в браузере Safari/Chrome):\n${url}`;
+                    const url = window.location.href.split('?')[0]; const targetId = isGroup ? this.activeThread.peerId : this.myId;
+                    
+                    let text = `Жду тебя в Полисе.\n\nМой ID:\n${targetId}\n\n(Скопируй ссылку и открой строго в браузере Safari/Chrome):\n${url}`;
+                    if (onlyId) text = targetId;
                     if (navigator.share) { navigator.share({ text: text }).catch(() => {}); } 
                     else if (navigator.clipboard) { navigator.clipboard.writeText(text).then(() => alert('Приглашение скопировано.')); }
                     this.showIdCopyModal = false;
@@ -478,11 +454,10 @@
                     if (Notification.permission === 'default') { Notification.requestPermission().then(p => { if (p === 'granted') alert('Уведомления включены'); }); } 
                     else { alert(Notification.permission === 'granted' ? 'Уведомления включены' : 'Включи их в настройках телефона'); }
                 },
-                donate() { this.clickSound(); alert('Модуль поддержки будет внедрен в следующей версии (Блок 15).'); },
+                donate() { this.clickSound(); alert('Модуль поддержки Истока будет внедрен в следующей версии.'); },
                 async login() {
                     if (this.masterPin.length !== 6) { 
                         this.clickSound(true); this.pinError = true; setTimeout(() => this.pinError = false, 400); 
-                        // Очистка при ошибке
                         this.pinArray = ['', '', '', '', '', '']; this.$refs['pin0'][0].focus(); return; 
                     }
                     this.clickSound(); window.addEventListener('devicemotion', this.handleShake);
@@ -500,16 +475,13 @@
                         this.log("Личность восстановлена");
                     }
                     this.loggedIn = true; 
-                    this.pinArray = ['', '', '', '', '', '']; // Очищаем массив для безопасности
+                    this.pinArray = ['', '', '', '', '', '']; 
                     this.mqtt = new MQTTBridge((s) => { this.mqttOnline = s; }, this.handleMsg, this.myId);
                     this.mqtt.connect(this.getAllTopics());
                 },
-                // УДАЛЕНИЕ ЛИЧНОСТИ
                 wipeIdentity() {
-                    if(confirm("ВНИМАНИЕ. Это действие навсегда сотрет текущую Личность, все связи и переписки. Продолжить?")) {
-                        sg.wipe();
-                        this.lockPolis();
-                        alert("Личность сожжена.");
+                    if(confirm("ВНИМАНИЕ. Это действие навсегда сотрет текущую Личность и все переписки. Сжечь?")) {
+                        sg.wipe(); this.lockPolis(); alert("Личность сожжена.");
                     }
                 },
                 handleShake(e) {
@@ -545,53 +517,50 @@
                     let id = this.activeThread.peerId; this.threads = this.threads.filter(t => t.peerId !== id);
                     this.$delete(this.messages, id); this.activeThread = null; this.save();
                 },
+                openWalletModal() {
+                    this.clickSound(); if (!this.activeThread) return;
+                    if (typeof this.activeThread.xmr === 'undefined') this.$set(this.activeThread, 'xmr', '');
+                    if (typeof this.activeThread.usdt === 'undefined') this.$set(this.activeThread, 'usdt', '');
+                    this.showWalletModal = true;
+                },
+                saveWalletConfig() { this.clickSound(); this.save(); this.showWalletModal = false; },
+                launchURI(uri) { window.location.href = uri; },
                 // =====================================================================
-                // [УЗЕЛ 15/108: РЕЗАК 108 И КАПСУЛА]
+                // БЛОК 05: ONE-SHOT (ОТПРАВКА БЕЗ ДРОБЛЕНИЯ) И АНТИ-ЭХО
                 // =====================================================================
                 sendMsg() {
                     if (!this.inputText || !this.activeThread) return;
                     this.clickSound(); const fullText = this.inputText.trim(); if (fullText === '') return;
-                    const uiMsgId = Date.now(); // Привязка для капсулы
+                    const uiMsgId = Date.now();
                     const msgObj = { id: uiMsgId, text: fullText, isMe: true, time: new Date().toLocaleTimeString().slice(0, 5), pending: !this.mqttOnline };
                     if (!this.messages[this.activeThread.peerId]) this.$set(this.messages, this.activeThread.peerId, []);
                     this.messages[this.activeThread.peerId].push(msgObj); this.$set(this.messages, this.activeThread.peerId, [...this.messages[this.activeThread.peerId]]);
-                    // РЕЖЕМ ПО 25 СИМВОЛОВ (Чтобы 100% влезть в расширенный алфавит 108)
-                    const chunkSize = 25; const chunks = [];
-                    for (let i = 0; i < fullText.length; i += chunkSize) { chunks.push(fullText.slice(i, i + chunkSize)); }
-                    let delay = 0;
-                    chunks.forEach((chunk) => {
-                        setTimeout(() => {
-                            const nonce = Math.floor(100 + Math.random() * 900).toString();
-                            try {
-                                // ФОРМАТ ПАКЕТА: nonce | myId | myName | текст
-                                const rawPayload = nonce + '|' + this.myId + '|' + this.myName + '|' + chunk;
-                                const code = cry.collapse(rawPayload, 0); 
-                                
-                                this.sentNonces.add(nonce); setTimeout(() => this.sentNonces.delete(nonce), 30000);
-                                const topic = this.activeThread.type === 'group' ? `polis108/group/${this.activeThread.peerId}` : `polis108/link/${[this.myId, this.activeThread.peerId].sort().join('_')}`;
-                                
-                                if (this.mqttOnline) { this.mqtt.send(topic, code); } 
-                                else { this.outbox.push({ topic, code, nonce, peerId: this.activeThread.peerId, uiMsgId: uiMsgId }); }
-                            } catch (e) { this.log(`Сбой: Код не влез в 108.`); }
-                        }, delay);
-                        delay += 300;
-                    });
+                    // ONE-SHOT ПАКЕТ: Никаких кусков. Одно сообщение = один пакет
+                    setTimeout(() => {
+                        try {
+                            const rawPayload = this.myId + '|' + this.myName + '|' + fullText;
+                            const code = cry.collapse(rawPayload, 0); 
+                            
+                            const topic = this.activeThread.type === 'group' ? `polis108/group/${this.activeThread.peerId}` : `polis108/link/${[this.myId, this.activeThread.peerId].sort().join('_')}`;
+                            
+                            if (this.mqttOnline) { this.mqtt.send(topic, code); } 
+                            else { this.outbox.push({ topic, code, peerId: this.activeThread.peerId, uiMsgId: uiMsgId }); }
+                        } catch (e) { this.log(`Сбой пакета`); }
+                    }, 50);
                     
                     this.inputText = ''; this.scrollBot(); this.save();
                 },
                 handleMsg(payload, topic) {
                     try {
                         const unencrypted = cry.resonate(payload, 0); const parts = unencrypted.split('|');
-                        if (parts.length < 4) return; // Формат: nonce|senderId|senderName|text
+                        if (parts.length < 3) return; // Формат: senderId|senderName|text
                         
-                        const incomingNonce = parts[0]; 
-                        const senderId = parts[1]; 
-                        const senderName = parts[2] || 'Аноним';
-                        const incomingText = parts.slice(3).join('|');
+                        const senderId = parts[0]; 
+                        const senderName = parts[1] || 'Аноним';
+                        const incomingText = parts.slice(2).join('|'); 
                         
                         // АНТИ ЭХО: Режет пакет, если он отправлен мной
                         if (senderId === this.myId) return;
-                        if (this.sentNonces.has(incomingNonce)) return;
                         let targetId = null;
                         if (topic.includes('polis108/link/')) {
                             this.threads.forEach(t => { if (t.type === 'personal' && topic === `polis108/link/${[this.myId, t.peerId].sort().join('_')}`) targetId = t.peerId; });
@@ -600,14 +569,8 @@
                         }
                         if (targetId) {
                             if (!this.messages[targetId]) this.$set(this.messages, targetId, []);
-                            const now = Date.now(); const lastMsg = this.messages[targetId][this.messages[targetId].length - 1];
-                            // Жесткая склейка по времени (600мс)
-                            if (lastMsg && !lastMsg.isMe && (now - lastMsg.id < 600) && lastMsg.senderId === senderId) {
-                                lastMsg.text += incomingText; lastMsg.id = now; this.$set(this.messages, targetId, [...this.messages[targetId]]);
-                            } else {
-                                const msgObj = { id: now, text: incomingText, isMe: false, time: new Date().toLocaleTimeString().slice(0, 5), senderName: senderName, senderId: senderId };
-                                this.messages[targetId].push(msgObj); this.$set(this.messages, targetId, [...this.messages[targetId]]);
-                            }
+                            const msgObj = { id: Date.now(), text: incomingText, isMe: false, time: new Date().toLocaleTimeString().slice(0, 5), senderName: senderName, senderId: senderId };
+                            this.messages[targetId].push(msgObj); this.$set(this.messages, targetId, [...this.messages[targetId]]);
                             const th = this.threads.find(t => t.peerId === targetId);
                             if (th && (!this.activeThread || this.activeThread.peerId !== targetId)) { this.$set(th, 'unread', (th.unread || 0) + 1); }
                             if (document.hidden && this.settings.notifs) { this.clickSound(); if (Notification.permission === 'granted') new Notification('Полис', { body: 'Новый контакт' }); if (navigator.vibrate) navigator.vibrate([50]); }
