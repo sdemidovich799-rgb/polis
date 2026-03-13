@@ -323,7 +323,6 @@
             </div>
         </div>
     </div>
-
     <script>
         // =====================================================================
         // [УЗЕЛ 01: КРИСТАЛЛ 108]
@@ -375,7 +374,7 @@
             }
         }
         // =====================================================================
-        // [УЗЕЛ 02: БАЗА ПАМЯТИ (Железобетонная версия)]
+        // [УЗЕЛ 02: БАЗА ПАМЯТИ]
         // =====================================================================
         class ShadowGateway {
             constructor() { this.currentKey = null; }
@@ -394,35 +393,49 @@
             lock() { this.currentKey = null; }
         }
         // =====================================================================
-        // [УЗЕЛ 03: MQTT РАЦИЯ («УМНАЯ РОЗЕТКА»)]
+        // [УЗЕЛ 03: MQTT РАЦИЯ (ИСПРАВЛЕНИЕ ДУБЛЕЙ ПОДПИСОК)]
         // =====================================================================
         class MQTTBridge {
             constructor(onStatus, onMsg, id) {
                 this.onStatus = onStatus; this.onMsg = onMsg; this.client = null;
                 this.url = 'wss://broker.emqx.io:8084/mqtt';
-                // ЖЕСТКИЙ ID: Брокер узнает этот телефон и отдаст ему накопившиеся пакеты.
                 this.clientId = 'node108_core_' + id; 
+                this.activeTopics = []; // Храним активные подписки, чтобы не дублировать
             }
             connect(topics) {
+                if (this.client && this.client.connected) {
+                    this._subscribeUnique(topics);
+                    return;
+                }
+                
                 if (this.client) this.client.end(true);
-                // CLEAN: FALSE — Брокер работает как почтовое отделение для офлайн-пользователей.
                 this.client = mqtt.connect(this.url, { 
                     clientId: this.clientId, 
                     keepalive: 60, 
                     reconnectPeriod: 3000, 
                     clean: false 
                 });
+                
                 this.client.on('connect', ()=>{ 
                     this.onStatus(true); 
-                    topics.forEach(t => this.client.subscribe(t, {qos:1})); 
+                    this.activeTopics = []; // Сброс при новом коннекте
+                    this._subscribeUnique(topics);
                 });
                 this.client.on('close', ()=> this.onStatus(false));
                 this.client.on('error', ()=> this.onStatus(false));
                 this.client.on('message', (t,p)=> this.onMsg(p.toString(), t));
             }
-            // RETAIN: FALSE (Капсула работает за счет очереди брокера и блокировки второго выстрела)
+            _subscribeUnique(topics) {
+                if (!this.client || !this.client.connected) return;
+                topics.forEach(t => {
+                    if (!this.activeTopics.includes(t)) {
+                        this.client.subscribe(t, {qos:1});
+                        this.activeTopics.push(t);
+                    }
+                });
+            }
             send(topic, msg) { if (this.client && this.client.connected) this.client.publish(topic, msg, {qos:1, retain: false}); }
-            disconnect() { if (this.client) this.client.end(true); this.onStatus(false); }
+            disconnect() { if (this.client) this.client.end(true); this.onStatus(false); this.activeTopics = []; }
         }
         const cry = new Crystal108Codec(); const sg = new ShadowGateway();
         const checkPWA = ()=> window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone || document.referrer.includes('android-app://');
@@ -497,7 +510,6 @@
                 log(t) { const time = new Date().toLocaleTimeString().slice(0,8); this.sysLogs.unshift(`[${time}] ${t}`); if (this.sysLogs.length > 80) this.sysLogs.pop(); },
                 copyLogs() { this.copy(this.sysLogs.join('\n'), 'Журнал скопирован в буфер'); },
                 onVisibilityChange() {
-                    // НИКАКИХ РАЗРЫВОВ СОКЕТА. Оставляем работу сети на уровне iOS и MQTT.js
                     if (document.visibilityState === 'hidden') { 
                         this.log('[SYS] Приложение в фоне (Ожидание)'); 
                     } else { 
@@ -614,6 +626,7 @@
                     this.$set(this.messages, id, []); 
                     this.save();
                     
+                    // Обновляем подписки бз переподключения
                     if (this.mqtt) this.mqtt.connect(this.getAllTopics()); 
                     this.showAddModal = false;
                     this.openThread(newTh);
@@ -649,7 +662,6 @@
                     else if (this.inputMode === 'cipher') this.decryptManual();
                 },
                 
-                // === ЯДРО ОТПРАВКИ (ИДЕАЛЬНАЯ РЕАКТИВНОСТЬ VUE) ===
                 sendMsg() {
                     if (!this.inputText || !this.activeThread || this.activeThread.type === 'citadel' || this.fieldLocked) return;
                     if (!this.mqttReady) { alert('Радиоканал еще греется. Подожди долю секунды...'); return; }
@@ -728,7 +740,7 @@
                     this.$set(this.messages, 'citadel', [...currentMsgs, msgObj]);
                     this.inputText = ''; this.scrollBot(); this.save();
                 },
-                // === ЛОВЕЦ ЭФИРА (И ОТКРЫТИЕ ЗАМКА) ===
+                // ИСПРАВЛЕНИЕ: ЖЕСТКАЯ ПРОВЕРКА НА ДУБЛИ ФАНТОМНЫХ ЧАТОВ
                 handleMsg(payload, topic) {
                     try {
                         const decrypted = cry.resonate(payload, 0); const parts = decrypted.split('|'); const type = parts[0];
@@ -742,7 +754,6 @@
                             if (senderId === this.activeThread?.peerId) { this.sonarStatus = 'online'; if (this.sonarTimer) clearTimeout(this.sonarTimer); this.log(`[<<] Словлен PONG. Цель в сети.`); }
                             return;
                         }
-                        // ПРИЛЕТЕЛО ЭХО -> СНИМАЕМ ЗАМОК (РЕАКТИВНО)
                         if (type === 'ACK') {
                             const ackMsgId = parseInt(parts[2],10);
                             let targetId = null;
@@ -751,7 +762,6 @@
                             
                             this.log(`[<<] Поймано ЭХО Доставки (ID: ${ackMsgId})`);
                             if (targetId && this.messages[targetId]) {
-                                // Пересобираем массив сообщений, чтобы Vue 100% перекрасил экран
                                 const updatedMsgs = this.messages[targetId].map(m => {
                                     if (m.id === ackMsgId && m.isMe) {
                                         return { ...m, status: 3 }; 
@@ -767,28 +777,30 @@
                             }
                             return;
                         }
-                        // ПРИЛЕТЕЛО ПИСЬМО
                         if (type === 'MSG') {
                             const senderId = parts[1]; const senderName = parts[2]; const msgId = parseInt(parts[3],10); const text = parts.slice(4).join('|');
-                            if (senderId === this.myId) return; // Свое эхо брокера игнорим
+                            if (senderId === this.myId) return; 
                             
                             let targetId = null;
                             if (topic.includes('polis108/link/')) { targetId = topic.replace('polis108/link/','').split('_').find(id => id !== this.myId); } 
                             else if (topic.includes('polis108/group/')) { targetId = topic.replace('polis108/group/',''); }
                             if (!targetId) return;
+                            // ИСПРАВЛЕНИЕ ЗАЩИТЫ ОТ ДУБЛИРОВАНИЯ ЧАТА
                             let thread = this.threads.find(t => t.peerId === targetId);
                             if (!thread) {
                                 thread = { name: senderName || 'Тайный связной', peerId: targetId, type: (targetId.startsWith('grp_')?'group':'personal'), unread:0 };
                                 this.threads.unshift(thread); 
-                                this.$set(this.messages, targetId, []);
+                                // Проверяем, может массив сообщений уже существует
+                                if (!this.messages[targetId]) {
+                                    this.$set(this.messages, targetId, []);
+                                }
                             }
-                            // ОБЯЗАТЕЛЬНО ОТСТРЕЛ ЭХА (РАЗБЛОКИРОВАТЬ ДРУГА)
                             if (this.mqttOnline) {
                                 const ackCode = cry.collapse(`ACK|${this.myId}|${msgId}`, 0);
                                 this.mqtt.send(topic, ackCode); 
                                 this.log(`[>>] Авто-ЭХО отбито.`);
                             }
-                            if (this.messages[targetId].some(m => !m.isMe && m.originalId === msgId)) {
+                            if (this.messages[targetId] && this.messages[targetId].some(m => !m.isMe && m.originalId === msgId)) {
                                 this.log(`[SYS] Дубль сообщения проигнорирован.`); return; 
                             }
                             const msgObj = { id: Date.now(), originalId: msgId, text: text, isMe: false, time: new Date().toLocaleTimeString().slice(0,5), status: 3, senderName: senderName };
