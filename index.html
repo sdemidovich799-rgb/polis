@@ -47,6 +47,7 @@
         
         .pulse-btn { animation: pulseBtn 2s infinite; }
         @keyframes pulseBtn { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 168, 132, 0.7); } 50% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(0, 168, 132, 0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 168, 132, 0); } }
+
         .header { padding: calc(env(safe-area-inset-top) + 12px) 16px 12px; background: #202c33; border-bottom: 1px solid #2d3f4b; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; z-index: 20; }
         .header-left { display: flex; align-items: center; gap: 12px; cursor: pointer; }
         .id-badge { background: transparent; border: 1px solid #00a884; color: #00a884; padding: 4px 12px; border-radius: 16px; font-weight: bold; font-size: 12px; cursor: pointer; }
@@ -67,6 +68,7 @@
         .onboarding { padding: 32px 20px; color: #8f9ca3; }
         .obs-step { background: #202c33; border-radius: 12px; padding: 16px; margin-bottom: 12px; font-size: 14px; line-height: 1.5; color: #e9edef; }
         .obs-hl { color: #00a884; font-weight: bold; }
+
         .chat-panel { position: absolute; top:0; left:0; width:100%; height:100%; background: #0b141a; display: flex; flex-direction: column; z-index: 6; transform: translateX(100%); transition: transform 0.25s cubic-bezier(0.3,0,0,1); }
         .chat-panel.active { transform: translateX(0); }
         .chat-header { padding: calc(env(safe-area-inset-top) + 8px) 16px 8px; background: #202c33; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #2d3f4b; flex-shrink: 0; }
@@ -138,6 +140,7 @@
                 </template>
             </div>
         </div>
+
         <!-- СЕЙФ ВХОДА -->
         <div v-else-if="!loggedIn" class="safe-panel">
             <div class="safe-top">
@@ -152,6 +155,7 @@
                     <p style="color:#8f9ca3; font-size:12px; margin-top:8px;">ПИН генерирует Личность.</p>
                 </div>
             </div>
+
             <div class="safe-bottom">
                 <div class="keypad">
                     <button class="key-btn" @click="addPinDigit(1)">1</button>
@@ -170,6 +174,7 @@
                 </div>
             </div>
         </div>
+
         <!-- ЯДРО -->
         <div v-else style="display:flex; flex-direction:column; height:100%;">
             <div class="header" v-if="!activeThread">
@@ -179,6 +184,7 @@
                 </div>
                 <button class="header-btn" style="color: #00a884;" @click="clickSound(); showSettings = true">⚙️</button>
             </div>
+
             <!-- СПИСОК СВЯЗЕЙ -->
             <div class="messenger-layout" v-if="!activeThread">
                 <div class="threads-panel">
@@ -197,6 +203,7 @@
                                 2. Как только получишь ID Друга — жми пульсирующий <span class="obs-hl">+</span> и вставляй, чтобы открыть Тет-а-Тет.
                             </div>
                         </div>
+
                         <div v-for="thread in threads" :key="thread.peerId" class="thread-item" @click="openThread(thread)">
                             <div>
                                 <div class="t-name" :style="thread.type === 'citadel' ? 'color:#00a884;' : ''">{{ thread.name }}</div>
@@ -207,6 +214,7 @@
                     </div>
                 </div>
             </div>
+
             <!-- ОКНО ЧАТА -->
             <div class="chat-panel active" v-if="activeThread">
                 <div class="chat-header">
@@ -225,6 +233,7 @@
                     </button>
                     <button v-if="activeThread.type !== 'citadel'" style="background:transparent; border:none; color:#ea0038; font-size:20px; padding:0 0 0 12px; cursor:pointer;" @click="deleteThread">🗑</button>
                 </div>
+
                 <div class="messages-box" ref="msgBox">
                     <div v-if="!messages[activeThread.peerId] || messages[activeThread.peerId].length === 0" style="text-align:center; padding:40px 20px; color:#8f9ca3; line-height: 1.5; font-size: 14px;">
                         <template v-if="activeThread.type === 'citadel'">
@@ -236,6 +245,7 @@
                             <p>Сжимай мысль до 108 символов.</p>
                         </template>
                     </div>
+
                     <template v-if="messages[activeThread.peerId]">
                         <div v-for="msg in messages[activeThread.peerId]" :key="msg.id" :class="['message-row', msg.isMe ? 'my-message-row' : 'other-message-row']" @dblclick="msg.status === 2 ? deleteMsg(msg.id) : null">
                             <div v-if="!msg.isMe && activeThread.type==='system' && msg.senderName" class="msg-sender">{{ msg.senderName }}</div>
@@ -247,10 +257,11 @@
                         </div>
                     </template>
                 </div>
+
                 <!-- ОМНИ-ПОЛЕ -->
                 <div class="input-area" v-if="activeThread && activeThread.type !== 'citadel'">
                     <template v-if="fieldLocked">
-                        <div class="locked-indicator">⏳ Капсула отправлена (Ждем Эмпульс)</div>
+                        <div class="locked-indicator">⏳ Капсула в орбите (Ждем Эмпульс)</div>
                     </template>
                     <template v-else>
                         <div class="input-wrapper">
@@ -268,6 +279,7 @@
                         </div>
                     </template>
                 </div>
+
                 <!-- ЧЕРТОГ -->
                 <div class="input-area" v-else-if="activeThread && activeThread.type === 'citadel'">
                     <div class="input-wrapper">
@@ -289,6 +301,7 @@
                 </div>
             </div>
         </div>
+
         <!-- МОДАЛКИ -->
         <div class="modal" v-if="showAddModal" @click.self="clickSound(); showAddModal=false">
             <div class="modal-content">
@@ -302,6 +315,7 @@
                 </div>
             </div>
         </div>
+
         <div class="modal" v-if="showIdCopyModal" @click.self="clickSound(); showIdCopyModal = false">
             <div class="modal-content">
                 <h3 style="color: #00a884; margin-bottom: 8px;">Мой Узел (ID)</h3>
@@ -315,12 +329,13 @@
                 <div class="btn-row" style="margin-top: 8px;"><button class="btn-cancel" @click="clickSound(); showIdCopyModal = false">Закрыть</button></div>
             </div>
         </div>
-        <div class="modal" v-if="showSettings" @click.self="clickSound(); showSettings=false">
+<!-- СТОП ЧАСТЬ 1 -->
+        <div class="modal" v-if="showSettings" @click.self="clickSound(); save(); showSettings=false">
             <div class="modal-content">
                 <h3 style="color:#00a884; margin-bottom: 16px;">Щит (Настройки)</h3>
                 <div style="margin-bottom: 16px;">
                     <label style="color:#8f9ca3; font-size:12px; display:block; margin-bottom:4px;">Моё имя (Для Групп):</label>
-                    <input v-model="myName" placeholder="Аноним" style="width:100%; box-sizing:border-box;">
+                    <input v-model="myName" placeholder="Аноним" style="width:100%; box-sizing:border-box;" @blur="save">
                 </div>
                 <button class="settings-btn" @click="reqGyro"><span>🧭 Гироскоп (Сброс рывком)</span> <span style="color:#00a884;">Акт</span></button>
                 <button class="settings-btn" @click="reqNotif"><span>🔔 Уведомления в фоне</span> <span style="color:#00a884;">Акт</span></button>
@@ -336,6 +351,9 @@
     </div>
 
     <script>
+        // =====================================================================
+        // [УЗЕЛ 01: КРИСТАЛЛ 108 (РОБАСТНЫЙ АЛФАВИТ)]
+        // =====================================================================
         class Crystal108Codec {
             constructor() {
                 this.alphabet = ' abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZабвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ0123456789-_/:;().,?!|~@#$%^&*=+<>\n';
@@ -383,10 +401,13 @@
             }
         }
 
+        // =====================================================================
+        // [УЗЕЛ 02: БАЗА ПАМЯТИ (ОТКАТ НА ЖЕЛЕЗОБЕТОННУЮ ВЕРСИЮ СИНХРОНИЗАЦИИ)]
+        // =====================================================================
         class ShadowGateway {
             constructor() { this.currentKey = null; }
             async enter(pin) {
-                const enc = new TextEncoder().encode(pin + "_polis_stable_2025");
+                const enc = new TextEncoder().encode(pin + "_polis_rock_solid_store");
                 const hash = await crypto.subtle.digest('SHA-256', enc);
                 const arr = Array.from(new Uint8Array(hash));
                 this.currentKey = 'p108_' + arr.map(b=>b.toString(16).padStart(2,'0')).join('').slice(0,32);
@@ -394,12 +415,16 @@
                 return data ? JSON.parse(data) : null;
             }
             save(data) {
+                // Строго синхронное сохранение, чтобы Vue не убил базу при ререндере
                 if (this.currentKey) localStorage.setItem(this.currentKey, JSON.stringify(data));
             }
             wipe() { if (this.currentKey) localStorage.removeItem(this.currentKey); this.currentKey = null; }
             lock() { this.currentKey = null; }
         }
 
+        // =====================================================================
+        // [УЗЕЛ 03: MQTT РАЦИЯ («ПОДВОДНАЯ ЛОДКА»)]
+        // =====================================================================
         class MQTTBridge {
             constructor(onStatus, onMsg, id) {
                 this.onStatus = onStatus; this.onMsg = onMsg; this.client = null;
@@ -421,6 +446,9 @@
         const cry = new Crystal108Codec(); const sg = new ShadowGateway();
         const checkPWA = ()=> window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone || document.referrer.includes('android-app://');
 
+        // =====================================================================
+        // [УЗЕЛ 04: ЯДРО ЛОГИКИ VUE]
+        // =====================================================================
         new Vue({
             el: '#app',
             data: {
@@ -482,8 +510,9 @@
             },
 
             methods: {
-                log(t) { const time = new Date().toLocaleTimeString().slice(0,8); this.sysLogs.unshift(`[${time}] ${t}`); if (this.sysLogs.length > 50) this.sysLogs.pop(); },
-                copyLogs() { this.copy(this.sysLogs.join('\n'), 'Журнал скопирован'); },
+                // ТЕРМИНАЛ
+                log(t) { const time = new Date().toLocaleTimeString().slice(0,8); this.sysLogs.unshift(`[${time}] ${t}`); if (this.sysLogs.length > 80) this.sysLogs.pop(); },
+                copyLogs() { this.copy(this.sysLogs.join('\n'), 'Журнал скопирован в буфер'); },
 
                 onVisibilityChange() {
                     if (document.visibilityState === 'hidden') { this.log('[SYS] Уход в подлодку (Сокет закрыт)'); if (this.mqtt) this.mqtt.disconnect(); } 
@@ -523,12 +552,13 @@
                 sharePolis() {
                     this.clickSound();
                     const url = window.location.href.split('?')[0]; 
-                    const text = `Жду тебя в Полисе.\n\nМой ID (скопируй):\n${this.myId}\n\n(Скопируй ссылку, открой в браузере и следуй инструкции):\n${url}`;
+                    const text = `Жду тебя в Полисе.\n\nМой ID (скопируй):\n${this.myId}\n\n(Жми на ссылку, открой в браузере и следуй инструкции):\n${url}`;
                     if (navigator.share) { navigator.share({ text: text }).catch(() => {}); } 
                     else if (navigator.clipboard) { navigator.clipboard.writeText(text).then(() => alert('Приглашение скопировано.')); }
                     this.showIdCopyModal = false;
                 },
 
+                // ИНИЦИАЦИЯ
                 async login() {
                     if (this.masterPin.length !== 6) { 
                         this.clickSound(true); this.pinError = true; setTimeout(() => this.pinError = false, 400); 
@@ -567,6 +597,7 @@
                 handleShake(e) { if (!this.loggedIn) return; let acc = e.acceleration || e.accelerationIncludingGravity; if (!acc) return; if (Math.abs(acc.x||0)+Math.abs(acc.y||0)+Math.abs(acc.z||0) > 25) this.lockPolis(); },
                 lockPolis() { this.clickSound(); if (this.mqtt) this.mqtt.disconnect(); sg.lock(); this.loggedIn = false; this.threads = []; this.messages = {}; this.myId = ''; this.myName = ''; this.activeThread = null; this.showSettings = false; },
 
+                // ЧАТЫ
                 getAllTopics() {
                     let subs = [`polis108/node/${this.myId}`];
                     this.threads.forEach(th => {
@@ -609,17 +640,18 @@
                     let id = this.activeThread.peerId; this.threads = this.threads.filter(t=>t.peerId!==id); this.$delete(this.messages, id); this.activeThread = null; this.save();
                 },
 
+                // СОНАР
                 sonarPing() {
-                    if (!this.mqttReady || !this.activeThread || this.activeThread.type === 'citadel') { this.log('[SONAR] Эфир не готов'); return; }
+                    if (!this.mqttReady || !this.activeThread || this.activeThread.type === 'citadel') { this.log('[SONAR] Отмена: Эфир не готов'); return; }
                     const topic = this.activeThread.type === 'group' ? `polis108/group/${this.activeThread.peerId}` : `polis108/link/${[this.myId, this.activeThread.peerId].sort().join('_')}`;
                     try {
                         const code = cry.collapse(`PING|${this.myId}`, 0);
                         this.mqtt.send(topic, code, false); 
-                        this.log(`[SONAR] Исходящий импульс`);
+                        this.log(`[>>] PING отправлен`);
                         this.sonarStatus = 'pinging';
                         if (this.sonarTimer) clearTimeout(this.sonarTimer);
                         this.sonarTimer = setTimeout(() => {
-                            if (this.sonarStatus === 'pinging') { this.sonarStatus = 'offline'; this.log('[SONAR] Тишина. Цель на глубине.'); }
+                            if (this.sonarStatus === 'pinging') { this.sonarStatus = 'offline'; this.log('[SONAR] Цель на глубине'); }
                         }, 2500);
                     } catch(e) {}
                 },
@@ -629,9 +661,10 @@
                     else if (this.inputMode === 'cipher') this.decryptManual();
                 },
                 
+                // РАЦИЯ В ЭФИР (КАПСУЛЫ)
                 sendMsg() {
                     if (!this.inputText || !this.activeThread || this.activeThread.type === 'citadel' || this.fieldLocked) return;
-                    if (!this.mqttReady) { this.log('[ERR] Отмена. Эфир еще не стабилизирован.'); alert('Канал не готов. Подожди секунду.'); return; }
+                    if (!this.mqttReady) { this.log('[ERR] Эфир не стабилизирован'); alert('Канал связи еще не готов. Подожди секунду.'); return; }
                     
                     const fullText = this.inputText.trim(); if (!fullText) return;
                     const msgId = Date.now();
@@ -647,8 +680,8 @@
                         const code = cry.collapse(rawPayload, 0);
                         const topic = this.activeThread.type === 'group' ? `polis108/group/${this.activeThread.peerId}` : `polis108/link/${[this.myId, this.activeThread.peerId].sort().join('_')}`;
                         
-                        this.mqtt.send(topic, code, true);
-                        this.log(`[NET] Выстрел в трубу (${topic}). Капсула в орбите.`);
+                        this.mqtt.send(topic, code, true); // Retain: true (капсула висит до получения)
+                        this.log(`[>>] Капсула отправлена. Замок: On.`);
                     } catch(e) { this.log('[ERR] Сбой кодека'); }
                 },
 
@@ -689,7 +722,7 @@
                             const topic = `polis108/link/${[this.myId, senderId].sort().join('_')}`;
                             const ackCode = cry.collapse(`ACK|${this.myId}|${originalMsgId}`, 0);
                             this.mqtt.send(topic, ackCode, false);
-                            this.log(`[NET] Сквозное ЭХО отбито`);
+                            this.log(`[>>] Сквозное ЭХО отбито`);
                         }
                         this.inputText = ''; this.scrollBot(); this.save();
                     } catch(e) { alert('Код искажен'); this.log(`[ERR] ${e.message}`); }
@@ -702,43 +735,47 @@
                     this.inputText = ''; this.scrollBot(); this.save();
                 },
 
+                // ЛОВЕЦ ЭФИРА (MQTT)
                 handleMsg(payload, topic) {
                     try {
                         const decrypted = cry.resonate(payload, 0); const parts = decrypted.split('|'); const type = parts[0];
                         
+                        // ПИНГ-ПОНГ
                         if (type === 'PING') {
                             const senderId = parts[1]; const pongCode = cry.collapse(`PONG|${this.myId}`, 0);
-                            this.mqtt.send(topic, pongCode, false); this.log(`[SONAR] Словлен PING, отбит PONG`); return;
+                            this.mqtt.send(topic, pongCode, false); this.log(`[<<] PING от ${senderId}, [>>] PONG отбит`); return;
                         }
                         if (type === 'PONG') {
                             const senderId = parts[1];
-                            if (senderId === this.activeThread?.peerId) { this.sonarStatus = 'online'; if (this.sonarTimer) clearTimeout(this.sonarTimer); this.log(`[SONAR] Входящий PONG`); }
+                            if (senderId === this.activeThread?.peerId) { this.sonarStatus = 'online'; if (this.sonarTimer) clearTimeout(this.sonarTimer); this.log(`[<<] PONG (Цель в сети)`); }
                             return;
                         }
 
+                        // ЭХО О ДОСТАВКЕ
                         if (type === 'ACK') {
                             const ackMsgId = parseInt(parts[2],10);
                             let targetId = null;
                             if (topic.includes('polis108/link/')) { targetId = topic.replace('polis108/link/','').split('_').find(id => id !== this.myId); } 
                             else if (topic.includes('polis108/group/')) { targetId = topic.replace('polis108/group/',''); }
                             
-                            this.log(`[NET] ЭХО от ${targetId}, Msg: ${ackMsgId}`);
+                            this.log(`[<<] ЭХО для пули ${ackMsgId}`);
 
                             if (targetId && this.messages[targetId]) {
                                 const msg = this.messages[targetId].find(m => m.id === ackMsgId && m.isMe);
                                 if (msg) {
                                     msg.status = 3; 
-                                    this.$set(this.messages, targetId, [...this.messages[targetId]]);
-                                    this.log(`[SYS] Точка зеленая. Замок открыт.`);
+                                    this.messages[targetId] = [...this.messages[targetId]]; // Форс-обновление Vue
+                                    this.log(`[SYS] Доставлено. Замок: Off.`);
                                     this.checkFieldLock(); this.save();
                                 }
                             }
                             return;
                         }
 
+                        // НОВОЕ СООБЩЕНИЕ ИЛИ КАПСУЛА
                         if (type === 'MSG') {
                             const senderId = parts[1]; const senderName = parts[2]; const msgId = parseInt(parts[3],10); const text = parts.slice(4).join('|');
-                            if (senderId === this.myId) return; 
+                            if (senderId === this.myId) return; // Игнор своего же пакета
                             
                             let targetId = null;
                             if (topic.includes('polis108/link/')) { targetId = topic.replace('polis108/link/','').split('_').find(id => id !== this.myId); } 
@@ -751,19 +788,22 @@
                                 this.threads.push(thread); this.$set(this.messages, targetId, []);
                             }
 
+                            // Немедленно стреляем ЭХО в ответ
                             if (this.mqttOnline) {
                                 const ackCode = cry.collapse(`ACK|${this.myId}|${msgId}`, 0);
                                 this.mqtt.send(topic, ackCode, false); 
-                                this.log(`[NET] Отбито ЭХО`);
+                                this.log(`[>>] Отбито ЭХО`);
                             }
 
+                            // Если это дубль (старая капсула), ничего не выводим
                             if (this.messages[targetId].some(m => !m.isMe && m.originalId === msgId)) return; 
 
+                            // Записываем сообщение в чат
                             const msgObj = { id: Date.now(), originalId: msgId, text: text, isMe: false, time: new Date().toLocaleTimeString().slice(0,5), status: 3, senderName: senderName };
                             this.messages[targetId].push(msgObj);
                             
                             if (this.activeThread?.peerId !== targetId) { thread.unread = (thread.unread || 0) + 1; }
-                            this.save(); this.scrollBot(); this.log(`[SYS] Сообщение сохранено.`);
+                            this.save(); this.scrollBot(); this.log(`[<<] Расшифровано (MSG)`);
 
                             if (document.hidden && this.settings.notifs) { if (Notification.permission === 'granted') new Notification('Полис', { body: `Сигнал из Эфира` }); }
                         }
