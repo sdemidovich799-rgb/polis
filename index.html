@@ -47,7 +47,6 @@
         
         .pulse-btn { animation: pulseBtn 2s infinite; }
         @keyframes pulseBtn { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 168, 132, 0.7); } 50% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(0, 168, 132, 0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 168, 132, 0); } }
-
         .header { padding: calc(env(safe-area-inset-top) + 12px) 16px 12px; background: #202c33; border-bottom: 1px solid #2d3f4b; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; z-index: 20; }
         .header-left { display: flex; align-items: center; gap: 12px; cursor: pointer; }
         .id-badge { background: transparent; border: 1px solid #00a884; color: #00a884; padding: 4px 12px; border-radius: 16px; font-weight: bold; font-size: 12px; cursor: pointer; }
@@ -68,7 +67,6 @@
         .onboarding { padding: 32px 20px; color: #8f9ca3; }
         .obs-step { background: #202c33; border-radius: 12px; padding: 16px; margin-bottom: 12px; font-size: 14px; line-height: 1.5; color: #e9edef; }
         .obs-hl { color: #00a884; font-weight: bold; }
-
         .chat-panel { position: absolute; top:0; left:0; width:100%; height:100%; background: #0b141a; display: flex; flex-direction: column; z-index: 6; transform: translateX(100%); transition: transform 0.25s cubic-bezier(0.3,0,0,1); }
         .chat-panel.active { transform: translateX(0); }
         .chat-header { padding: calc(env(safe-area-inset-top) + 8px) 16px 8px; background: #202c33; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #2d3f4b; flex-shrink: 0; }
@@ -140,7 +138,6 @@
                 </template>
             </div>
         </div>
-
         <!-- СЕЙФ ВХОДА -->
         <div v-else-if="!loggedIn" class="safe-panel">
             <div class="safe-top">
@@ -152,10 +149,9 @@
                             {{ pinDigits[index] }}
                         </div>
                     </div>
-                    <p style="color:#8f9ca3; font-size:12px; margin-top:8px;">Введи ПИН (6 цифр).<br>Он создает уникальную Личность.</p>
+                    <p style="color:#8f9ca3; font-size:12px; margin-top:8px;">ПИН генерирует Личность.</p>
                 </div>
             </div>
-
             <div class="safe-bottom">
                 <div class="keypad">
                     <button class="key-btn" @click="addPinDigit(1)">1</button>
@@ -174,7 +170,6 @@
                 </div>
             </div>
         </div>
-
         <!-- ЯДРО -->
         <div v-else style="display:flex; flex-direction:column; height:100%;">
             <div class="header" v-if="!activeThread">
@@ -184,7 +179,6 @@
                 </div>
                 <button class="header-btn" style="color: #00a884;" @click="clickSound(); showSettings = true">⚙️</button>
             </div>
-
             <!-- СПИСОК СВЯЗЕЙ -->
             <div class="messenger-layout" v-if="!activeThread">
                 <div class="threads-panel">
@@ -203,7 +197,6 @@
                                 2. Как только получишь ID Друга — жми пульсирующий <span class="obs-hl">+</span> и вставляй, чтобы открыть Тет-а-Тет.
                             </div>
                         </div>
-
                         <div v-for="thread in threads" :key="thread.peerId" class="thread-item" @click="openThread(thread)">
                             <div>
                                 <div class="t-name" :style="thread.type === 'citadel' ? 'color:#00a884;' : ''">{{ thread.name }}</div>
@@ -214,7 +207,6 @@
                     </div>
                 </div>
             </div>
-
             <!-- ОКНО ЧАТА -->
             <div class="chat-panel active" v-if="activeThread">
                 <div class="chat-header">
@@ -233,7 +225,6 @@
                     </button>
                     <button v-if="activeThread.type !== 'citadel'" style="background:transparent; border:none; color:#ea0038; font-size:20px; padding:0 0 0 12px; cursor:pointer;" @click="deleteThread">🗑</button>
                 </div>
-
                 <div class="messages-box" ref="msgBox">
                     <div v-if="!messages[activeThread.peerId] || messages[activeThread.peerId].length === 0" style="text-align:center; padding:40px 20px; color:#8f9ca3; line-height: 1.5; font-size: 14px;">
                         <template v-if="activeThread.type === 'citadel'">
@@ -245,7 +236,6 @@
                             <p>Сжимай мысль до 108 символов.</p>
                         </template>
                     </div>
-
                     <template v-if="messages[activeThread.peerId]">
                         <div v-for="msg in messages[activeThread.peerId]" :key="msg.id" :class="['message-row', msg.isMe ? 'my-message-row' : 'other-message-row']" @dblclick="msg.status === 2 ? deleteMsg(msg.id) : null">
                             <div v-if="!msg.isMe && activeThread.type==='system' && msg.senderName" class="msg-sender">{{ msg.senderName }}</div>
@@ -257,11 +247,10 @@
                         </div>
                     </template>
                 </div>
-
                 <!-- ОМНИ-ПОЛЕ -->
                 <div class="input-area" v-if="activeThread && activeThread.type !== 'citadel'">
                     <template v-if="fieldLocked">
-                        <div class="locked-indicator">⏳ Капсула в орбите (Ждем Эмпульс)</div>
+                        <div class="locked-indicator">⏳ Капсула отправлена (Ждем Эмпульс)</div>
                     </template>
                     <template v-else>
                         <div class="input-wrapper">
@@ -279,7 +268,6 @@
                         </div>
                     </template>
                 </div>
-
                 <!-- ЧЕРТОГ -->
                 <div class="input-area" v-else-if="activeThread && activeThread.type === 'citadel'">
                     <div class="input-wrapper">
@@ -295,10 +283,12 @@
                 <div class="logs-box">
                     <div v-for="(l,i) in sysLogs" :key="i" class="log-entry">{{ l }}</div>
                 </div>
-                <button style="background:transparent; color:#00a884; border:1px solid #00a884; padding:12px; border-radius:8px;" @click="clickSound(); showLogsPanel=false">Закрыть Терминал</button>
+                <div style="display: flex; gap: 8px;">
+                    <button style="flex: 1; background: #00a884; color: #111b21; border: none; padding: 12px; border-radius: 8px; font-weight: bold;" @click="copyLogs">Копировать Логи</button>
+                    <button style="background:transparent; color:#00a884; border:1px solid #00a884; padding:12px; border-radius:8px;" @click="showLogsPanel=false">Закрыть</button>
+                </div>
             </div>
         </div>
-
         <!-- МОДАЛКИ -->
         <div class="modal" v-if="showAddModal" @click.self="clickSound(); showAddModal=false">
             <div class="modal-content">
@@ -312,7 +302,6 @@
                 </div>
             </div>
         </div>
-
         <div class="modal" v-if="showIdCopyModal" @click.self="clickSound(); showIdCopyModal = false">
             <div class="modal-content">
                 <h3 style="color: #00a884; margin-bottom: 8px;">Мой Узел (ID)</h3>
@@ -326,8 +315,7 @@
                 <div class="btn-row" style="margin-top: 8px;"><button class="btn-cancel" @click="clickSound(); showIdCopyModal = false">Закрыть</button></div>
             </div>
         </div>
-
-        <div class="modal" v-if="showSettings" @click.self="clickSound(); saveSettings(); showSettings=false">
+        <div class="modal" v-if="showSettings" @click.self="clickSound(); showSettings=false">
             <div class="modal-content">
                 <h3 style="color:#00a884; margin-bottom: 16px;">Щит (Настройки)</h3>
                 <div style="margin-bottom: 16px;">
@@ -342,18 +330,14 @@
                 <button style="background: #111b21; font-size: 14px; padding: 12px; border-radius: 8px; border: 1px solid #ea0038; text-align: center; cursor: pointer; width: 100%; margin-top: 8px;" @click="wipeIdentity">
                     <span style="color:#ea0038; font-weight:bold;">🗑 Сжечь Личность</span>
                 </button>
-                <div class="btn-row" style="margin-top: 8px;"><button class="btn-confirm" @click="clickSound(); saveSettings(); showSettings=false" style="width:100%;">Закрыть</button></div>
+                <div class="btn-row" style="margin-top: 8px;"><button class="btn-confirm" @click="clickSound(); save(); showSettings=false" style="width:100%;">Закрыть</button></div>
             </div>
         </div>
     </div>
-<!-- СТОП ЧАСТЬ 1 -->
+
     <script>
-        // =====================================================================
-        // [УЗЕЛ 01: КРИСТАЛЛ 108 (РОБАСТНЫЙ АЛФАВИТ)]
-        // =====================================================================
         class Crystal108Codec {
             constructor() {
-                // Алфавит 140 символов. Включает "_", скобки и спецсимволы.
                 this.alphabet = ' abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZабвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ0123456789-_/:;().,?!|~@#$%^&*=+<>\n';
                 this.charToIdx = {}; this.idxToChar = [];
                 for (let i=0; i<this.alphabet.length; i++) { this.charToIdx[this.alphabet[i]]=i; this.idxToChar[i]=this.alphabet[i]; }
@@ -372,33 +356,26 @@
                 for (let i=0; i<text.length; i++) res += this.charToIdx.hasOwnProperty(text[i]) ? text[i] : ' ';
                 return res;
             }
-            
             collapse(text, astroSalt=0) {
                 const clean = this._normalize(text);
                 if (clean.length===0) throw new Error('Пусто');
                 let num = 0n;
                 for (let i=0; i<clean.length; i++) num = num * this.base + BigInt(this.charToIdx[clean[i]]);
-                
                 const plain = clean.length.toString().padStart(4,'0') + num.toString();
                 const len = plain.length; 
-                
                 const rand = this._prng(Math.floor(astroSalt * this.PI * this.PHI * 10000));
                 let mask = ''; for (let i=0; i<len; i++) mask += Math.floor(rand()*10).toString();
                 let enc = ''; for (let i=0; i<len; i++) enc += ((parseInt(plain[i],10)+parseInt(mask[i],10))%10).toString();
                 return enc; 
             }
-            
             resonate(code, astroSalt=0) {
                 code = code.toString().trim();
                 const len = code.length; if (len<5) throw new Error('Сбой длины');
-                
                 const rand = this._prng(Math.floor(astroSalt * this.PI * this.PHI * 10000));
                 let mask = ''; for (let i=0; i<len; i++) mask += Math.floor(rand()*10).toString();
                 let plain = ''; for (let i=0; i<len; i++) plain += ((parseInt(code[i],10)-parseInt(mask[i],10)+10)%10).toString();
-                
                 const charCount = parseInt(plain.slice(0,4),10);
                 const numStr = plain.slice(4).replace(/^0+/,'') || '0';
-                
                 let n = BigInt(numStr); let digs = [];
                 while (n>0n) { digs.unshift(Number(n % this.base)); n /= this.base; }
                 while (digs.length < charCount) digs.unshift(0);
@@ -406,37 +383,32 @@
             }
         }
 
-        // =====================================================================
-        // [УЗЕЛ 02: БАЗА ПАМЯТИ]
-        // =====================================================================
         class ShadowGateway {
             constructor() { this.currentKey = null; }
             async enter(pin) {
-                // Изменен_salt_v3: Гарантирует сброс старых глючных баз при первом входе.
-                const enc = new TextEncoder().encode(pin + "_polis_absolute_salt_v4");
+                const enc = new TextEncoder().encode(pin + "_polis_stable_2025");
                 const hash = await crypto.subtle.digest('SHA-256', enc);
                 const arr = Array.from(new Uint8Array(hash));
                 this.currentKey = 'p108_' + arr.map(b=>b.toString(16).padStart(2,'0')).join('').slice(0,32);
                 const data = localStorage.getItem(this.currentKey);
                 return data ? JSON.parse(data) : null;
             }
-            async save(data) { if (this.currentKey) localStorage.setItem(this.currentKey, JSON.stringify(data)); }
+            save(data) {
+                if (this.currentKey) localStorage.setItem(this.currentKey, JSON.stringify(data));
+            }
             wipe() { if (this.currentKey) localStorage.removeItem(this.currentKey); this.currentKey = null; }
             lock() { this.currentKey = null; }
         }
 
-        // =====================================================================
-        // [УЗЕЛ 03: MQTT РАЦИЯ («ПОДВОДНАЯ ЛОДКА»)]
-        // =====================================================================
         class MQTTBridge {
             constructor(onStatus, onMsg, id) {
                 this.onStatus = onStatus; this.onMsg = onMsg; this.client = null;
                 this.url = 'wss://broker.emqx.io:8084/mqtt';
-                this.clientId = 'n108_' + id + '_' + Math.floor(Math.random()*1000);
+                this.clientId = 'p108_' + id + '_' + Math.floor(Math.random()*10000);
             }
             connect(topics) {
                 if (this.client) this.client.end(true);
-                this.client = mqtt.connect(this.url, { clientId: this.clientId, keepalive: 45, reconnectPeriod: 3000, clean: true });
+                this.client = mqtt.connect(this.url, { clientId: this.clientId, keepalive: 60, reconnectPeriod: 3000, clean: true });
                 this.client.on('connect', ()=>{ this.onStatus(true); topics.forEach(t => this.client.subscribe(t, {qos:1})); });
                 this.client.on('close', ()=> this.onStatus(false));
                 this.client.on('error', ()=> this.onStatus(false));
@@ -449,9 +421,6 @@
         const cry = new Crystal108Codec(); const sg = new ShadowGateway();
         const checkPWA = ()=> window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone || document.referrer.includes('android-app://');
 
-        // =====================================================================
-        // [УЗЕЛ 04: ЯДРО ЛОГИКИ VUE]
-        // =====================================================================
         new Vue({
             el: '#app',
             data: {
@@ -461,7 +430,7 @@
                 showAddModal: false, showIdCopyModal: false, showSettings: false, newThreadName: '', newThreadId: '',
                 activeThread: null, inputText: '', threads: [], messages: {}, outbox: [],
                 sysLogs: [], showLogsPanel: false, settings: { sound: true, notifs: true },
-                sonarStatus: '', sonarTimer: null, fieldLocked: false,
+                sonarStatus: '', sonarTimer: null, fieldLocked: false, mqttReady: false
             },
             computed: {
                 isIOS() { return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream; },
@@ -492,7 +461,11 @@
                     if (this.inputMode === 'text' && clean.length > 108) clean = clean.substring(0, 108);
                     if (val !== clean) { this.inputText = clean; this.clickSound(true); }
                 },
-                mqttOnline(online) { if (online && this.activeThread) this.checkFieldLock(); },
+                mqttOnline(online) { 
+                    if (online) { this.log('[SYS] Эфир подключен.'); setTimeout(() => { this.mqttReady = true; }, 500); } 
+                    else { this.mqttReady = false; }
+                    if (online && this.activeThread) this.checkFieldLock(); 
+                },
                 activeThread() { this.checkFieldLock(); this.sonarStatus = ''; }
             },
             
@@ -510,10 +483,11 @@
 
             methods: {
                 log(t) { const time = new Date().toLocaleTimeString().slice(0,8); this.sysLogs.unshift(`[${time}] ${t}`); if (this.sysLogs.length > 50) this.sysLogs.pop(); },
-                
+                copyLogs() { this.copy(this.sysLogs.join('\n'), 'Журнал скопирован'); },
+
                 onVisibilityChange() {
-                    if (document.visibilityState === 'hidden') { this.log('[SYS] Уход в офлайн (Сокет закрыт)'); if (this.mqtt) this.mqtt.disconnect(); } 
-                    else { if (this.mqtt && this.loggedIn) { this.log('[SYS] Реконнект...'); this.mqtt.connect(this.getAllTopics()); } }
+                    if (document.visibilityState === 'hidden') { this.log('[SYS] Уход в подлодку (Сокет закрыт)'); if (this.mqtt) this.mqtt.disconnect(); } 
+                    else { if (this.mqtt && this.loggedIn) { this.log('[SYS] Всплытие. Реконнект...'); this.mqtt.connect(this.getAllTopics()); } }
                 },
                 onFocus() { if (document.visibilityState === 'visible' && this.mqtt && !this.mqttOnline && this.loggedIn) this.mqtt.connect(this.getAllTopics()); },
                 
@@ -522,7 +496,7 @@
                     const idx = this.pinDigits.findIndex(x=>x==='');
                     if (idx>=0) {
                         this.$set(this.pinDigits, idx, d.toString()); this.clickSound();
-                        if (idx === 5) setTimeout(() => this.login(), 200);
+                        if (idx === 5) setTimeout(() => this.login(), 100);
                     }
                 },
                 clearLastPin() {
@@ -555,8 +529,6 @@
                     this.showIdCopyModal = false;
                 },
 
-                saveSettings() { this.save(); },
-
                 async login() {
                     if (this.masterPin.length !== 6) { 
                         this.clickSound(true); this.pinError = true; setTimeout(() => this.pinError = false, 400); 
@@ -582,10 +554,16 @@
                         this.log('[SYS] Личность загружена');
                     }
                     this.loggedIn = true; this.pinDigits = ['','','','','',''];
+                    this.save();
+                    
                     this.mqtt = new MQTTBridge((s)=>{ this.mqttOnline = s; }, this.handleMsg, this.myId);
-                    this.mqtt.connect(this.getAllTopics()); this.save();
+                    this.mqtt.connect(this.getAllTopics());
                 },
-                wipeIdentity() { if (confirm('🔥 УНИЧТОЖЕНИЕ ПРОТОКОЛОВ. Это сотрет всю базу. Выполнить?')) { sg.wipe(); this.lockPolis(); } },
+                save() {
+                    try { sg.save({ t: this.threads, m: this.messages, myId: this.myId, o: this.outbox, n: this.myName }); } 
+                    catch(e) { this.log('[ERR] Ошибка сохранения стейта'); }
+                },
+                wipeIdentity() { if (confirm('🔥 УНИЧТОЖЕНИЕ ПРОТОКОЛОВ. Это сотрет всю базу навсегда. Подтверждаешь?')) { sg.wipe(); this.lockPolis(); } },
                 handleShake(e) { if (!this.loggedIn) return; let acc = e.acceleration || e.accelerationIncludingGravity; if (!acc) return; if (Math.abs(acc.x||0)+Math.abs(acc.y||0)+Math.abs(acc.z||0) > 25) this.lockPolis(); },
                 lockPolis() { this.clickSound(); if (this.mqtt) this.mqtt.disconnect(); sg.lock(); this.loggedIn = false; this.threads = []; this.messages = {}; this.myId = ''; this.myName = ''; this.activeThread = null; this.showSettings = false; },
 
@@ -612,9 +590,12 @@
                     else { id = 'grp_' + Math.random().toString(36).substr(2,8); type = 'group'; n = n === 'Аватар' ? 'Группа' : n; }
                     
                     if (this.threads.some(t=>t.peerId===id)) { alert('Связь уже есть'); return; }
-                    this.threads.push({ name: n, peerId:id, type, unread:0 }); this.$set(this.messages, id, []); this.save();
+                    const newTh = { name: n, peerId:id, type, unread:0 };
+                    this.threads.push(newTh); this.$set(this.messages, id, []); this.save();
+                    
                     if (this.mqtt) this.mqtt.updateTopics(this.getAllTopics());
-                    this.showAddModal = false; this.openThread(this.threads[this.threads.length-1]);
+                    this.showAddModal = false;
+                    this.openThread(newTh);
                 },
 
                 deleteMsg(id) {
@@ -629,7 +610,7 @@
                 },
 
                 sonarPing() {
-                    if (!this.mqttOnline || !this.activeThread || this.activeThread.type === 'citadel') return;
+                    if (!this.mqttReady || !this.activeThread || this.activeThread.type === 'citadel') { this.log('[SONAR] Эфир не готов'); return; }
                     const topic = this.activeThread.type === 'group' ? `polis108/group/${this.activeThread.peerId}` : `polis108/link/${[this.myId, this.activeThread.peerId].sort().join('_')}`;
                     try {
                         const code = cry.collapse(`PING|${this.myId}`, 0);
@@ -650,6 +631,8 @@
                 
                 sendMsg() {
                     if (!this.inputText || !this.activeThread || this.activeThread.type === 'citadel' || this.fieldLocked) return;
+                    if (!this.mqttReady) { this.log('[ERR] Отмена. Эфир еще не стабилизирован.'); alert('Канал не готов. Подожди секунду.'); return; }
+                    
                     const fullText = this.inputText.trim(); if (!fullText) return;
                     const msgId = Date.now();
                     
@@ -664,12 +647,8 @@
                         const code = cry.collapse(rawPayload, 0);
                         const topic = this.activeThread.type === 'group' ? `polis108/group/${this.activeThread.peerId}` : `polis108/link/${[this.myId, this.activeThread.peerId].sort().join('_')}`;
                         
-                        if (this.mqttOnline) {
-                            this.mqtt.send(topic, code, true); // ПЛАВАЮЩАЯ МЫСЛЬ
-                            this.log(`[NET] Отправка. Замок закрыт.`);
-                        } else {
-                            this.log('[NET] Ошибка: нет Эфира.');
-                        }
+                        this.mqtt.send(topic, code, true);
+                        this.log(`[NET] Выстрел в трубу (${topic}). Капсула в орбите.`);
                     } catch(e) { this.log('[ERR] Сбой кодека'); }
                 },
 
@@ -684,7 +663,7 @@
                         this.messages[this.activeThread.peerId].push(msgObj);
                         
                         this.inputText = ''; this.scrollBot(); this.save();
-                    } catch(e) { alert('Ошибка шифратора'); }
+                    } catch(e) { alert('Ошибка шифрования'); }
                 },
 
                 decryptManual() {
@@ -710,7 +689,7 @@
                             const topic = `polis108/link/${[this.myId, senderId].sort().join('_')}`;
                             const ackCode = cry.collapse(`ACK|${this.myId}|${originalMsgId}`, 0);
                             this.mqtt.send(topic, ackCode, false);
-                            this.log(`[NET] Сквозное ЭХО отправлено`);
+                            this.log(`[NET] Сквозное ЭХО отбито`);
                         }
                         this.inputText = ''; this.scrollBot(); this.save();
                     } catch(e) { alert('Код искажен'); this.log(`[ERR] ${e.message}`); }
@@ -743,7 +722,7 @@
                             if (topic.includes('polis108/link/')) { targetId = topic.replace('polis108/link/','').split('_').find(id => id !== this.myId); } 
                             else if (topic.includes('polis108/group/')) { targetId = topic.replace('polis108/group/',''); }
                             
-                            this.log(`[NET] Получено ЭХО для: ${ackMsgId}`);
+                            this.log(`[NET] ЭХО от ${targetId}, Msg: ${ackMsgId}`);
 
                             if (targetId && this.messages[targetId]) {
                                 const msg = this.messages[targetId].find(m => m.id === ackMsgId && m.isMe);
@@ -768,7 +747,7 @@
 
                             let thread = this.threads.find(t => t.peerId === targetId);
                             if (!thread) {
-                                thread = { name: senderName || 'Тайный связной', peerId: targetId, type: (targetId.startsWith('grp_')?'group':'personal'), unread:0 };
+                                thread = { name: senderName || targetId, peerId: targetId, type: (targetId.startsWith('grp_')?'group':'personal'), unread:0 };
                                 this.threads.push(thread); this.$set(this.messages, targetId, []);
                             }
 
@@ -788,7 +767,7 @@
 
                             if (document.hidden && this.settings.notifs) { if (Notification.permission === 'granted') new Notification('Полис', { body: `Сигнал из Эфира` }); }
                         }
-                    } catch(e) { this.log(`[ERR] Искаженный пакет отброшен`); }
+                    } catch(e) { this.log(`[ERR] Искаженный пакет`); }
                 },
 
                 checkFieldLock() {
