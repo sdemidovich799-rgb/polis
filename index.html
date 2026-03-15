@@ -6,6 +6,10 @@
     <meta name="theme-color" content="#0b141a">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="108">
+    
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23000'/%3E%3Ccircle cx='50' cy='50' r='35' stroke='%2300a884' stroke-width='6' fill='none'/%3E%3Ccircle cx='50' cy='50' r='10' fill='%2300a884'/%3E%3C/svg%3E">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23000'/%3E%3Ccircle cx='50' cy='50' r='35' stroke='%2300a884' stroke-width='6' fill='none'/%3E%3Ccircle cx='50' cy='50' r='10' fill='%2300a884'/%3E%3C/svg%3E">
     <title>108</title>
     
     <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.min.js"></script>
@@ -14,443 +18,1004 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; user-select: none; }
         input, button { user-select: auto; }
-        html, body { position: fixed; inset: 0; width: 100%; height: 100%; height: -webkit-fill-available; height: 100dvh; background: #0b141a; color: #e9edef; font-family: monospace, sans-serif; overflow: hidden; }
-        #app { width: 100%; max-width: 800px; margin: 0 auto; height: 100%; display: flex; flex-direction: column; position: relative; }
+        html, body { position: fixed; inset: 0; width: 100%; height: 100%; height: -webkit-fill-available; height: 100dvh; background: #0b141a; color: #e9edef; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; overflow: hidden; }
+        #app { width: 100%; max-width: 800px; margin: 0 auto; height: 100%; height: -webkit-fill-available; height: 100dvh; display: flex; flex-direction: column; background: #0b141a; position: relative; }
         
         .pwa-gate { position: absolute; inset:0; z-index: 9999; background: #0b141a; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center; }
-        .gate-card { background: #111b21; padding: 32px 24px; border-radius: 16px; border: 1px solid #2d3f4b; max-width: 320px; width: 100%; }
+        .gate-card { background: #111b21; padding: 32px 24px; border-radius: 16px; border: 1px solid #2d3f4b; max-width: 320px; width: 100%; display: flex; flex-direction: column; gap: 16px;}
+        .instruct-row { display: flex; align-items: center; gap: 12px; text-align: left; background: #202c33; padding: 12px; border-radius: 8px; font-size: 14px; color: #e9edef; line-height: 1.4;}
         
-        .safe-panel { display: flex; flex-direction: column; height: 100%; padding: 20px; justify-content: space-between;}
-        .pin-grid { display: flex; gap: 12px; justify-content: center; margin-top: 40px;}
-        .pin-slot { width: 32px; height: 48px; border-bottom: 2px solid #2d3f4b; font-size: 32px; color: transparent; text-align: center; }
-        .pin-slot.filled { color: #00a884; border-bottom-color: #00a884; }
-        .keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; width: 100%; max-width: 280px; margin: 0 auto 40px; }
-        .key-btn { background: transparent; border: none; color: #8f9ca3; font-size: 32px; padding: 16px; border-radius: 50%; }
+        .safe-panel { display: flex; flex-direction: column; height: 100%; background: #0b141a; padding: 20px; }
+        .safe-top { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 32px; }
+        .safe-bottom { width: 100%; display: flex; justify-content: center; padding-bottom: calc(env(safe-area-inset-bottom) + 20px); }
         
-        .header { padding: calc(env(safe-area-inset-top) + 12px) 16px 12px; background: #202c33; border-bottom: 1px solid #2d3f4b; display: flex; justify-content: space-between; align-items: center; }
-        .monad { width: 16px; height: 16px; border: 2px solid #ea0038; border-radius: 50%; opacity: 0.5; transition: 0.3s; }
-        .monad.pulse { border-color: #00a884; background: #00a884; opacity: 1; box-shadow: 0 0 10px #00a884;}
+        .pin-grid { display: flex; gap: 12px; justify-content: center; }
+        .pin-slot { width: 32px; height: 48px; border-bottom: 2px solid #2d3f4b; font-size: 32px; color: transparent; text-align: center; font-family: monospace; font-weight: bold; transition: 0.3s; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 4px; }
+        .pin-slot.filled { color: #00a884; border-bottom-color: #00a884; text-shadow: 0 0 12px rgba(0,168,132,0.8); }
+        .pin-slot.error { border-bottom-color: #ea0038; color: #ea0038; text-shadow: 0 0 12px rgba(234,0,56,0.8); }
         
-        .threads-panel { flex: 1; overflow-y: auto; }
-        .thread-item { padding: 16px; border-bottom: 1px solid #202c33; display: flex; justify-content: space-between; }
+        .keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px 32px; width: 100%; max-width: 280px; }
+        .key-btn { background: transparent; border: none; color: #8f9ca3; font-size: 32px; font-family: monospace; font-weight: 300; padding: 8px; border-radius: 50%; cursor: pointer; transition: 0.15s; display:flex; align-items:center; justify-content:center; width: 64px; height: 64px; justify-self: center;}
+        .key-btn:active { color: #00a884; transform: scale(1.1); text-shadow: 0 0 10px rgba(0,168,132,0.5); }
+        .key-btn-clear { color: #ea0038; font-size: 24px; }
         
-        .chat-panel { position: absolute; inset:0; background: #0b141a; display: flex; flex-direction: column; z-index: 10; }
-        .chat-header { padding: calc(env(safe-area-inset-top) + 8px) 16px 8px; background: #202c33; display: flex; gap: 12px; align-items: center; border-bottom: 1px solid #2d3f4b; }
-        .messages-box { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+        .color-on { color: #00a884; } .color-off { color: #ea0038; }
+        .monad { position: relative; width: 32px; height: 32px; border: 2px solid rgba(255,255,255,0.05); border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: 0.5s; flex-shrink:0;}
+        .monad-dot { width: 8px; height: 8px; background: #ea0038; border-radius: 50%; transition: 0.5s; }
+        .monad.pulse { border-color: rgba(0, 168, 132, 0.3); } .monad.pulse .monad-dot { background: #00a884; box-shadow: 0 0 12px #00a884; animation: pulseDot 2s infinite alternate; }
+        @keyframes pulseDot { 0% { transform: scale(0.8); } 100% { transform: scale(1.4); } }
+        
+        .pulse-btn { animation: pulseBtn 2s infinite; }
+        @keyframes pulseBtn { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 168, 132, 0.7); } 50% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(0, 168, 132, 0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 168, 132, 0); } }
+        .header { padding: calc(env(safe-area-inset-top) + 12px) 16px 12px; background: #202c33; border-bottom: 1px solid #2d3f4b; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; z-index: 20; }
+        .header-left { display: flex; align-items: center; gap: 12px; cursor: pointer; }
+        .id-badge { background: transparent; border: 1px solid #00a884; color: #00a884; padding: 4px 12px; border-radius: 16px; font-weight: bold; font-size: 12px; cursor: pointer; }
+        .header-btn { background: transparent; border: none; color: #00a884; font-size: 24px; cursor: pointer; padding: 4px; display: flex; align-items: center;}
+        
+        .messenger-layout { display: flex; flex: 1; overflow: hidden; position: relative; min-height: 0; }
+        .threads-panel { width: 100%; display: flex; flex-direction: column; background: #111b21; z-index: 5; }
+        .threads-header { padding: 16px; display: flex; justify-content: space-between; align-items: center; background: #202c33; border-bottom: 1px solid #0b141a; }
+        .add-btn { background: #00a884; color: #111b21; border: none; border-radius: 50%; width: 36px; height: 36px; font-size: 24px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold;}
+        
+        .thread-list { flex: 1; overflow-y: auto; padding-bottom: env(safe-area-inset-bottom); -webkit-overflow-scrolling: touch; }
+        .thread-item { padding: 16px; border-bottom: 1px solid #202c33; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+        .thread-item:active { background: #2a3942; }
+        .t-name { font-weight: 600; font-size: 16px; color: #e9edef; margin-bottom: 4px;}
+        .t-id { font-size: 11px; color: #8f9ca3; font-family: monospace; text-transform: uppercase;}
+        .unread-badge { background: #00a884; color: #111b21; border-radius: 12px; padding: 2px 8px; font-size: 12px; font-weight: bold; }
+        
+        .onboarding { padding: 32px 20px; color: #8f9ca3; }
+        .obs-step { background: #202c33; border-radius: 12px; padding: 16px; margin-bottom: 12px; font-size: 14px; line-height: 1.5; color: #e9edef; }
+        .obs-hl { color: #00a884; font-weight: bold; }
+        .chat-panel { position: absolute; top:0; left:0; width:100%; height:100%; background: #0b141a; display: flex; flex-direction: column; z-index: 6; transform: translateX(100%); transition: transform 0.25s cubic-bezier(0.3,0,0,1); }
+        .chat-panel.active { transform: translateX(0); }
+        .chat-header { padding: calc(env(safe-area-inset-top) + 8px) 16px 8px; background: #202c33; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #2d3f4b; flex-shrink: 0; }
+        
+        .sonar-btn { background: transparent; border: 1px solid #00a884; border-radius: 50%; width: 32px; height: 32px; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.3s;}
+        .sonar-btn.sonar-idle { color: #00a884; border-color: #00a884; }
+        .sonar-btn.sonar-ping { color: #ffcc00; border-color: #ffcc00; box-shadow: 0 0 8px rgba(255, 204, 0, 0.5); }
+        .sonar-btn.sonar-on { color: #00a884; border-color: #00a884; background: rgba(0,168,132,0.2); }
+        .sonar-btn.sonar-off { color: #ea0038; border-color: #ea0038; opacity: 0.7;}
+        
+        .messages-box { flex: 1; overflow-y: auto; padding: 16px 12px; display: flex; flex-direction: column; gap: 8px; -webkit-overflow-scrolling: touch; }
         .message-row { display: flex; flex-direction: column; max-width: 85%; }
-        .my-message-row { align-self: flex-end; } .other-message-row { align-self: flex-start; }
-        .message { padding: 8px 12px; border-radius: 12px; font-size: 15px; word-wrap: break-word; }
-        .my-message { background: #005c4b; } .other-message { background: #202c33; }
-        .msg-footer { font-size: 10px; color: #8f9ca3; text-align: right; margin-top: 4px; }
+        .message { padding: 8px 12px; border-radius: 16px; font-size: 15px; line-height: 1.35; word-wrap: break-word; white-space: pre-wrap; }
+        .my-message-row { align-self: flex-end; }
+        .other-message-row { align-self: flex-start; }
+        .my-message { background: #005c4b; color: #e9edef; border-bottom-right-radius: 4px; }
+        .other-message { background: #202c33; color: #e9edef; border-top-left-radius: 4px; }
         
-        .action-bar { padding: 8px 16px calc(env(safe-area-inset-bottom) + 8px); background: #202c33; display: flex; gap: 8px; align-items: center; }
-        .input-wrapper { flex: 1; position: relative; }
-        .input-wrapper input { width: 100%; background: #2a3942; border: none; color: #fff; padding: 12px 16px; border-radius: 24px; font-size: 16px; outline: none; }
-        .btn-circle { background: #00a884; color: #111b21; border: none; width: 44px; height: 44px; border-radius: 50%; font-size: 18px; font-weight: bold; }
-        .btn-tool { background: transparent; border: 1px solid #8f9ca3; color: #8f9ca3; border-radius: 16px; padding: 6px 12px; font-size: 12px; cursor: pointer; }
-        .btn-tool.active { background: #00a884; color: #111b21; border-color: #00a884; }
-        .modal { position: fixed; inset:0; background: rgba(0,0,0,0.9); z-index: 50; display: flex; align-items: center; justify-content: center; padding: 20px; }
-        .modal-content { background: #111b21; padding: 24px; border-radius: 16px; width: 100%; border: 1px solid #2d3f4b; display: flex; flex-direction: column; gap: 12px; }
-        .modal-content input { padding: 12px; background: #202c33; border: none; color: #fff; border-radius: 8px; }
+        .msg-footer { display: flex; align-items: center; justify-content: flex-end; gap: 6px; margin-top: 2px; font-size: 10px; color: rgba(255,255,255,0.5); }
         
-        #optical-canvas { position: fixed; top:0; left:0; width: 100vw; height: 100vh; z-index: 9999; pointer-events: none; display: none; }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+        .status-0 { background: #8f9ca3; } 
+        .status-1 { background: #b38b5a; box-shadow: 0 0 6px #b38b5a;} 
+        .status-2 { background: #ea0038; box-shadow: 0 0 6px #ea0038;} 
+        .status-3 { background: #00a884; box-shadow: 0 0 6px #00a884;} 
+        
+        .input-area { padding: 8px 16px calc(env(safe-area-inset-bottom) + 8px); background: #202c33; display: flex; gap: 8px; align-items: center; flex-shrink: 0; border-top: 1px solid #2d3f4b; margin: 0;}
+        .input-wrapper { flex: 1; position: relative; display: flex; align-items: center; }
+        .input-wrapper input { width: 100%; background: #2a3942; border: none; color: #fff; padding: 0 46px 0 16px; border-radius: 24px; font-size: 16px; outline: none; height: 44px; margin: 0;}
+        .char-count { position: absolute; right: 14px; font-size: 10px; color: #8f9ca3; pointer-events: none; font-family: monospace;}
+        
+        .action-btns { display: flex; gap: 8px; }
+        .action-btn { background: #00a884; color: #fff; border: none; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; }
+        .cipher-btn { background: transparent; border: 1px solid #00a884; color: #00a884; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; }
+        .locked-indicator { flex:1; background: #111b21; border: 1px dashed #ea0038; border-radius: 24px; color: #ea0038; display: flex; align-items: center; justify-content: center; height: 44px; font-size: 13px; font-weight:bold; letter-spacing: 1px;}
+        
+        .modal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); z-index: 50; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(3px); padding: 20px; }
+        .modal-content { background: #111b21; padding: 24px; border-radius: 16px; width: 100%; max-width: 320px; display: flex; flex-direction: column; gap: 16px; border: 1px solid #2d3f4b; }
+        .modal-content input { padding: 14px; border-radius: 8px; border: 1px solid #2d3f4b; background: #202c33; color: #e9edef; outline: none; font-size: 15px;}
+        .btn-row { display: flex; justify-content: flex-end; gap: 12px; margin-top: 8px; }
+        .btn-cancel { background: transparent; color: #8f9ca3; padding: 10px; border: none; cursor: pointer; font-size: 15px; font-weight:bold;}
+        .btn-confirm { background: #00a884; color: #111b21; padding: 10px 16px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .settings-btn { background: #202c33; color: #e9edef; font-size: 14px; padding: 12px; border-radius: 8px; border: 1px solid #2d3f4b; text-align: left; cursor: pointer; display: flex; justify-content: space-between; align-items: center;}
+        
+        .logs-overlay { position: absolute; inset:0; background: rgba(0,0,0,0.95); z-index: 200; display: flex; flex-direction: column; padding: calc(env(safe-area-inset-top) + 20px) 20px calc(env(safe-area-inset-bottom) + 20px); }
+        .logs-box { flex: 1; background: #000; color: #00a884; font-family: monospace; font-size: 11px; overflow-y: auto; padding: 10px; border-radius: 8px; margin-bottom: 12px; white-space: pre-wrap; word-break: break-all; }
+        .log-entry { margin-bottom: 4px; border-bottom: 1px dashed rgba(0,168,132,0.3); padding-bottom: 4px; }
     </style>
 </head>
 <body>
-    <canvas id="optical-canvas"></canvas>
-    
     <div id="app">
-        <!-- ВХОД -->
-        <div v-if="!loggedIn" class="safe-panel">
-            <div style="text-align:center; margin-top:20vh;">
-                <div class="monad pulse" style="margin: 0 auto;"></div>
-                <div class="pin-grid">
-                    <div v-for="(_, i) in 6" :key="i" class="pin-slot" :class="{'filled': pinDigits[i] !== ''}">*</div>
+        <div v-if="!isPWAInstalled" class="pwa-gate">
+            <div class="gate-card">
+                <div style="display:flex; justify-content:center; margin-bottom:16px;">
+                    <div class="monad pulse"><div class="monad-dot"></div></div>
                 </div>
-            </div>
-            <div class="keypad">
-                <button v-for="n in 9" class="key-btn" @click="addPin(n)">{{n}}</button>
-                <div></div><button class="key-btn" @click="addPin(0)">0</button><button class="key-btn" style="color:#ea0038" @click="clearPin">⌫</button>
+                <h3 style="color:#e9edef; font-size:18px; text-align:center;">Установка Полиса</h3>
+                <p style="color:#8f9ca3; font-size:13px; text-align:center;">Для шифрования данных перейди в Изолированный режим.</p>
+                <template v-if="isIOS">
+                    <div class="instruct-row"><span style="border:1.5px solid #e9edef; border-radius:4px; padding:1px 3px; font-size:14px;">↑<span style="font-size:10px;">◡</span></span><div>Нажми <b>Поделиться</b><br><span style="font-size:11px; color:#8f9ca3;">внизу браузера</span></div></div>
+                    <div style="color:#00a884; font-size:24px; text-align:center; line-height: 0.5;">⬇</div>
+                    <div class="instruct-row"><span style="background:#e9edef; color:#111b21; padding:2px 6px; border-radius:4px;">+</span><div>Выбери <b>На экран «Домой»</b></div></div>
+                </template>
+                <template v-else>
+                    <div class="instruct-row"><span style="font-size:18px;">⋮</span><div>Нажми <b>Меню</b><br><span style="font-size:11px; color:#8f9ca3;">справа сверху</span></div></div>
+                    <div style="color:#00a884; font-size:24px; text-align:center; line-height: 0.5;">⬇</div>
+                    <div class="instruct-row"><span style="background:#e9edef; color:#111b21; padding:2px 6px; border-radius:4px;">+</span><div>Выбери <b>Добавить на экран</b></div></div>
+                </template>
             </div>
         </div>
-        <!-- ОСНОВНОЙ ИНТЕРФЕЙС -->
+        <div v-else-if="!loggedIn" class="safe-panel">
+            <div class="safe-top">
+                <div class="monad pulse" style="width:48px; height:48px; border-width:3px;"><div class="monad-dot" style="width:12px; height:12px;"></div></div>
+                <div style="display:flex; flex-direction:column; align-items:center; gap:8px;">
+                    <div class="pin-grid">
+                        <div v-for="(digit, index) in 6" :key="index" class="pin-slot" :class="{'filled': pinDigits[index] !== '', 'error': pinError}">
+                            {{ pinDigits[index] }}
+                        </div>
+                    </div>
+                    <p style="color:#8f9ca3; font-size:12px; margin-top:8px;">ПИН генерирует Личность.</p>
+                </div>
+            </div>
+            <div class="safe-bottom">
+                <div class="keypad">
+                    <button class="key-btn" @click="addPinDigit(1)">1</button>
+                    <button class="key-btn" @click="addPinDigit(2)">2</button>
+                    <button class="key-btn" @click="addPinDigit(3)">3</button>
+                    <button class="key-btn" @click="addPinDigit(4)">4</button>
+                    <button class="key-btn" @click="addPinDigit(5)">5</button>
+                    <button class="key-btn" @click="addPinDigit(6)">6</button>
+                    <button class="key-btn" @click="addPinDigit(7)">7</button>
+                    <button class="key-btn" @click="addPinDigit(8)">8</button>
+                    <button class="key-btn" @click="addPinDigit(9)">9</button>
+                    <div></div> 
+                    <button class="key-btn" @click="addPinDigit(0)">0</button>
+                    <button class="key-btn key-btn-clear" @click="clearLastPin">⌫</button>
+                </div>
+            </div>
+        </div>
         <div v-else style="display:flex; flex-direction:column; height:100%;">
-            <div class="header">
-                <div style="display:flex; gap:12px; align-items:center;">
-                    <div class="monad" :class="{'pulse': mqttOnline}"></div>
-                    <span style="color:#00a884; font-weight:bold; font-size:14px;" @click="copyMyId">МОЙ ID</span>
+            <div class="header" v-if="!activeThread">
+                <div class="header-left" @dblclick="showLogsPanel = true">
+                    <div :class="['monad', mqttOnline ? 'pulse' : '']"><div class="monad-dot"></div></div>
+                    <button class="id-badge" @click="clickSound(); showIdCopyModal = true">ID</button>
                 </div>
-                <button class="btn-circle" style="width:32px; height:32px; font-size:20px; line-height:0;" @click="showAdd=true">+</button>
+                <button class="header-btn" style="color: #00a884;" @click="clickSound(); showSettings = true">⚙️</button>
             </div>
-            <div class="threads-panel" v-if="!activeThread">
-                <div v-for="t in threads" :key="t.peerId" class="thread-item" @click="openThread(t)">
-                    <div>
-                        <div style="color:#e9edef; font-weight:bold;">{{ t.name }}</div>
-                        <div style="color:#8f9ca3; font-size:12px;">{{ t.type === 'citadel' ? 'Чертог' : 'Узел связи' }}</div>
+            <div class="messenger-layout" v-if="!activeThread">
+                <div class="threads-panel">
+                    <div class="threads-header">
+                        <span style="font-weight:600; color:#8f9ca3; font-size:13px; text-transform:uppercase;">Связи</span>
+                        <button class="add-btn" :class="{ 'pulse-btn': threads.length <= 1 }" @click="openAddModal">+</button>
                     </div>
-                    <div v-if="t.unread" style="color:#00a884; font-weight:bold; font-size:12px;">+{{t.unread}}</div>
+                    
+                    <div class="thread-list">
+                        <div v-if="threads.length <= 1" class="onboarding">
+                            <h3 style="color:#e9edef; font-size: 16px; margin-bottom: 12px; text-align:center;">Установи первую связь</h3>
+                            <div class="obs-step">
+                                1. Нажми кнопку <span class="obs-hl">ID</span> наверху слева, чтобы скопировать свой Узел.
+                            </div>
+                            <div class="obs-step">
+                                2. Как только получишь ID Друга — жми пульсирующий <span class="obs-hl">+</span> и вставляй, чтобы открыть Тет-а-Тет.
+                            </div>
+                        </div>
+                        <div v-for="thread in threads" :key="thread.peerId" class="thread-item" @click="openThread(thread)">
+                            <div>
+                                <div class="t-name" :style="thread.type === 'citadel' ? 'color:#00a884;' : ''">{{ thread.name }}</div>
+                                <div class="t-id">{{ thread.type === 'citadel' ? 'ВНУТРЕННИЙ БУНКЕР' : (thread.type === 'system' ? 'БЛИЖНИЙ КРУГ' : 'ТЕТ-А-ТЕТ') }}</div>
+                            </div>
+                            <div v-if="thread.unread > 0" class="unread-badge">{{ thread.unread }}</div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <!-- ЧАТ -->
-            <div class="chat-panel" v-if="activeThread">
+            <div class="chat-panel active" v-if="activeThread">
                 <div class="chat-header">
-                    <button style="background:none; border:none; color:#00a884; font-size:24px;" @click="activeThread=null">‹</button>
-                    <div style="flex:1;">
-                        <div style="color:#e9edef; font-weight:bold;">{{ activeThread.name }}</div>
-                    </div>
-                    <button v-if="activeThread.type !== 'citadel'" class="btn-tool" @click="showWallet=true">Финансы</button>
-                </div>
-                
-                <div class="messages-box" ref="box">
-                    <div v-for="m in messages[activeThread.peerId]" :key="m.id" class="message-row" :class="m.isMe ? 'my-message-row':'other-message-row'">
-                        <div class="message" :class="m.isMe?'my-message':'other-message'" @click="m.status===2?deleteMsg(m.id):null">
-                            {{ m.text }}
-                        </div>
-                        <div class="msg-footer">
-                            <span v-if="m.isMe" :style="{color: m.status===3 ? '#00a884' : '#ea0038'}">
-                                {{ m.status===3 ? '✓ Открыто' : '⏳ Замок' }}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-                <div class="action-bar" v-if="activeThread.type !== 'citadel'">
-                    <!-- Панель инструментов физики Земли -->
-                    <div style="display:flex; gap:4px; flex-direction:column; margin-right:4px;">
-                        <button class="btn-tool" @click="toggleAcousticRec">{{ isListeningAc ? '🔴 Звук' : '🎙 Звук' }}</button>
-                        <button class="btn-tool" @click="toggleOpticRec">{{ isScanningOpt ? '🔴 Свет' : '👁 Свет' }}</button>
+                    <button style="background:transparent; border:none; color:#00a884; font-size:32px; padding:0 12px 0 0; cursor:pointer;" @click="closeThread">‹</button>
+                    <div :class="['monad', mqttOnline ? 'pulse' : '']" style="width:20px; height:20px; border-width:1px;"><div class="monad-dot" style="width:4px; height:4px;"></div></div>
+                    
+                    <div style="flex:1; overflow:hidden;" @click="activeThread.type !== 'citadel' ? copy(activeThread.peerId, 'ID Узла скопирован') : null">
+                        <div style="font-weight:600; font-size:16px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#e9edef;">{{ activeThread.name }}</div>
+                        <div style="font-size:11px; color:#8f9ca3;">{{ activeThread.type === 'citadel' ? 'Секретные записи' : (activeThread.type==='system' ? 'Ближний круг' : 'Тет-а-тет') }}</div>
                     </div>
                     
+                    <button v-if="activeThread.type !== 'citadel'" class="sonar-btn" :class="'sonar-' + (sonarStatus || 'idle')" @click="sonarPing" :title="sonarStatusTitle">
+                        <span v-if="sonarStatus === 'online'">✔</span>
+                        <span v-else-if="sonarStatus === 'offline'">✘</span>
+                        <span v-else>📡</span>
+                    </button>
+                    <button v-if="activeThread.type !== 'citadel'" style="background:transparent; border:none; color:#ea0038; font-size:20px; padding:0 0 0 12px; cursor:pointer;" @click="deleteThread">🗑</button>
+                </div>
+                <div class="messages-box" ref="msgBox">
+                    <div v-if="!messages[activeThread.peerId] || messages[activeThread.peerId].length === 0" style="text-align:center; padding:40px 20px; color:#8f9ca3; line-height: 1.5; font-size: 14px;">
+                        <template v-if="activeThread.type === 'citadel'">
+                            <p style="color:#00a884; font-weight:bold;">Мой Чертог.</p>
+                            <p>Заметки и пароли здесь зашифрованы твоим ПИНом и закрыты внутри устройства.</p>
+                        </template>
+                        <template v-else>
+                            <p style="color:#00a884; font-weight:bold;">Канал связи открыт.</p>
+                            <p>Сжимай мысль до 108 символов.</p>
+                        </template>
+                    </div>
+                    <template v-if="messages[activeThread.peerId]">
+                        <div v-for="msg in messages[activeThread.peerId]" :key="msg.id" :class="['message-row', msg.isMe ? 'my-message-row' : 'other-message-row']" @dblclick="msg.status === 2 ? deleteMsg(msg.id) : null">
+                            <div v-if="!msg.isMe && activeThread.type==='system' && msg.senderName" class="msg-sender">{{ msg.senderName }}</div>
+                            <div :class="['message', msg.isMe ? 'my-message' : 'other-message']">{{ msg.text }}</div>
+                            <div class="msg-footer">
+                                <span class="status-dot" :class="'status-'+ msg.status"></span>
+                                <span>{{ msg.time }}</span>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+                <div class="input-area" v-if="activeThread && activeThread.type !== 'citadel'">
+                    <template v-if="fieldLocked">
+                        <div class="locked-indicator">⏳ Капсула в орбите. (Ждем ЭХО)</div>
+                    </template>
+                    <template v-else>
+                        <div class="input-wrapper">
+                            <input v-model="inputText" @keyup.enter.prevent="handleAction" placeholder="Крипто-шлюз открыт..." autocomplete="off">
+                            <span class="char-count" :class="{'max': inputMode === 'text' && inputText.length === 108}">{{ inputMode === 'text' ? inputText.length + '/108' : 'ШИФР' }}</span>
+                        </div>
+                        <div class="action-btns">
+                            <template v-if="inputMode === 'text'">
+                                <button class="cipher-btn" @click="copyCipher" title="Скопировать шифр">⧉</button>
+                                <button class="action-btn" @click="sendMsg" title="Выстрел в Эфир">➤</button>
+                                <!-- НОВЫЕ КНОПКИ ФИЗИЧЕСКОГО УРОВНЯ -->
+                                <button class="cipher-btn" @click="sendAcoustic" title="Звуком">🔊</button>
+                                <button class="cipher-btn" @click="sendOptical" title="Светом">💡</button>
+                                <button class="cipher-btn" @click="showWallet=true" title="Финансы">💰</button>
+                                <button class="cipher-btn" @click="toggleAcousticRec" :style="isListeningAc ? 'color:#ea0038; border-color:#ea0038':''" title="Слушать звук">🎙</button>
+                            </template>
+                            <template v-else-if="inputMode === 'cipher'">
+                                <button class="action-btn" style="width: 100%; border-radius: 24px;" @click="decryptManual">📥 РАСШИФРОВАТЬ</button>
+                            </template>
+                        </div>
+                    </template>
+                </div>
+                <div class="input-area" v-else-if="activeThread && activeThread.type === 'citadel'">
                     <div class="input-wrapper">
-                        <input v-model="inputText" placeholder="Текст..." v-if="!fieldLocked" autocomplete="off" @keyup.enter="sendMQTT">
-                        <div v-else style="color:#ea0038; font-size:12px; padding:12px; text-align:center; border:1px dashed #ea0038; border-radius:24px;">ЭФИР ЗАКРЫТ (Ждем ЭХО)</div>
+                        <input v-model="inputText" @keyup.enter.prevent="saveToCitadel" placeholder="Зашифровать заметку..." autocomplete="off">
                     </div>
-                    
-                    <!-- Варианты отправки -->
-                    <div style="display:flex; flex-direction:column; gap:4px;" v-if="!fieldLocked">
-                        <button class="btn-circle" style="width:32px; height:32px; font-size:12px;" @click="sendMQTT" title="В эфир">➤</button>
-                        <div style="display:flex; gap:2px;">
-                            <button class="btn-circle" style="width:15px; height:15px; font-size:8px; line-height:0;" @click="sendAcoustic" title="Звуком">🔊</button>
-                            <button class="btn-circle" style="width:15px; height:15px; font-size:8px; line-height:0;" @click="sendOptical" title="Светом">💡</button>
-                        </div>
-                    </div>
+                    <button class="action-btn" @click="saveToCitadel">💾</button>
                 </div>
             </div>
             
-            <!-- МОДАЛКА: НОВЫЙ ЧАТ -->
-            <div class="modal" v-if="showAdd" @click.self="showAdd=false">
-                <div class="modal-content">
-                    <h3 style="color:#00a884;">Реквизиты Узла</h3>
-                    <input v-model="addName" placeholder="Имя">
-                    <input v-model="addId" placeholder="ID (вставь скопированное)">
-                    <button class="btn-circle" style="width:100%; border-radius:8px;" @click="createThread">Создать мост</button>
+            <div v-if="showLogsPanel" class="logs-overlay">
+                <h3 style="margin-bottom:12px; color:#fff;">ТЕРМИНАЛ МАТРИЦЫ</h3>
+                <div class="logs-box">
+                    <div v-for="(l,i) in sysLogs" :key="i" class="log-entry">{{ l }}</div>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <button style="flex: 1; background: #00a884; color: #111b21; border: none; padding: 12px; border-radius: 8px; font-weight: bold;" @click="copyLogs">Копировать Логи</button>
+                    <button style="background:transparent; color:#00a884; border:1px solid #00a884; padding:12px; border-radius:8px;" @click="showLogsPanel=false">Закрыть</button>
                 </div>
             </div>
-            <!-- МОДАЛКА: КОШЕЛЕК -->
-            <div class="modal" v-if="showWallet" @click.self="showWallet=false">
-                <div class="modal-content">
-                    <h3 style="color:#00a884;">Финансовый Узел</h3>
-                    <p style="font-size:11px; color:#8f9ca3;">Адреса друга лежат в локальном Чертоге.</p>
-                    
-                    <label style="color:#8f9ca3; font-size:12px;">Его Monero (XMR):</label>
-                    <input v-model="walletData.xmr" placeholder="4... или 8..." @blur="saveWallet">
-                    <button style="background:transparent; border:1px solid #e9edef; color:#fff; padding:8px; border-radius:8px;" @click="pay('XMR')">Отправить XMR (Deep Link)</button>
-                    
-                    <label style="color:#8f9ca3; font-size:12px; margin-top:10px;">Его USDT (TRC20):</label>
-                    <input v-model="walletData.usdt" placeholder="T..." @blur="saveWallet">
-                    <button style="background:transparent; border:1px solid #e9edef; color:#fff; padding:8px; border-radius:8px;" @click="pay('USDT')">Отправить USDT (Trust Wallet Link)</button>
+        </div>
+        <div class="modal" v-if="showAddModal" @click.self="clickSound(); showAddModal=false">
+            <div class="modal-content">
+                <h3 style="color:#e9edef;">Новая связь</h3>
+                <input v-model="newThreadName" placeholder="Имя абонента" autocomplete="off">
+                <input v-model="newThreadId" placeholder="Вставь ID Узла" autocomplete="off">
+                <p style="font-size:11px; color:#8f9ca3; line-height: 1.4;">Для создания открытой группы оставь поле ID пустым.</p>
+                <div class="btn-row">
+                    <button class="btn-cancel" @click="clickSound(); showAddModal=false">Отмена</button>
+                    <button class="btn-confirm" @click="createThread">Создать</button>
                 </div>
+            </div>
+        </div>
+        <div class="modal" v-if="showIdCopyModal" @click.self="clickSound(); showIdCopyModal = false">
+            <div class="modal-content">
+                <h3 style="color: #00a884; margin-bottom: 8px;">Мой Узел (ID)</h3>
+                <div style="background:#202c33; padding:12px; border-radius:8px; word-break:break-all; font-family:monospace; color:#8f9ca3; text-align:center; font-size: 14px; margin-bottom: 12px;">{{ myId }}</div>
+                <button style="background: #2a3942; border: 1px solid #00a884; color: #e9edef; padding: 12px; border-radius: 8px; cursor: pointer; width: 100%;" @click="copy(myId, 'Мой ID скопирован')">
+                    Скопировать ID
+                </button>
+                <button style="background: #00a884; border: none; color: #111b21; padding: 12px; border-radius: 8px; cursor: pointer; font-weight:bold; margin-top: 8px; width: 100%;" @click="sharePolis()">
+                    Отправить Инструкцию Другу
+                </button>
+                <div class="btn-row" style="margin-top: 8px;"><button class="btn-cancel" @click="clickSound(); showIdCopyModal = false">Закрыть</button></div>
+            </div>
+        </div>
+        <div class="modal" v-if="showSettings" @click.self="clickSound(); save(); showSettings=false">
+            <div class="modal-content">
+                <h3 style="color:#00a884; margin-bottom: 16px;">Щит (Настройки)</h3>
+                <div style="margin-bottom: 16px;">
+                    <label style="color:#8f9ca3; font-size:12px; display:block; margin-bottom:4px;">Моё имя (Для Групп):</label>
+                    <input v-model="myName" placeholder="Аноним" style="width:100%; box-sizing:border-box;" @blur="save">
+                </div>
+                <button class="settings-btn" @click="reqGyro"><span>🧭 Гироскоп (Сброс рывком)</span> <span style="color:#00a884;">Акт</span></button>
+                <button class="settings-btn" @click="reqNotif"><span>🔔 Уведомления в фоне</span> <span style="color:#00a884;">Акт</span></button>
+                <button style="background: #111b21; font-size: 14px; padding: 12px; border-radius: 8px; border: 1px solid #8f9ca3; text-align: center; margin-top: 12px; cursor: pointer; width: 100%;" @click="alert('Модуль обновления Ядра закрыт для MVP.')">
+                    <span style="color:#8f9ca3;">⚙️ Системное Ядро (Кузня)</span>
+                </button>
+                <button style="background: #111b21; font-size: 14px; padding: 12px; border-radius: 8px; border: 1px solid #ea0038; text-align: center; cursor: pointer; width: 100%; margin-top: 8px;" @click="wipeIdentity">
+                    <span style="color:#ea0038; font-weight:bold;">🗑 Сжечь Личность</span>
+                </button>
+                <div class="btn-row" style="margin-top: 8px;"><button class="btn-confirm" @click="clickSound(); save(); showSettings=false" style="width:100%;">Закрыть</button></div>
+            </div>
+        </div>
+        <!-- НОВАЯ МОДАЛКА КОШЕЛЬКА -->
+        <div class="modal" v-if="showWallet" @click.self="showWallet=false">
+            <div class="modal-content">
+                <h3 style="color:#00a884;">Диспетчер Кошельков</h3>
+                <input v-model="walletXMR" placeholder="Его XMR адрес (начинается на 4/8)" @blur="save">
+                <button class="btn-confirm" style="width:100%; margin-top:4px;" @click="pay('XMR')">Оплатить XMR</button>
+                
+                <input v-model="walletUSDT" placeholder="Его USDT TRC20 адрес" style="margin-top:12px;" @blur="save">
+                <button class="btn-confirm" style="width:100%; margin-top:4px;" @click="pay('USDT')">Оплатить USDT (TrustWallet)</button>
             </div>
         </div>
     </div>
     <script>
-        // ==========================================
-        // БАЗОВЫЕ МОДУЛИ 4.0 (Сжатие + Хранилище)
-        // ==========================================
-        class Crystal108 {
-            collapse(text) {
-                // Упрощенный генератор (для MVP 108 случайных цифр + полезная нагрузка внутри)
-                // Строго 108 цифр на выход.
-                let hex = '';
-                for(let i=0; i<text.length; i++) {
-                    let code = text.charCodeAt(i).toString(10);
-                    hex += code.padStart(3, '0');
-                }
-                while(hex.length < 108) hex += Math.floor(Math.random()*10);
-                return hex.substring(0, 108);
+        // =====================================================================
+        // [УЗЕЛ 01: КРИСТАЛЛ 108]
+        // =====================================================================
+        class Crystal108Codec {
+            constructor() {
+                this.alphabet = ' abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZабвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ0123456789-_/:;().,?!|~@#$%^&*=+<>\n';
+                this.charToIdx = {}; this.idxToChar = [];
+                for (let i=0; i<this.alphabet.length; i++) { this.charToIdx[this.alphabet[i]]=i; this.idxToChar[i]=this.alphabet[i]; }
+                this.base = BigInt(this.alphabet.length); this.PI = Math.PI; this.PHI = (1+Math.sqrt(5))/2;
             }
-            resonate(code108) {
+            _prng(seed) {
+                return function() {
+                    seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+                    let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+                    t = (t + Math.imul(t ^ t >>> 7, 61 | t)) ^ t;
+                    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+                };
+            }
+            _normalize(text) {
                 let res = '';
-                for(let i=0; i<code108.length; i+=3) {
-                    let num = parseInt(code108.substr(i,3), 10);
-                    if(num >= 32 && num <= 1105) res += String.fromCharCode(num);
-                }
-                return res.replace(/[^а-яa-z0-9\s\|\.\,\!\?]/gi, '').trim(); // Фильтр мусора
+                for (let i=0; i<text.length; i++) res += this.charToIdx.hasOwnProperty(text[i]) ? text[i] : ' ';
+                return res;
+            }
+            collapse(text, astroSalt=0) {
+                const clean = this._normalize(text);
+                if (clean.length===0) throw new Error('Пусто');
+                let num = 0n;
+                for (let i=0; i<clean.length; i++) num = num * this.base + BigInt(this.charToIdx[clean[i]]);
+                const plain = clean.length.toString().padStart(4,'0') + num.toString();
+                const len = plain.length; 
+                const rand = this._prng(Math.floor(astroSalt * this.PI * this.PHI * 10000));
+                let mask = ''; for (let i=0; i<len; i++) mask += Math.floor(rand()*10).toString();
+                let enc = ''; for (let i=0; i<len; i++) enc += ((parseInt(plain[i],10)+parseInt(mask[i],10))%10).toString();
+                return enc; 
+            }
+            resonate(code, astroSalt=0) {
+                code = code.toString().trim();
+                const len = code.length; if (len<5) throw new Error('Сбой длины');
+                const rand = this._prng(Math.floor(astroSalt * this.PI * this.PHI * 10000));
+                let mask = ''; for (let i=0; i<len; i++) mask += Math.floor(rand()*10).toString();
+                let plain = ''; for (let i=0; i<len; i++) plain += ((parseInt(code[i],10)-parseInt(mask[i],10)+10)%10).toString();
+                const charCount = parseInt(plain.slice(0,4),10);
+                const numStr = plain.slice(4).replace(/^0+/,'') || '0';
+                let n = BigInt(numStr); let digs = [];
+                while (n>0n) { digs.unshift(Number(n % this.base)); n /= this.base; }
+                while (digs.length < charCount) digs.unshift(0);
+                return digs.map(d=>this.idxToChar[d]).join('');
             }
         }
-        class Storage {
-            constructor() { this.key = null; }
-            auth(pin) { this.key = 'p108_'+pin; return JSON.parse(localStorage.getItem(this.key)); }
-            save(data) { localStorage.setItem(this.key, JSON.stringify(data)); }
+
+        // =====================================================================
+        // [УЗЕЛ 02: БАЗА ПАМЯТИ]
+        // =====================================================================
+        class ShadowGateway {
+            constructor() { this.currentKey = null; }
+            async enter(pin) {
+                const enc = new TextEncoder().encode(pin + "_polis_base_v1");
+                const hash = await crypto.subtle.digest('SHA-256', enc);
+                const arr = Array.from(new Uint8Array(hash));
+                this.currentKey = 'p108_' + arr.map(b=>b.toString(16).padStart(2,'0')).join('').slice(0,32);
+                const data = localStorage.getItem(this.currentKey);
+                return data ? JSON.parse(data) : null;
+            }
+            save(data) {
+                if (this.currentKey) localStorage.setItem(this.currentKey, JSON.stringify(data));
+            }
+            wipe() { if (this.currentKey) localStorage.removeItem(this.currentKey); this.currentKey = null; }
+            lock() { this.currentKey = null; }
         }
-        // ==========================================
-        // МОДУЛЬ 1.1: АКУСТИКА (State Machine ФСК)
-        // ==========================================
+
+        // =====================================================================
+        // [УЗЕЛ 03: MQTT РАЦИЯ («УМНАЯ РОЗЕТКА»)]
+        // =====================================================================
+        class MQTTBridge {
+            constructor(onStatus, onMsg, id) {
+                this.onStatus = onStatus; this.onMsg = onMsg; this.client = null;
+                this.url = 'wss://broker.emqx.io:8084/mqtt';
+                this.clientId = 'node108_core_' + id; 
+                this.activeTopics = [];
+            }
+            connect(topics) {
+                if (this.client && this.client.connected) {
+                    this._subscribeUnique(topics);
+                    return;
+                }
+                
+                if (this.client) this.client.end(true);
+                this.client = mqtt.connect(this.url, { 
+                    clientId: this.clientId, 
+                    keepalive: 60, 
+                    reconnectPeriod: 3000, 
+                    clean: false 
+                });
+                
+                this.client.on('connect', ()=>{ 
+                    this.onStatus(true); 
+                    this.activeTopics = [];
+                    this._subscribeUnique(topics);
+                });
+                this.client.on('close', ()=> this.onStatus(false));
+                this.client.on('error', ()=> this.onStatus(false));
+                this.client.on('message', (t,p)=> this.onMsg(p.toString(), t));
+            }
+
+            _subscribeUnique(topics) {
+                if (!this.client || !this.client.connected) return;
+                topics.forEach(t => {
+                    if (!this.activeTopics.includes(t)) {
+                        this.client.subscribe(t, {qos:1});
+                        this.activeTopics.push(t);
+                    }
+                });
+            }
+
+            send(topic, msg) { if (this.client && this.client.connected) this.client.publish(topic, msg, {qos:1, retain: false}); }
+            disconnect() { if (this.client) this.client.end(true); this.onStatus(false); this.activeTopics = []; }
+        }
+
+        // =====================================================================
+        // [УЗЕЛ 05: ФИЗИКА ЗЕМЛИ И ФИНАНСОВ] (Добавление к Версии 4.0)
+        // =====================================================================
         class AcousticModem {
             constructor() {
-                this.freqs = [600, 800, 1000, 1200, 1400, 1600, 1800, 2000, 2200, 2400]; // 0-9
-                this.preamble = 2800; // Старт
-                this.dur = 0.15;
-                this.ctx = null;
+                this.freqs = [600, 800, 1000, 1200, 1400, 1600, 1800, 2000, 2200, 2400];
+                this.preamble = 2800; this.dur = 0.15; this.ctx = null;
+                this.isListening = false;
+                this.stream = null;
+                this.onDataCallback = null;
             }
             send(code108) {
                 this.ctx = new (window.AudioContext || window.webkitAudioContext)();
                 let t = this.ctx.currentTime;
-                // Преамбула (2 импульса)
-                this._tone(this.preamble, t); t+=this.dur;
-                this._tone(this.preamble, t); t+=this.dur;
-                for(let i=0; i<code108.length; i++) {
-                    this._tone(this.freqs[parseInt(code108[i])], t);
-                    t += this.dur;
-                }
+                this._tone(this.preamble, t); t+=this.dur; this._tone(this.preamble, t); t+=this.dur;
+                for(let i=0; i<code108.length; i++) { this._tone(this.freqs[parseInt(code108[i])], t); t += this.dur; }
                 setTimeout(()=>this.ctx.close(), (t - this.ctx.currentTime)*1000 + 500);
             }
             _tone(f, t) {
                 const o = this.ctx.createOscillator(); const g = this.ctx.createGain();
                 o.frequency.value = f;
-                g.gain.setValueAtTime(0.5, t); g.gain.setTargetAtTime(0.001, t + this.dur - 0.02);
+                g.gain.setValueAtTime(0.5, t); g.gain.setTargetAtTime(0.001, t + this.dur - 0.02, 0.01);
                 o.connect(g); g.connect(this.ctx.destination);
                 o.start(t); o.stop(t+this.dur);
             }
             listen(onData) {
+                this.onDataCallback = onData;
                 this.ctx = new (window.AudioContext || window.webkitAudioContext)();
                 navigator.mediaDevices.getUserMedia({audio:true}).then(s => {
-                    this.stream = s;
-                    const src = this.ctx.createMediaStreamSource(s);
-                    this.an = this.ctx.createAnalyser();
-                    this.an.fftSize = 2048;
-                    src.connect(this.an);
-                    this.listening = true;
-                    this.buffer = '';
-                    this._loop(onData);
+                    this.stream = s; const src = this.ctx.createMediaStreamSource(s);
+                    this.an = this.ctx.createAnalyser(); this.an.fftSize = 2048;
+                    src.connect(this.an); this.isListening = true; this.buffer = '';
+                    this._loop();
                 });
             }
-            _loop(onData) {
-                if(!this.listening) return;
-                const arr = new Float32Array(this.an.frequencyBinCount);
-                this.an.getFloatFrequencyData(arr);
-                
-                // Простейший поиск пика
+            _loop() {
+                if(!this.isListening) return;
+                const arr = new Float32Array(this.an.frequencyBinCount); this.an.getFloatFrequencyData(arr);
                 let max = -Infinity, idx = -1;
-                for(let i=20; i<arr.length/2; i++) {
-                    if(arr[i]>max) { max = arr[i]; idx = i; }
-                }
-                
-                let hz = idx *this.ctx.sampleRate/this.an.fftSize;
-                
-                // Эвристика: если громко и попадает в сетку
+                for(let i=20; i<arr.length/2; i++) { if(arr[i]>max) { max = arr[i]; idx = i; } }
+                let hz = idx * this.ctx.sampleRate / this.an.fftSize;
                 if(max > -40) {
-                    if(Math.abs(hz - this.preamble) < 100) this.buffer = ''; // Сброс при преамбуле
+                    if(Math.abs(hz - this.preamble) < 100) this.buffer = '';
                     for(let i=0; i<10; i++) {
                         if(Math.abs(hz - this.freqs[i]) < 50) {
-                            if(this.buffer.length < 108 && this.buffer.slice(-1) != i.toString()) {
-                                this.buffer += i; // Простая защита от двойного чтения
-                            }
+                            if(this.buffer.length < 108 && this.buffer.slice(-1) != i.toString()) this.buffer += i;
                         }
                     }
                 }
-                
-                if(this.buffer.length === 108) {
-                    onData(this.buffer);
-                    this.stop();
-                } else {
-                    requestAnimationFrame(()=>this._loop(onData));
-                }
+                if(this.buffer.length === 108) { 
+                    if(this.onDataCallback) this.onDataCallback(this.buffer); 
+                    this.stop(); 
+                } else 
+                    requestAnimationFrame(()=>this._loop());
             }
             stop() {
-                this.listening = false;
+                this.isListening = false;
                 if(this.stream) this.stream.getTracks().forEach(t=>t.stop());
                 if(this.ctx) this.ctx.close();
             }
         }
-        // ==========================================
-        // МОДУЛЬ 1.2: ОПТИКА (Цветовой ФСК)
-        // ==========================================
         class OpticalLink {
             constructor() {
-                // 10 насыщенных цветов для чтения матрицей камеры iOS
                 this.colors = ['#000', '#f00', '#0f0', '#00f', '#ff0', '#0ff', '#f0f', '#fff', '#888', '#f80'];
-                this.cvs = document.getElementById('optical-canvas');
-                this.dur = 150; // мс на кадр
+                this.cvs = document.createElement('canvas');
+                this.cvs.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:9999;pointer-events:none;display:none;';
+                document.body.appendChild(this.cvs);
+                this.dur = 150;
             }
             async send(code108) {
-                this.cvs.style.display = 'block';
-                const ctx = this.cvs.getContext('2d');
-                // Преамбула белый экран
+                this.cvs.style.display = 'block'; const ctx = this.cvs.getContext('2d');
                 ctx.fillStyle = '#fff'; ctx.fillRect(0,0,10000,10000); await new Promise(r=>setTimeout(r, 500));
-                
                 for(let i=0; i<code108.length; i++) {
-                    let c = this.colors[parseInt(code108[i])];
-                    ctx.fillStyle = c; ctx.fillRect(0,0,10000,10000);
+                    ctx.fillStyle = this.colors[parseInt(code108[i])]; ctx.fillRect(0,0,10000,10000);
                     await new Promise(r=>setTimeout(r, this.dur));
-                    // Разделитель чернота
-                    ctx.fillStyle = '#000'; ctx.fillRect(0,0,10000,10000);
-                    await new Promise(r=>setTimeout(r, 50));
+                    ctx.fillStyle = '#000'; ctx.fillRect(0,0,10000,10000); await new Promise(r=>setTimeout(r, 50));
                 }
                 this.cvs.style.display = 'none';
             }
-            // Функция сканера сложна для 1 файла (захват видео, getImageData),
-            // Оставляем аппаратную заготовку на стороне отправителя, 
-            // Приемник вынесен на 2 этап (сложность WebRTC камеры на iOS).
         }
-        // ==========================================
-        // МОДУЛЬ 3: ФИНАНСОВЫЙ ДИСПЕТЧЕР
-        // ==========================================
         const WalletRouter = {
             generateXmrLink: (addr, amt) => `monero:${addr}${amt?`?tx_amount=${amt}`:''}`,
             generateUsdtLink: (addr, amt) => `trust://send?asset=c195&address=${addr}&amount=${amt||0}`
         };
-        // ==========================================
-        // VUE APP (ЯДРО)
-        // ==========================================
-        const cry = new Crystal108();
-        const store = new Storage();
+
+        const cry = new Crystal108Codec(); const sg = new ShadowGateway();
+        const checkPWA = ()=> window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone || document.referrer.includes('android-app://');
+
+        // =====================================================================
+        // [УЗЕЛ 04: ЯДРО ЛОГИКИ VUE]  (с добавленными новыми методами и полями)
+        // =====================================================================
         new Vue({
             el: '#app',
             data: {
-                loggedIn: false, pinDigits: ['','','','','',''],
-                myId: '', mq: null, mqttOnline: false,
-                threads: [], messages: {}, activeThread: null,
-                inputText: '', fieldLocked: false,
-                showAdd: false, addName: '', addId: '',
-                showWallet: false, walletData: {xmr:'', usdt:''},
-                modem: new AcousticModem(), optic: new OpticalLink(),
-                isListeningAc: false, isScanningOpt: false
+                isPWAInstalled: false, loggedIn: false, 
+                pinDigits: ['','','','','',''], pinError: false, 
+                myId: '', myName: '', mqttOnline: false, mqtt: null,
+                showAddModal: false, showIdCopyModal: false, showSettings: false, newThreadName: '', newThreadId: '',
+                activeThread: null, inputText: '', threads: [], messages: {}, outbox: [],
+                sysLogs: [], showLogsPanel: false, settings: { sound: true, notifs: true },
+                sonarStatus: '', sonarTimer: null, fieldLocked: false, mqttReady: false,
+                // Новые поля для кошелька и модемов
+                showWallet: false, walletXMR: '', walletUSDT: '',
+                modem: new AcousticModem(), optic: new OpticalLink(), isListeningAc: false
             },
-            methods: {
-                addPin(n) {
-                    let idx = this.pinDigits.findIndex(x=>x==='');
-                    if(idx>=0) {
-                        this.$set(this.pinDigits, idx, n);
-                        if(idx === 5) setTimeout(this.login, 100);
-                    }
+            computed: {
+                isIOS() { return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream; },
+                masterPin() { return this.pinDigits.join(''); },
+                inputMode() {
+                    if (this.inputText.length === 0) return 'text';
+                    const onlyDigits = /^[0-9]+$/.test(this.inputText);
+                    if (onlyDigits && this.inputText.length > 150) return 'cipher';
+                    return 'text';
                 },
-                clearPin() { this.pinDigits = ['','','','','','']; },
-                login() {
-                    let pin = this.pinDigits.join('');
-                    let d = store.auth(pin);
-                    if(!d) {
-                        this.myId = 'id_'+Math.random().toString(36).substr(2,6);
-                        this.threads = [{name:'Мой Чертог', peerId:'citadel', type:'citadel'}];
-                    } else {
-                        this.threads = d.t; this.messages = d.m; this.myId = d.id;
-                    }
-                    this.loggedIn = true; this.save(); this.initMQTT();
+                sonarIcon() {
+                    if (this.sonarStatus === 'pinging') return '📡';
+                    if (this.sonarStatus === 'online') return '✔';
+                    if (this.sonarStatus === 'offline') return '✘';
+                    return '📡';
                 },
-                save() { store.save({t:this.threads, m:this.messages, id:this.myId}); },
-                
-                initMQTT() {
-                    const tops = [`polis108/node/${this.myId}`, ...this.threads.filter(t=>t.type!=='citadel').map(t=>`polis108/link/${[this.myId, t.peerId].sort().join('_')}`)];
-                    this.mq = mqtt.connect('wss://broker.emqx.io:8084/mqtt', {clientId:this.myId, clean:false});
-                    this.mq.on('connect', ()=>{ this.mqttOnline=true; tops.forEach(t=>this.mq.subscribe(t,{qos:1})); });
-                    this.mq.on('message', this.handleMsg);
+                sonarStatusTitle() {
+                    if (this.sonarStatus === 'pinging') return 'Сонар: ожидание Эха...';
+                    if (this.sonarStatus === 'online') return 'Сонар: Контакт в Эфире';
+                    if (this.sonarStatus === 'offline') return 'Сонар: Контакт на Глубине (Офлайн)';
+                    return 'Запустить Сонар (Проверить Эфир)';
+                }
+            },
+            watch: {
+                inputText(val) {
+                    const regex = /[^a-zA-ZABCDEFGHIJKLMNOPQRSTUVWXYZабвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ0-9\-\_\/\:\;\(\)\.\,\?\!\|~@#$%^&*=+<>\n\s]/g;
+                    let clean = val.replace(regex, '');
+                    if (this.inputMode === 'text' && clean.length > 108) clean = clean.substring(0, 108);
+                    if (val !== clean) { this.inputText = clean; this.clickSound(true); }
                 },
-                createThread() {
-                    if(!this.addId) return;
-                    let th = {name: this.addName||'Анон', peerId: this.addId, type:'link', xmr:'', usdt:''};
-                    this.threads.push(th); this.$set(this.messages, this.addId, []);
-                    this.save(); this.showAdd=false; this.initMQTT();
-                },
-                openThread(t) { 
-                    this.activeThread = t; t.unread = 0; 
-                    this.walletData = {xmr: t.xmr||'', usdt: t.usdt||''};
-                    this.checkLock(); 
-                },
-                
-                saveWallet() {
-                    this.activeThread.xmr = this.walletData.xmr;
-                    this.activeThread.usdt = this.walletData.usdt;
-                    this.save();
-                },
-                pay(cur) {
-                    let url = cur==='XMR' ? WalletRouter.generateXmrLink(this.walletData.xmr) : WalletRouter.generateUsdtLink(this.walletData.usdt);
-                    if(!url.includes('undefined')) window.location.href = url;
-                    else alert('Нет адреса');
-                },
-                sendBase(payload, method) {
-                    if(!payload || this.fieldLocked) return;
-                    let id = Date.now();
-                    let msg = {id: id, text: payload, isMe: true, status: 2};
-                    this.messages[this.activeThread.peerId].push(msg);
-                    this.checkLock(); this.save();
-                    let fullPayload = `MSG|${this.myId}|${id}|${payload}`;
-                    let code = cry.collapse(fullPayload);
-                    this.inputText = '';
-                    if(method === 'mqtt' && this.mqttOnline) {
-                        let top = `polis108/link/${[this.myId, this.activeThread.peerId].sort().join('_')}`;
-                        this.mq.publish(top, code, {qos:1, retain:false});
-                    } else if(method === 'sound') {
-                        this.modem.send(code);
-                    } else if(method === 'light') {
-                        this.optic.send(code);
-                    }
-                },
-                sendMQTT() { this.sendBase(this.inputText, 'mqtt'); },
-                sendAcoustic() { this.sendBase(this.inputText, 'sound'); },
-                sendOptical() { this.sendBase(this.inputText, 'light'); },
-                handleMsg(top, buff) {
-                    let code = buff.toString();
-                    let raw = cry.resonate(code);
-                    let parts = raw.split('|');
-                    
-                    if(parts[0] === 'ACK') {
-                        let tid = parts[1]; let mid = parseInt(parts[2]);
-                        if(this.messages[tid]) {
-                            let m = this.messages[tid].find(x=>x.id === mid);
-                            if(m) { m.status = 3; this.checkLock(); this.save(); }
-                        }
+                mqttOnline(online) { 
+                    if (online) { 
+                        this.log('[SYS] Радиоконтакт с брокером.');
+                        setTimeout(() => { this.mqttReady = true; this.log('[SYS] Эфир стабилизирован.'); }, 500);
                     } 
-                    else if(parts[0] === 'MSG') {
-                        let sid = parts[1]; let mid = parseInt(parts[2]); let text = parts[3];
-                        if(sid === this.myId) return;
-                        
-                        // Отстрел ЭХА обратно
-                        if(this.mqttOnline) {
-                            this.mq.publish(`polis108/link/${[this.myId, sid].sort().join('_')}`, cry.collapse(`ACK|${this.myId}|${mid}`), {qos:1});
-                        }
-                        
-                        let th = this.threads.find(t=>t.peerId === sid);
-                        if(!th) return; // Спам-фильтр
-                        if(!this.messages[sid].some(x=>x.id===mid)) {
-                            this.messages[sid].push({id:mid, text:text, isMe:false});
-                            if(this.activeThread?.peerId !== sid) th.unread = (th.unread||0)+1;
-                            this.save();
+                    else {
+                        this.mqttReady = false;
+                    }
+                    if (online && this.activeThread) this.checkFieldLock(); 
+                },
+                activeThread() { 
+                    this.checkFieldLock(); 
+                    this.sonarStatus = ''; 
+                    // Подгружаем адреса кошельков из выбранного треда
+                    if (this.activeThread) {
+                        this.walletXMR = this.activeThread.xmr || '';
+                        this.walletUSDT = this.activeThread.usdt || '';
+                    }
+                }
+            },
+            
+            mounted() {
+                setTimeout(()=>{ this.isPWAInstalled = checkPWA() || (window.innerHeight === screen.height); }, 100);
+                window.addEventListener('visibilitychange', this.onVisibilityChange);
+                window.addEventListener('focus', this.onFocus);
+            },
+            beforeDestroy() {
+                if (this.mqtt) this.mqtt.disconnect();
+                window.removeEventListener('devicemotion', this.handleShake);
+                window.removeEventListener('visibilitychange', this.onVisibilityChange);
+                if (this.sonarTimer) clearTimeout(this.sonarTimer);
+            },
+
+            methods: {
+                log(t) { const time = new Date().toLocaleTimeString().slice(0,8); this.sysLogs.unshift(`[${time}] ${t}`); if (this.sysLogs.length > 80) this.sysLogs.pop(); },
+                copyLogs() { this.copy(this.sysLogs.join('\n'), 'Журнал скопирован в буфер'); },
+
+                onVisibilityChange() {
+                    if (document.visibilityState === 'hidden') { 
+                        this.log('[SYS] Приложение в фоне (Ожидание)'); 
+                    } else { 
+                        this.log('[SYS] Возврат фокуса. Сверка связи...'); 
+                        if (this.mqtt && this.loggedIn && !this.mqttOnline) {
+                            this.mqtt.connect(this.getAllTopics()); 
                         }
                     }
                 },
+                onFocus() { 
+                    if (document.visibilityState === 'visible' && this.mqtt && !this.mqttOnline && this.loggedIn) {
+                        this.mqtt.connect(this.getAllTopics()); 
+                    }
+                },
                 
+                addPinDigit(d) {
+                    if (this.pinDigits.every(x=>x!=='')) return;
+                    const idx = this.pinDigits.findIndex(x=>x==='');
+                    if (idx>=0) {
+                        this.$set(this.pinDigits, idx, d.toString()); this.clickSound();
+                        if (idx === 5) setTimeout(() => this.login(), 100);
+                    }
+                },
+                clearLastPin() {
+                    const idx = this.pinDigits.slice().reverse().findIndex(x=>x!=='');
+                    if (idx>=0) { const realIdx = 5-idx; this.$set(this.pinDigits, realIdx, ''); this.clickSound(true); }
+                },
+                clickSound(err) {
+                    if (!this.settings.sound) return;
+                    try {
+                        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                        const osc = ctx.createOscillator(); const gain = ctx.createGain();
+                        osc.connect(gain); gain.connect(ctx.destination);
+                        osc.type = err ? 'triangle' : 'sine'; osc.frequency.value = err ? 150 : 1200;
+                        gain.gain.setValueAtTime(0.01, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+0.1);
+                        osc.start(); osc.stop(ctx.currentTime+0.1);
+                    } catch(e){}
+                },
+
+                copy(t, msg='Скопировано') {
+                    const el = document.createElement('textarea'); el.value = t; document.body.appendChild(el); 
+                    el.select(); document.execCommand('copy'); document.body.removeChild(el); alert(msg); this.clickSound();
+                },
+                
+                sharePolis() {
+                    this.clickSound();
+                    const url = window.location.href.split('?')[0]; 
+                    const text = `Жду тебя в Полисе.\n\nМой ID (скопируй):\n${this.myId}\n\n(Жми на ссылку, открой в браузере и следуй инструкции):\n${url}`;
+                    if (navigator.share) { navigator.share({ text: text }).catch(() => {}); } 
+                    else if (navigator.clipboard) { navigator.clipboard.writeText(text).then(() => alert('Приглашение скопировано.')); }
+                    this.showIdCopyModal = false;
+                },
+
+                async login() {
+                    if (this.masterPin.length !== 6) { 
+                        this.clickSound(true); this.pinError = true; setTimeout(() => this.pinError = false, 400); 
+                        this.pinDigits = ['','','','','','']; return; 
+                    }
+                    this.clickSound(); window.addEventListener('devicemotion', this.handleShake);
+                    
+                    let d = null;
+                    try { d = await sg.enter(this.masterPin); } catch(e) { this.log('[ERR] Сбой базы: ' + e); }
+                    
+                    if (!d) {
+                        this.myId = 'id_' + Math.random().toString(36).substr(2,8); this.myName = '';
+                        this.threads = [{ name: 'Мой Чертог', peerId: 'citadel', type: 'citadel', unread: 0 }];
+                        this.messages = { citadel: [] }; this.outbox = [];
+                        this.log('[SYS] Новая Личность');
+                    } else {
+                        this.threads = d.t || []; this.messages = d.m || {}; this.myId = d.myId; this.outbox = d.o || []; this.myName = d.n || '';
+                        if (!this.threads.some(t => t.peerId === 'citadel')) {
+                            this.threads.unshift({ name: 'Мой Чертог', peerId: 'citadel', type: 'citadel', unread: 0 });
+                            this.$set(this.messages, 'citadel', []);
+                        }
+                        this.threads.forEach(t => { if (typeof t.unread === 'undefined') this.$set(t, 'unread', 0); });
+                        this.log('[SYS] База загружена');
+                    }
+                    this.loggedIn = true; this.pinDigits = ['','','','','',''];
+                    this.save();
+                    
+                    this.mqtt = new MQTTBridge((s)=>{ this.mqttOnline = s; }, this.handleMsg, this.myId);
+                    this.mqtt.connect(this.getAllTopics());
+                },
+                save() {
+                    try { sg.save({ t: this.threads, m: this.messages, myId: this.myId, o: this.outbox, n: this.myName }); } 
+                    catch(e) { this.log('[ERR] Ошибка сохранения'); }
+                },
+                wipeIdentity() { if (confirm('🔥 УНИЧТОЖИТЬ ЛИЧНОСТЬ И БАЗУ?')) { sg.wipe(); this.lockPolis(); } },
+                handleShake(e) { if (!this.loggedIn) return; let acc = e.acceleration || e.accelerationIncludingGravity; if (!acc) return; if (Math.abs(acc.x||0)+Math.abs(acc.y||0)+Math.abs(acc.z||0) > 25) this.lockPolis(); },
+                lockPolis() { this.clickSound(); if (this.mqtt) this.mqtt.disconnect(); sg.lock(); this.loggedIn = false; this.threads = []; this.messages = {}; this.myId = ''; this.myName = ''; this.activeThread = null; this.showSettings = false; },
+
+                getAllTopics() {
+                    let subs = [`polis108/node/${this.myId}`];
+                    this.threads.forEach(th => {
+                        if (th.type === 'group') subs.push(`polis108/group/${th.peerId}`);
+                        if (th.type === 'personal') subs.push(`polis108/link/${[this.myId, th.peerId].sort().join('_')}`);
+                    });
+                    return subs;
+                },
+                openThread(th) { this.activeThread = th; th.unread = 0; this.save(); this.scrollBot(); this.checkFieldLock(); },
+                closeThread() { this.activeThread = null; },
+                
+                openAddModal() {
+                    this.clickSound();
+                    this.newThreadName = ''; this.newThreadId = '';
+                    this.showAddModal = true;
+                },
+
+                createThread() {
+                    this.clickSound(); let n = this.newThreadName || 'Аватар'; let rawId = this.newThreadId.trim(); let type = 'personal'; let id = '';
+                    if (rawId) { id = rawId.replace(/[^A-Za-z0-9_]/g, ''); if (!id) return alert('Неверный формат ID'); if (id.startsWith('grp_')) type = 'group'; } 
+                    else { id = 'grp_' + Math.random().toString(36).substr(2,8); type = 'group'; n = n === 'Аватар' ? 'Группа' : n; }
+                    
+                    if (this.threads.some(t=>t.peerId===id)) { alert('Связь уже открыта'); return; }
+                    
+                    const newTh = { name: n, peerId:id, type, unread:0, xmr: '', usdt: '' };
+                    this.threads.push(newTh); 
+                    this.$set(this.messages, id, []); 
+                    this.save();
+                    
+                    if (this.mqtt) this.mqtt.connect(this.getAllTopics()); 
+                    this.showAddModal = false;
+                    this.openThread(newTh);
+                },
+
+                deleteMsg(id) {
+                    if (confirm('Сжечь эту мысль, чтобы снять Замок?')) {
+                        const targetId = this.activeThread.peerId;
+                        this.messages[targetId] = this.messages[targetId].filter(m => m.id !== id);
+                        this.checkFieldLock(); 
+                        this.save();
+                    }
+                },
+                deleteThread() {
+                    if (!confirm('Обрубить мост?')) return;
+                    let id = this.activeThread.peerId; this.threads = this.threads.filter(t=>t.peerId!==id); this.$delete(this.messages, id); this.activeThread = null; this.save();
+                },
+
+                sonarPing() {
+                    if (!this.mqttOnline || !this.activeThread || this.activeThread.type === 'citadel') { this.log('[SONAR] Нет Радиоконтакта'); return; }
+                    const topic = this.activeThread.type === 'group' ? `polis108/group/${this.activeThread.peerId}` : `polis108/link/${[this.myId, this.activeThread.peerId].sort().join('_')}`;
+                    try {
+                        const code = cry.collapse(`PING|${this.myId}`, 0);
+                        this.mqtt.send(topic, code); 
+                        this.log(`[>>] Отправлен PING-импульс`);
+                        this.sonarStatus = 'pinging';
+                        if (this.sonarTimer) clearTimeout(this.sonarTimer);
+                        this.sonarTimer = setTimeout(() => {
+                            if (this.sonarStatus === 'pinging') { this.sonarStatus = 'offline'; this.log('[SONAR] Тишина. Цель на глубине.'); }
+                        }, 2500);
+                    } catch(e) {}
+                },
+
+                handleAction() {
+                    if (this.inputMode === 'text') this.sendMsg();
+                    else if (this.inputMode === 'cipher') this.decryptManual();
+                },
+                
+                sendMsg() {
+                    if (!this.inputText || !this.activeThread || this.activeThread.type === 'citadel' || this.fieldLocked) return;
+                    if (!this.mqttReady) { alert('Радиоканал еще греется. Подожди долю секунды...'); return; }
+                    
+                    const fullText = this.inputText.trim(); if (!fullText) return;
+                    const msgId = Date.now();
+                    const targetId = this.activeThread.peerId;
+                    
+                    const msgObj = { id: msgId, text: fullText, isMe: true, time: new Date().toLocaleTimeString().slice(0,5), status: 2 };
+                    
+                    const currentMsgs = this.messages[targetId] || [];
+                    this.$set(this.messages, targetId, [...currentMsgs, msgObj]);
+                    
+                    this.inputText = ''; 
+                    this.scrollBot(); 
+                    
+                    this.checkFieldLock();
+                    this.save(); 
+
+                    const rawPayload = `MSG|${this.myId}|${this.myName}|${msgId}|${fullText}`;
+                    try {
+                        const code = cry.collapse(rawPayload, 0);
+                        const topic = this.activeThread.type === 'group' ? `polis108/group/${this.activeThread.peerId}` : `polis108/link/${[this.myId, this.activeThread.peerId].sort().join('_')}`;
+                        
+                        this.mqtt.send(topic, code); 
+                        this.log(`[>>] Капсула в Эфире (ID: ${msgId}). Замок активирован.`);
+                    } catch(e) { this.log('[ERR] Ошибка Кодека'); }
+                },
+
+                copyCipher() {
+                    if (!this.inputText) return; const fullText = this.inputText.trim(); const msgId = Date.now();
+                    const targetId = this.activeThread.peerId;
+                    const rawPayload = `MSG|${this.myId}|${this.myName}|${msgId}|${fullText}`;
+                    try {
+                        const code = cry.collapse(rawPayload, 0);
+                        this.copy(code, 'Кристалл скопирован для отправки внешним текстом.');
+                        
+                        const msgObj = { id: msgId, text: fullText, isMe: true, time: new Date().toLocaleTimeString().slice(0,5), status: 1 };
+                        const currentMsgs = this.messages[targetId] || [];
+                        this.$set(this.messages, targetId, [...currentMsgs, msgObj]);
+                        
+                        this.inputText = ''; this.scrollBot(); this.save();
+                    } catch(e) { alert('Ошибка шифрования'); }
+                },
+
+                decryptManual() {
+                    if (this.inputMode !== 'cipher') return;
+                    const cipher = this.inputText.trim();
+                    try {
+                        const decrypted = cry.resonate(cipher, 0); const parts = decrypted.split('|');
+                        if (parts.length < 5 || parts[0] !== 'MSG') { alert('Код поврежден'); return; }
+                        
+                        const senderId = parts[1]; const senderName = parts[2]; const originalMsgId = parseInt(parts[3],10); const text = parts.slice(4).join('|');
+                        if (senderId === this.myId) { this.inputText = ''; return; } 
+
+                        let thread = this.threads.find(t => t.peerId === senderId && t.type === 'personal');
+                        if (!thread) {
+                            thread = { name: senderName || 'Тайный связной', peerId: senderId, type: 'personal', unread: 0 };
+                            this.threads.unshift(thread); 
+                            this.$set(this.messages, senderId, []);
+                        }
+
+                        const msgObj = { id: Date.now(), originalId: originalMsgId, text: text, isMe: false, time: new Date().toLocaleTimeString().slice(0,5), status: 3, senderName: senderName };
+                        const currentMsgs = this.messages[senderId] || [];
+                        this.$set(this.messages, senderId, [...currentMsgs, msgObj]);
+                        
+                        if (this.mqttOnline) {
+                            const topic = `polis108/link/${[this.myId, senderId].sort().join('_')}`;
+                            const ackCode = cry.collapse(`ACK|${this.myId}|${originalMsgId}`, 0);
+                            this.mqtt.send(topic, ackCode);
+                            this.log(`[>>] Ручное Сквозное ЭХО отбито`);
+                        }
+                        this.inputText = ''; this.scrollBot(); this.save();
+                    } catch(e) { alert('Ошибка расшифровки'); this.log(`[ERR] ${e.message}`); }
+                },
+
+                saveToCitadel() {
+                    if (!this.inputText) return; const text = this.inputText.trim(); if (!text) return;
+                    const msgObj = { id: Date.now(), text: text, isMe: true, time: new Date().toLocaleTimeString().slice(0,5), status: 0 };
+                    const currentMsgs = this.messages.citadel || [];
+                    this.$set(this.messages, 'citadel', [...currentMsgs, msgObj]);
+                    this.inputText = ''; this.scrollBot(); this.save();
+                },
+
+                // ===== НОВЫЕ МЕТОДЫ ДЛЯ ФИЗИЧЕСКИХ КАНАЛОВ И КОШЕЛЬКА =====
+                sendAcoustic() {
+                    if(!this.inputText || this.fieldLocked) return;
+                    const msgId = Date.now();
+                    const rawPayload = `MSG|${this.myId}|${this.myName}|${msgId}|${this.inputText.trim()}`;
+                    const code = cry.collapse(rawPayload, 0);
+                    this.modem.send(code);
+                    this.log(`[>>] Звуковой пакет отправлен`);
+                },
+                sendOptical() {
+                    if(!this.inputText || this.fieldLocked) return;
+                    const msgId = Date.now();
+                    const rawPayload = `MSG|${this.myId}|${this.myName}|${msgId}|${this.inputText.trim()}`;
+                    const code = cry.collapse(rawPayload, 0);
+                    this.optic.send(code);
+                    this.log(`[>>] Световой пакет высвечен`);
+                },
                 toggleAcousticRec() {
-                    if(this.isListeningAc) { this.modem.stop(); this.isListeningAc=false; }
-                    else {
-                        this.isListeningAc = true;
-                        this.modem.listen((code)=>{
-                            let payload = cry.resonate(code).split('|')[3];
-                            if(payload) this.messages[this.activeThread.peerId].push({id:Date.now(), text: `[Звук] ${payload}`, isMe:false});
+                    if(this.isListeningAc) { 
+                        this.modem.stop(); 
+                        this.isListeningAc = false; 
+                        this.log(`[SYS] Звуковой сонар отключен`); 
+                    } else {
+                        this.isListeningAc = true; 
+                        this.log(`[SYS] Сонар слушает звуковой эфир...`);
+                        this.modem.listen((code) => {
+                            this.inputText = code; // Вставляем в поле для расшифровки
+                            // this.inputMode = 'cipher';  // определится само
+                            this.decryptManual(); // Вызываем старый метод расшифровки
                             this.isListeningAc = false;
                         });
                     }
                 },
-                toggleOpticRec() { alert('Сканнер камеры в разработке. Используйте звук.'); },
-                checkLock() {
-                    if(!this.activeThread || this.activeThread.type==='citadel') this.fieldLocked=false;
-                    else {
-                        let myL = this.messages[this.activeThread.peerId].filter(x=>x.isMe).slice(-1)[0];
-                        this.fieldLocked = myL && myL.status === 2;
+                pay(cur) {
+                    // Сохраним в профиль контакта
+                    this.$set(this.activeThread, 'xmr', this.walletXMR);
+                    this.$set(this.activeThread, 'usdt', this.walletUSDT);
+                    this.save();
+                    
+                    let url = cur==='XMR' ? WalletRouter.generateXmrLink(this.walletXMR) : WalletRouter.generateUsdtLink(this.walletUSDT);
+                    if(url.includes('undefined') || url === 'monero:' || url.includes('address=')) alert('Сначала введи адрес');
+                    else window.location.href = url;
+                },
+
+                // ===== ИСПРАВЛЕННЫЙ handleMsg =====
+                handleMsg(payload, topic) {
+                    try {
+                        const decrypted = cry.resonate(payload, 0); const parts = decrypted.split('|'); const type = parts[0];
+                        
+                        if (type === 'PING') {
+                            const senderId = parts[1]; const pongCode = cry.collapse(`PONG|${this.myId}`, 0);
+                            this.mqtt.send(topic, pongCode); this.log(`[<<] Словлен PING от ${senderId}. Выпущен PONG.`); return;
+                        }
+                        if (type === 'PONG') {
+                            const senderId = parts[1];
+                            if (senderId === this.activeThread?.peerId) { this.sonarStatus = 'online'; if (this.sonarTimer) clearTimeout(this.sonarTimer); this.log(`[<<] Словлен PONG. Цель в сети.`); }
+                            return;
+                        }
+
+                        if (type === 'ACK') {
+                            const ackMsgId = parseInt(parts[2],10);
+                            let targetId = null;
+                            
+                            // ИСПРАВЛЕНИЕ БАГА "ЗАМКА": ID узлов в структуре имеют символ '_', поэтому split('_') 
+                            // рушил парсинг топика. Берем targetId напрямую из расшифрованного пакета ЭХА (senderId)
+                            if (topic.includes('polis108/link/')) { targetId = parts[1]; } 
+                            else if (topic.includes('polis108/group/')) { targetId = topic.replace('polis108/group/',''); }
+                            
+                            this.log(`[<<] Поймано ЭХО Доставки (ID: ${ackMsgId})`);
+
+                            if (targetId && this.messages[targetId]) {
+                                const updatedMsgs = this.messages[targetId].map(m => {
+                                    if (m.id === ackMsgId && m.isMe) {
+                                        return { ...m, status: 3 }; 
+                                    }
+                                    return m;
+                                });
+                                
+                                this.$set(this.messages, targetId, updatedMsgs);
+                                this.log(`[SYS] Сообщение Зеленое. Замок Открыт.`);
+                                
+                                this.checkFieldLock();
+                                this.save();
+                            }
+                            return;
+                        }
+
+                        if (type === 'MSG') {
+                            const senderId = parts[1]; const senderName = parts[2]; const msgId = parseInt(parts[3],10); const text = parts.slice(4).join('|');
+                            if (senderId === this.myId) return; 
+                            
+                            let thread = this.threads.find(t => t.peerId === senderId);
+                            
+                            // Если отправителя нет в нашем списке контактов, мы просто ИГНОРИРУЕМ пакет. 
+                            // Это защита от спама и "невидимых абонентов". Оба должны добавить друг друга.
+                            if (!thread) {
+                                this.log(`[ERR] Блок анти-спама: получен сигнал от неизвестного узла ${senderId}.`);
+                                return;
+                            }
+
+                            if (this.mqttOnline) {
+                                const ackCode = cry.collapse(`ACK|${this.myId}|${msgId}`, 0);
+                                this.mqtt.send(topic, ackCode); 
+                                this.log(`[>>] Авто-ЭХО отбито.`);
+                            }
+
+                            if (this.messages[senderId] && this.messages[senderId].some(m => !m.isMe && m.originalId === msgId)) {
+                                this.log(`[SYS] Дубль сообщения проигнорирован.`); return; 
+                            }
+
+                            const msgObj = { id: Date.now(), originalId: msgId, text: text, isMe: false, time: new Date().toLocaleTimeString().slice(0,5), status: 3, senderName: senderName };
+                            const currentMsgs = this.messages[senderId] || [];
+                            this.$set(this.messages, senderId, [...currentMsgs, msgObj]);
+                            
+                            if (this.activeThread?.peerId !== senderId) { thread.unread = (thread.unread || 0) + 1; }
+                            this.save(); this.scrollBot(); this.log(`[<<] Расшифровано входящее сообщение.`);
+
+                            if (document.hidden && this.settings.notifs) { if (Notification.permission === 'granted') new Notification('Полис', { body: `Сигнал из Эфира` }); }
+                        }
+                    } catch(e) { this.log(`[ERR] Поврежденный пакет`); }
+                },
+
+                checkFieldLock() {
+                    if (!this.activeThread || this.activeThread.type === 'citadel') { this.fieldLocked = false; return; }
+                    const msgs = this.messages[this.activeThread.peerId] || [];
+                    const lastMyMsg = msgs.filter(m => m.isMe).slice(-1)[0];
+                    
+                    if (lastMyMsg && lastMyMsg.status === 2) {
+                        this.fieldLocked = true;
+                    } else {
+                        this.fieldLocked = false;
                     }
                 },
-                copyMyId() { navigator.clipboard.writeText(this.myId); alert('ID скопирован'); },
-                deleteMsg(id) { 
-                    this.messages[this.activeThread.peerId] = this.messages[this.activeThread.peerId].filter(x=>x.id!==id); 
-                    this.checkLock(); this.save(); 
+                
+                scrollBot() { this.$nextTick(()=>{ const b = this.$refs.msgBox; if(b) b.scrollTop = b.scrollHeight + 100; }); },
+
+                async reqGyro() {
+                    if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+                        try { const res = await DeviceMotionEvent.requestPermission(); if (res === 'granted') alert('Гироскоп активен'); } catch(e) {}
+                    } else alert('Доступ уже открыт');
+                },
+                reqNotif() {
+                    if (Notification.permission === 'default') Notification.requestPermission().then(p => { if(p==='granted') alert('Уведомления ВКЛ'); });
+                    else alert(Notification.permission === 'granted' ? 'Уже ВКЛ' : 'Включи в настройках телефона');
                 }
             }
         });
