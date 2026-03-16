@@ -93,15 +93,17 @@
         .status-2 { background: #ea0038; box-shadow: 0 0 6px #ea0038;} 
         .status-3 { background: #00a884; box-shadow: 0 0 6px #00a884;} 
         
-        .input-area { padding: 8px 16px calc(env(safe-area-inset-bottom) + 8px); background: #202c33; display: flex; gap: 8px; align-items: center; flex-shrink: 0; border-top: 1px solid #2d3f4b; margin: 0;}
-        .input-wrapper { flex: 1; position: relative; display: flex; align-items: center; }
-        .input-wrapper input { width: 100%; background: #2a3942; border: none; color: #fff; padding: 0 46px 0 16px; border-radius: 24px; font-size: 16px; outline: none; height: 44px; margin: 0;}
+        .input-area { padding: 8px 16px calc(env(safe-area-inset-bottom) + 8px); background: #202c33; display: flex; gap: 8px; align-items: flex-end; flex-shrink: 0; border-top: 1px solid #2d3f4b; margin: 0;}
+        .input-wrapper { flex: 1; position: relative; display: flex; align-items: center; margin-bottom: 2px;}
+        .input-wrapper input { width: 100%; background: #2a3942; border: none; color: #fff; padding: 0 46px 0 16px; border-radius: 24px; font-size: 16px; outline: none; height: 42px; margin: 0;}
         .char-count { position: absolute; right: 14px; font-size: 10px; color: #8f9ca3; pointer-events: none; font-family: monospace;}
         
-        .action-btns { display: flex; gap: 8px; }
-        .action-btn { background: #00a884; color: #fff; border: none; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; }
-        .cipher-btn { background: transparent; border: 1px solid #00a884; color: #00a884; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; }
-        .locked-indicator { flex:1; background: #111b21; border: 1px dashed #ea0038; border-radius: 24px; color: #ea0038; display: flex; align-items: center; justify-content: center; height: 44px; font-size: 13px; font-weight:bold; letter-spacing: 1px;}
+        /* Сетка кнопок 3x2 */
+        .action-btns { display: grid; grid-template-columns: repeat(3, 40px); gap: 6px; }
+        .action-btn { background: #00a884; color: #fff; border: none; width: 100%; height: 40px; border-radius: 50%; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; }
+        .cipher-btn { background: transparent; border: 1px solid #00a884; color: #00a884; width: 100%; height: 40px; border-radius: 50%; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; transition: 0.2s;}
+        
+        .locked-indicator { flex:1; background: #111b21; border: 1px dashed #ea0038; border-radius: 24px; color: #ea0038; display: flex; align-items: center; justify-content: center; height: 44px; margin-bottom:2px; font-size: 12px; font-weight:bold; letter-spacing: 1px;}
         
         .modal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); z-index: 50; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(3px); padding: 20px; }
         .modal-content { background: #111b21; padding: 24px; border-radius: 16px; width: 100%; max-width: 320px; display: flex; flex-direction: column; gap: 16px; border: 1px solid #2d3f4b; }
@@ -240,9 +242,10 @@
                         </div>
                     </template>
                 </div>
+                
                 <div class="input-area" v-if="activeThread && activeThread.type !== 'citadel'">
                     <template v-if="fieldLocked">
-                        <div class="locked-indicator">⏳ Капсула в орбите. (Ждем ЭХО)</div>
+                        <div class="locked-indicator">⏳ Капсула в орбите (Ждем ЭХО)</div>
                     </template>
                     <template v-else>
                         <div class="input-wrapper">
@@ -251,16 +254,15 @@
                         </div>
                         <div class="action-btns">
                             <template v-if="inputMode === 'text'">
-                                <button class="cipher-btn" @click="copyCipher" title="Скопировать шифр">⧉</button>
-                                <button class="action-btn" @click="sendMsg" title="Выстрел в Эфир">➤</button>
-                                <!-- НОВЫЕ КНОПКИ ФИЗИЧЕСКОГО УРОВНЯ -->
                                 <button class="cipher-btn" @click="sendAcoustic" title="Звуком">🔊</button>
                                 <button class="cipher-btn" @click="sendOptical" title="Светом">💡</button>
+                                <button class="cipher-btn" @click="toggleAcousticRec" :style="isListeningAc ? 'color:#ea0038; border-color:#ea0038; background:rgba(234,0,56,0.1);':''" title="Слушать">🎙</button>
+                                <button class="cipher-btn" @click="copyCipher" title="Скопировать шифр">⧉</button>
                                 <button class="cipher-btn" @click="showWallet=true" title="Финансы">💰</button>
-                                <button class="cipher-btn" @click="toggleAcousticRec" :style="isListeningAc ? 'color:#ea0038; border-color:#ea0038':''" title="Слушать звук">🎙</button>
+                                <button class="action-btn" @click="sendMsg" title="Выстрел в Эфир">➤</button>
                             </template>
                             <template v-else-if="inputMode === 'cipher'">
-                                <button class="action-btn" style="width: 100%; border-radius: 24px;" @click="decryptManual">📥 РАСШИФРОВАТЬ</button>
+                                <button class="action-btn" style="grid-column: span 3; width: 100%; border-radius: 20px; font-size: 20px; font-weight:bold;" @click="decryptManual">📥 РАСШИФРОВАТЬ</button>
                             </template>
                         </div>
                     </template>
@@ -269,7 +271,7 @@
                     <div class="input-wrapper">
                         <input v-model="inputText" @keyup.enter.prevent="saveToCitadel" placeholder="Зашифровать заметку..." autocomplete="off">
                     </div>
-                    <button class="action-btn" @click="saveToCitadel">💾</button>
+                    <button class="action-btn" style="width: 44px; height: 44px; border-radius: 50%; display: flex;" @click="saveToCitadel">💾</button>
                 </div>
             </div>
             
@@ -327,14 +329,14 @@
                 <div class="btn-row" style="margin-top: 8px;"><button class="btn-confirm" @click="clickSound(); save(); showSettings=false" style="width:100%;">Закрыть</button></div>
             </div>
         </div>
-        <!-- НОВАЯ МОДАЛКА КОШЕЛЬКА -->
-        <div class="modal" v-if="showWallet" @click.self="showWallet=false">
+        
+        <div class="modal" v-if="showWallet" @click.self="syncWallet(); showWallet=false">
             <div class="modal-content">
                 <h3 style="color:#00a884;">Диспетчер Кошельков</h3>
-                <input v-model="walletXMR" placeholder="Его XMR адрес (начинается на 4/8)" @blur="save">
-                <button class="btn-confirm" style="width:100%; margin-top:4px;" @click="pay('XMR')">Оплатить XMR</button>
+                <input v-model="walletXMR" placeholder="Его XMR адрес (начинается на 4 или 8)" @blur="syncWallet">
+                <button class="btn-confirm" style="width:100%; margin-top:4px;" @click="pay('XMR')">Оплатить XMR (Deep Link)</button>
                 
-                <input v-model="walletUSDT" placeholder="Его USDT TRC20 адрес" style="margin-top:12px;" @blur="save">
+                <input v-model="walletUSDT" placeholder="Его USDT TRC20 адрес (начинается на T)" style="margin-top:12px;" @blur="syncWallet">
                 <button class="btn-confirm" style="width:100%; margin-top:4px;" @click="pay('USDT')">Оплатить USDT (TrustWallet)</button>
             </div>
         </div>
@@ -459,15 +461,13 @@
         }
 
         // =====================================================================
-        // [УЗЕЛ 05: ФИЗИКА ЗЕМЛИ И ФИНАНСОВ] (Добавление к Версии 4.0)
+        // [УЗЕЛ 05: ФИЗИКА ЗЕМЛИ И ФИНАНСОВ]
         // =====================================================================
         class AcousticModem {
             constructor() {
                 this.freqs = [600, 800, 1000, 1200, 1400, 1600, 1800, 2000, 2200, 2400];
                 this.preamble = 2800; this.dur = 0.15; this.ctx = null;
-                this.isListening = false;
-                this.stream = null;
-                this.onDataCallback = null;
+                this.isListening = false; this.stream = null; this.onDataCallback = null;
             }
             send(code108) {
                 this.ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -479,7 +479,7 @@
             _tone(f, t) {
                 const o = this.ctx.createOscillator(); const g = this.ctx.createGain();
                 o.frequency.value = f;
-                g.gain.setValueAtTime(0.5, t); g.gain.setTargetAtTime(0.001, t + this.dur - 0.02, 0.01);
+                g.gain.setValueAtTime(0.5, t); g.gain.setTargetAtTime(0.001, t + this.dur - 0.02, 0.015);
                 o.connect(g); g.connect(this.ctx.destination);
                 o.start(t); o.stop(t+this.dur);
             }
@@ -491,7 +491,7 @@
                     this.an = this.ctx.createAnalyser(); this.an.fftSize = 2048;
                     src.connect(this.an); this.isListening = true; this.buffer = '';
                     this._loop();
-                });
+                }).catch(e => alert("Доступ к микрофону закрыт: " + e));
             }
             _loop() {
                 if(!this.isListening) return;
@@ -510,8 +510,7 @@
                 if(this.buffer.length === 108) { 
                     if(this.onDataCallback) this.onDataCallback(this.buffer); 
                     this.stop(); 
-                } else 
-                    requestAnimationFrame(()=>this._loop());
+                } else requestAnimationFrame(()=>this._loop());
             }
             stop() {
                 this.isListening = false;
@@ -519,6 +518,7 @@
                 if(this.ctx) this.ctx.close();
             }
         }
+        
         class OpticalLink {
             constructor() {
                 this.colors = ['#000', '#f00', '#0f0', '#00f', '#ff0', '#0ff', '#f0f', '#fff', '#888', '#f80'];
@@ -538,6 +538,7 @@
                 this.cvs.style.display = 'none';
             }
         }
+        
         const WalletRouter = {
             generateXmrLink: (addr, amt) => `monero:${addr}${amt?`?tx_amount=${amt}`:''}`,
             generateUsdtLink: (addr, amt) => `trust://send?asset=c195&address=${addr}&amount=${amt||0}`
@@ -547,7 +548,7 @@
         const checkPWA = ()=> window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone || document.referrer.includes('android-app://');
 
         // =====================================================================
-        // [УЗЕЛ 04: ЯДРО ЛОГИКИ VUE]  (с добавленными новыми методами и полями)
+        // [УЗЕЛ 04: ЯДРО ЛОГИКИ VUE]
         // =====================================================================
         new Vue({
             el: '#app',
@@ -559,7 +560,7 @@
                 activeThread: null, inputText: '', threads: [], messages: {}, outbox: [],
                 sysLogs: [], showLogsPanel: false, settings: { sound: true, notifs: true },
                 sonarStatus: '', sonarTimer: null, fieldLocked: false, mqttReady: false,
-                // Новые поля для кошелька и модемов
+                // Модуль Земли
                 showWallet: false, walletXMR: '', walletUSDT: '',
                 modem: new AcousticModem(), optic: new OpticalLink(), isListeningAc: false
             },
@@ -606,7 +607,7 @@
                     this.checkFieldLock(); 
                     this.sonarStatus = ''; 
                     // Подгружаем адреса кошельков из выбранного треда
-                    if (this.activeThread) {
+                    if (this.activeThread && this.activeThread.type !== 'citadel') {
                         this.walletXMR = this.activeThread.xmr || '';
                         this.walletUSDT = this.activeThread.usdt || '';
                     }
@@ -699,7 +700,15 @@
                         this.messages = { citadel: [] }; this.outbox = [];
                         this.log('[SYS] Новая Личность');
                     } else {
-                        this.threads = d.t || []; this.messages = d.m || {}; this.myId = d.myId; this.outbox = d.o || []; this.myName = d.n || '';
+                        // Патч: дописываем старым базам новые поля xmr/usdt при загрузке
+                        this.threads = (d.t || []).map(th => {
+                            if(th.type !== 'citadel') {
+                                if(typeof th.xmr === 'undefined') th.xmr = '';
+                                if(typeof th.usdt === 'undefined') th.usdt = '';
+                            }
+                            return th;
+                        });
+                        this.messages = d.m || {}; this.myId = d.myId; this.outbox = d.o || []; this.myName = d.n || '';
                         if (!this.threads.some(t => t.peerId === 'citadel')) {
                             this.threads.unshift({ name: 'Мой Чертог', peerId: 'citadel', type: 'citadel', unread: 0 });
                             this.$set(this.messages, 'citadel', []);
@@ -845,7 +854,7 @@
 
                         let thread = this.threads.find(t => t.peerId === senderId && t.type === 'personal');
                         if (!thread) {
-                            thread = { name: senderName || 'Тайный связной', peerId: senderId, type: 'personal', unread: 0 };
+                            thread = { name: senderName || 'Тайный связной', peerId: senderId, type: 'personal', unread: 0, xmr: '', usdt: '' };
                             this.threads.unshift(thread); 
                             this.$set(this.messages, senderId, []);
                         }
@@ -872,7 +881,7 @@
                     this.inputText = ''; this.scrollBot(); this.save();
                 },
 
-                // ===== НОВЫЕ МЕТОДЫ ДЛЯ ФИЗИЧЕСКИХ КАНАЛОВ И КОШЕЛЬКА =====
+                // ===== НОВЫЕ МЕТОДЫ =====
                 sendAcoustic() {
                     if(!this.inputText || this.fieldLocked) return;
                     const msgId = Date.now();
@@ -891,32 +900,28 @@
                 },
                 toggleAcousticRec() {
                     if(this.isListeningAc) { 
-                        this.modem.stop(); 
-                        this.isListeningAc = false; 
-                        this.log(`[SYS] Звуковой сонар отключен`); 
+                        this.modem.stop(); this.isListeningAc = false; this.log(`[SYS] Звуковой сонар отключен`); 
                     } else {
-                        this.isListeningAc = true; 
-                        this.log(`[SYS] Сонар слушает звуковой эфир...`);
+                        this.isListeningAc = true; this.log(`[SYS] Сонар слушает звуковой эфир...`);
                         this.modem.listen((code) => {
-                            this.inputText = code; // Вставляем в поле для расшифровки
-                            // this.inputMode = 'cipher';  // определится само
-                            this.decryptManual(); // Вызываем старый метод расшифровки
+                            this.inputText = code; 
+                            this.decryptManual(); 
                             this.isListeningAc = false;
                         });
                     }
                 },
-                pay(cur) {
-                    // Сохраним в профиль контакта
+                syncWallet() {
                     this.$set(this.activeThread, 'xmr', this.walletXMR);
                     this.$set(this.activeThread, 'usdt', this.walletUSDT);
                     this.save();
-                    
+                },
+                pay(cur) {
+                    this.syncWallet();
                     let url = cur==='XMR' ? WalletRouter.generateXmrLink(this.walletXMR) : WalletRouter.generateUsdtLink(this.walletUSDT);
                     if(url.includes('undefined') || url === 'monero:' || url.includes('address=')) alert('Сначала введи адрес');
                     else window.location.href = url;
                 },
 
-                // ===== ИСПРАВЛЕННЫЙ handleMsg =====
                 handleMsg(payload, topic) {
                     try {
                         const decrypted = cry.resonate(payload, 0); const parts = decrypted.split('|'); const type = parts[0];
@@ -932,29 +937,18 @@
                         }
 
                         if (type === 'ACK') {
-                            const ackMsgId = parseInt(parts[2],10);
-                            let targetId = null;
-                            
-                            // ИСПРАВЛЕНИЕ БАГА "ЗАМКА": ID узлов в структуре имеют символ '_', поэтому split('_') 
-                            // рушил парсинг топика. Берем targetId напрямую из расшифрованного пакета ЭХА (senderId)
+                            const ackMsgId = parseInt(parts[2],10); let targetId = null;
                             if (topic.includes('polis108/link/')) { targetId = parts[1]; } 
                             else if (topic.includes('polis108/group/')) { targetId = topic.replace('polis108/group/',''); }
-                            
                             this.log(`[<<] Поймано ЭХО Доставки (ID: ${ackMsgId})`);
-
                             if (targetId && this.messages[targetId]) {
                                 const updatedMsgs = this.messages[targetId].map(m => {
-                                    if (m.id === ackMsgId && m.isMe) {
-                                        return { ...m, status: 3 }; 
-                                    }
+                                    if (m.id === ackMsgId && m.isMe) { return { ...m, status: 3 }; }
                                     return m;
                                 });
-                                
                                 this.$set(this.messages, targetId, updatedMsgs);
                                 this.log(`[SYS] Сообщение Зеленое. Замок Открыт.`);
-                                
-                                this.checkFieldLock();
-                                this.save();
+                                this.checkFieldLock(); this.save();
                             }
                             return;
                         }
@@ -964,23 +958,14 @@
                             if (senderId === this.myId) return; 
                             
                             let thread = this.threads.find(t => t.peerId === senderId);
-                            
-                            // Если отправителя нет в нашем списке контактов, мы просто ИГНОРИРУЕМ пакет. 
-                            // Это защита от спама и "невидимых абонентов". Оба должны добавить друг друга.
-                            if (!thread) {
-                                this.log(`[ERR] Блок анти-спама: получен сигнал от неизвестного узла ${senderId}.`);
-                                return;
-                            }
+                            if (!thread) { this.log(`[ERR] Блок анти-спама: получен сигнал от неизвестного узла ${senderId}.`); return; }
 
                             if (this.mqttOnline) {
                                 const ackCode = cry.collapse(`ACK|${this.myId}|${msgId}`, 0);
-                                this.mqtt.send(topic, ackCode); 
-                                this.log(`[>>] Авто-ЭХО отбито.`);
+                                this.mqtt.send(topic, ackCode); this.log(`[>>] Авто-ЭХО отбито.`);
                             }
 
-                            if (this.messages[senderId] && this.messages[senderId].some(m => !m.isMe && m.originalId === msgId)) {
-                                this.log(`[SYS] Дубль сообщения проигнорирован.`); return; 
-                            }
+                            if (this.messages[senderId] && this.messages[senderId].some(m => !m.isMe && m.originalId === msgId)) { return; }
 
                             const msgObj = { id: Date.now(), originalId: msgId, text: text, isMe: false, time: new Date().toLocaleTimeString().slice(0,5), status: 3, senderName: senderName };
                             const currentMsgs = this.messages[senderId] || [];
@@ -998,12 +983,7 @@
                     if (!this.activeThread || this.activeThread.type === 'citadel') { this.fieldLocked = false; return; }
                     const msgs = this.messages[this.activeThread.peerId] || [];
                     const lastMyMsg = msgs.filter(m => m.isMe).slice(-1)[0];
-                    
-                    if (lastMyMsg && lastMyMsg.status === 2) {
-                        this.fieldLocked = true;
-                    } else {
-                        this.fieldLocked = false;
-                    }
+                    if (lastMyMsg && lastMyMsg.status === 2) { this.fieldLocked = true; } else { this.fieldLocked = false; }
                 },
                 
                 scrollBot() { this.$nextTick(()=>{ const b = this.$refs.msgBox; if(b) b.scrollTop = b.scrollHeight + 100; }); },
@@ -1022,3 +1002,4 @@
     </script>
 </body>
 </html>
+
