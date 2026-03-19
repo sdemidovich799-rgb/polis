@@ -171,7 +171,7 @@
             <div class="header" v-if="!activeThread">
                 <div class="header-left" @dblclick="showLogsPanel = true">
                     <div :class="['monad', mqttOnline ? 'pulse' : '']"><div class="monad-dot"></div></div>
-                    <button class="id-badge" @click="clickSound(); showIdCopyModal = true">МАТРИЦА 108</button>
+                    <button class="id-badge" @click="clickSound(); showIdCopyModal = true">ID</button>
                 </div>
                 <button class="header-btn" style="color: #00a884;" @click="clickSound(); showSettings = true">⚙️</button>
             </div>
@@ -332,6 +332,22 @@
             </div>
         </div>
     </div>
+<!-- МОДАЛКА НАСТРОЕК -->
+<div class="modal" v-if="showSettings" @click.self="clickSound(); save(); showSettings=false">
+    <div class="modal-content">
+        <h3 style="color:#00a884; margin-bottom: 16px;">Щит (Настройки)</h3>
+        <div style="margin-bottom: 16px;">
+            <label style="color:#8f9ca3; font-size:12px; display:block; margin-bottom:4px;">Моё имя (Для Групп):</label>
+            <input v-model="myName" placeholder="Аноним" style="width:100%; box-sizing:border-box;" @blur="save">
+        </div>
+        <button class="settings-btn" @click="reqGyro"><span>🧭 Гироскоп (Сброс рывком)</span> <span style="color:#00a884;">Акт</span></button>
+        <button class="settings-btn" @click="reqNotif"><span>🔔 Уведомления в фоне</span> <span style="color:#00a884;">Акт</span></button>
+        <button style="background: #111b21; font-size: 14px; padding: 12px; border-radius: 8px; border: 1px solid #ea0038; text-align: center; cursor: pointer; width: 100%; margin-top: 8px;" @click="wipeIdentity">
+            <span style="color:#ea0038; font-weight:bold;">🗑 Сжечь Личность</span>
+        </button>
+        <div class="btn-row" style="margin-top: 8px;"><button class="btn-confirm" @click="clickSound(); save(); showSettings=false" style="width:100%;">Закрыть</button></div>
+    </div>
+</div>
     <script>
         // =====================================================================
         // [УЗЕЛ 01: КРИСТАЛЛ 108]
@@ -770,6 +786,18 @@
                 saveToCitadel() { if (!this.inputText) return; this.$set(this.messages, 'citadel', [...(this.messages.citadel || []), { id: Date.now(), text: this.inputText.trim(), isMe: true, time: new Date().toLocaleTimeString().slice(0,5), status: 0 }]); this.inputText = ''; this.scrollBot(); this.save(); },
                 checkFieldLock() { if (!this.activeThread || this.activeThread.type === 'citadel') { this.fieldLocked = false; return; } const myL = (this.messages[this.activeThread.peerId] || []).filter(m => m.isMe).slice(-1)[0]; this.fieldLocked = myL && myL.status === 2; },
                 scrollBot() { this.$nextTick(()=>{ const b = this.$refs.msgBox; if(b) b.scrollTop = b.scrollHeight + 100; }); },
+reqGyro() {
+    if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+        try { DeviceMotionEvent.requestPermission().then(res => { if (res === 'granted') alert('Гироскоп активен'); }); } catch(e) {}
+    } else alert('Доступ уже открыт');
+},
+reqNotif() {
+    if (Notification.permission === 'default') Notification.requestPermission().then(p => { if(p==='granted') alert('Уведомления ВКЛ'); });
+    else alert(Notification.permission === 'granted' ? 'Уже ВКЛ' : 'Включи в настройках телефона');
+},
+wipeIdentity() { 
+    if (confirm('🔥 УНИЧТОЖИТЬ ЛИЧНОСТЬ И БАЗУ?')) { sg.wipe(); this.lockPolis(); } 
+},
             }
         });
     </script>
