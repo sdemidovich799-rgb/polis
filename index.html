@@ -754,7 +754,10 @@
                     if(this.isListeningAc) { this.modem.stop(); this.isListeningAc = false; this.log(`[SYS] Сонар отключен`); } 
                     else {
                         this.isListeningAc = true; this.log(`[SYS] Сонар слушает звуковой эфир... (Нужна тишина)`);
-                        this.modem.listen((code) => { this.inputText = code; this.isListeningAc = false; });
+                        this.modem.listen((code) => { 
+                            this.inputText = code; 
+                            this.isListeningAc = false; 
+                        });
                     }
                 },
 
@@ -811,7 +814,27 @@
                 },
 
                 saveToCitadel() { if (!this.inputText) return; this.$set(this.messages, 'citadel', [...(this.messages.citadel || []), { id: Date.now(), text: this.inputText.trim(), isMe: true, time: new Date().toLocaleTimeString().slice(0,5), status: 0 }]); this.inputText = ''; this.scrollBot(); this.save(); },
-                checkFieldLock() { if (!this.activeThread || this.activeThread.type === 'citadel') { this.fieldLocked = false; return; } const myL = (this.messages[this.activeThread.peerId] || []).filter(m => m.isMe).slice(-1)[0]; this.fieldLocked = myL && myL.status === 2; },
+                
+                // ===== ИСПРАВЛЕННЫЙ БЕЗОПАСНЫЙ МЕТОД checkFieldLock =====
+                checkFieldLock() { 
+                    if (!this.activeThread || this.activeThread.type === 'citadel') { 
+                        this.fieldLocked = false; 
+                        return; 
+                    } 
+                    const threadMessages = this.messages[this.activeThread.peerId];
+                    if (!threadMessages || threadMessages.length === 0) {
+                        this.fieldLocked = false;
+                        return;
+                    }
+                    const myMsgs = threadMessages.filter(m => m.isMe);
+                    if (myMsgs.length === 0) {
+                        this.fieldLocked = false;
+                        return;
+                    }
+                    const lastMsg = myMsgs[myMsgs.length - 1];
+                    this.fieldLocked = (lastMsg.status === 2); 
+                },
+                
                 scrollBot() { 
                     if (!this.$refs.msgBox) return;
                     this.$nextTick(()=>{ const b = this.$refs.msgBox; if(b) b.scrollTop = b.scrollHeight + 100; }); 
