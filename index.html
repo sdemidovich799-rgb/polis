@@ -347,7 +347,7 @@
             </div>
         </div>
     </div>
-    <script>
+<script>
         // =====================================================================
         // [УЗЕЛ 01: КРИСТАЛЛ 108]
         // =====================================================================
@@ -518,7 +518,6 @@
                 sonarStatus: '', sonarTimer: null, fieldLocked: false, mqttReady: false,
                 modem: new AcousticModem(), optic: new OpticalLink(), isListeningAc: false,
                 
-                // Новые переменные Трояна (Такт 1)
                 showActionSheet: false, longPressTimer: null, longPressTriggered: false,
                 showContactProfile: false, contactProfileThread: null
             },
@@ -540,12 +539,11 @@
                     
                     if (val !== clean) { this.inputText = clean; this.clickSound(true); }
                     
-                    // АВТО-РАСШИФРОВКА БУФЕРА
                     if (/^\d{108}$/.test(clean)) {
                         const cipher = clean;
-                        this.inputText = ''; // Очищаем поле немедленно
+                        this.inputText = ''; 
                         this.$nextTick(() => {
-                            this.inputText = cipher; // Временно возвращаем для декодера
+                            this.inputText = cipher; 
                             this.decryptManual();
                         });
                     }
@@ -641,7 +639,6 @@
                     if (this.mqtt) this.mqtt.connect(this.getAllTopics()); 
                     this.showAddModal = false; this.openThread(newTh);
                 },
-                // ===== ЛОГИКА ДОЛГОГО ТАПА (ACTION SHEET) =====
                 longPressStart(e) {
                     this.longPressTriggered = false;
                     this.longPressTimer = setTimeout(() => {
@@ -655,10 +652,9 @@
                 },
                 longPressCancel(e) { clearTimeout(this.longPressTimer); this.longPressTriggered = false; },
                 closeActionSheet() { this.showActionSheet = false; },
-                // ===== ПРОФИЛЬ УЗЛА И КОШЕЛЕК (С ЗАЩИТОЙ IOS) =====
                 openContactProfile(thread) { this.contactProfileThread = thread; this.showContactProfile = true; },
                 payFromProfile(currency) {
-                    this.save(); // Сохраняем адреса перед вызовом
+                    this.save(); 
                     let url = currency === 'XMR' ? WalletRouter.generateXmrLink(this.contactProfileThread.xmr)  : WalletRouter.generateUsdtLink(this.contactProfileThread.usdt);
                     if (url.includes('undefined') || url === 'monero:' || url.includes('address=')) { alert('Сначала введи адрес кошелька'); return; }
                     
@@ -673,7 +669,6 @@
                         window.removeEventListener('blur', onBlur);
                     });
                 },
-                // ===== ОТПРАВКА И ЭФИР =====
                 sendMsg() {
                     if (!this.inputText || !this.activeThread || this.activeThread.type === 'citadel' || this.fieldLocked) return;
                     if (!this.mqttReady) { alert('Радиоканал еще греется...'); return; }
@@ -732,7 +727,6 @@
                         const msgObj = { id: Date.now(), originalId: originalMsgId, text: text, isMe: false, time: new Date().toLocaleTimeString().slice(0,5), status: 3, senderName: senderName };
                         this.$set(this.messages, senderId, [...(this.messages[senderId] || []), msgObj]);
                         
-                        // АВТО-ЭХО ДЛЯ БУФЕРА
                         if (this.mqttOnline) { this.mqtt.send(`polis108/link/${[this.myId, senderId].sort().join('_')}`, cry.collapse(`ACK|${this.myId}|${originalMsgId}`, 0)); }
                         this.inputText = ''; this.scrollBot(); this.save();
                     } catch(e) { this.log(`[ERR] Сбой дешифратора: ${e.message}`); this.inputText = '';}
@@ -767,6 +761,7 @@
                 checkFieldLock() { if (!this.activeThread || this.activeThread.type === 'citadel') { this.fieldLocked = false; return; } const myL = (this.messages[this.activeThread.peerId] || []).filter(m => m.isMe).slice(-1)[0]; this.fieldLocked = myL && myL.status === 2; },
                 scrollBot() { this.$nextTick(()=>{ const b = this.$refs.msgBox; if(b) b.scrollTop = b.scrollHeight + 100; }); },
                 
+                // ИСПРАВЛЕНИЕ 3: МЕТОДЫ ДОБАВЛЕНЫ ОБРАТНО, ЗАПЯТЫЕ СОБЛЮДЕНЫ
                 reqGyro() {
                     if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
                         try { DeviceMotionEvent.requestPermission().then(res => { if (res === 'granted') alert('Гироскоп активен'); }); } catch(e) {}
