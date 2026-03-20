@@ -797,9 +797,25 @@ reqNotif() {
 },
 wipeIdentity() { 
     if (confirm('🔥 УНИЧТОЖИТЬ ЛИЧНОСТЬ И БАЗУ?')) { sg.wipe(); this.lockPolis(); } 
-}
+},
             }
         });
+<!-- МОДАЛКА НАСТРОЕК -->
+<div class="modal" v-if="showSettings" @click.self="clickSound(); save(); showSettings=false">
+    <div class="modal-content">
+        <h3 style="color:#00a884; margin-bottom: 16px;">Щит (Настройки)</h3>
+        <div style="margin-bottom: 16px;">
+            <label style="color:#8f9ca3; font-size:12px; display:block; margin-bottom:4px;">Моё имя (Для Групп):</label>
+            <input v-model="myName" placeholder="Аноним" style="width:100%; box-sizing:border-box;" @blur="save">
+        </div>
+        <button class="settings-btn" @click="reqGyro"><span>🧭 Гироскоп (Сброс рывком)</span> <span style="color:#00a884;">Акт</span></button>
+        <button class="settings-btn" @click="reqNotif"><span>🔔 Уведомления в фоне</span> <span style="color:#00a884;">Акт</span></button>
+        <button style="background: #111b21; font-size: 14px; padding: 12px; border-radius: 8px; border: 1px solid #ea0038; text-align: center; cursor: pointer; width: 100%; margin-top: 8px;" @click="wipeIdentity">
+            <span style="color:#ea0038; font-weight:bold;">🗑 Сжечь Личность</span>
+        </button>
+        <div class="btn-row" style="margin-top: 8px;"><button class="btn-confirm" @click="clickSound(); save(); showSettings=false" style="width:100%;">Закрыть</button></div>
+    </div>
+</div>
     </script>
 </body>
 </html>
