@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ru" style="background-color: #0b141a;">
 <head>
@@ -46,9 +45,6 @@
         .monad.pulse { border-color: rgba(0, 168, 132, 0.3); } .monad.pulse .monad-dot { background: #00a884; box-shadow: 0 0 12px #00a884; animation: pulseDot 2s infinite alternate; }
         @keyframes pulseDot { 0% { transform: scale(0.8); } 100% { transform: scale(1.4); } }
         
-        .pulse-btn { animation: pulseBtn 2s infinite; }
-        @keyframes pulseBtn { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 168, 132, 0.7); } 50% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(0, 168, 132, 0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 168, 132, 0); } }
-        
         .header { padding: calc(env(safe-area-inset-top) + 12px) 16px 12px; background: #202c33; border-bottom: 1px solid #2d3f4b; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; z-index: 20; }
         .header-left { display: flex; align-items: center; gap: 12px; cursor: pointer; }
         .id-badge { background: transparent; border: 1px solid #00a884; color: #00a884; padding: 4px 12px; border-radius: 16px; font-weight: bold; font-size: 12px; cursor: pointer; }
@@ -75,36 +71,30 @@
         .chat-header { padding: calc(env(safe-area-inset-top) + 8px) 16px 8px; background: #202c33; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #2d3f4b; flex-shrink: 0; }
         
         .sonar-btn { background: transparent; border: 1px solid #00a884; border-radius: 50%; width: 32px; height: 32px; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.3s;}
-        .sonar-btn.sonar-idle { color: #00a884; border-color: #00a884; }
-        .sonar-btn.sonar-ping { color: #ffcc00; border-color: #ffcc00; box-shadow: 0 0 8px rgba(255, 204, 0, 0.5); }
-        .sonar-btn.sonar-on { color: #00a884; border-color: #00a884; background: rgba(0,168,132,0.2); }
+        .sonar-btn.sonar-on { background: rgba(0,168,132,0.2); }
         .sonar-btn.sonar-off { color: #ea0038; border-color: #ea0038; opacity: 0.7;}
         
         .messages-box { flex: 1; overflow-y: auto; padding: 16px 12px; display: flex; flex-direction: column; gap: 8px; -webkit-overflow-scrolling: touch; }
         .message-row { display: flex; flex-direction: column; max-width: 85%; }
         .message { padding: 8px 12px; border-radius: 16px; font-size: 15px; line-height: 1.35; word-wrap: break-word; white-space: pre-wrap; }
-        .my-message-row { align-self: flex-end; }
-        .other-message-row { align-self: flex-start; }
+        .my-message-row { align-self: flex-end; } .other-message-row { align-self: flex-start; }
         .my-message { background: #005c4b; color: #e9edef; border-bottom-right-radius: 4px; }
         .other-message { background: #202c33; color: #e9edef; border-top-left-radius: 4px; }
-        
         .msg-footer { display: flex; align-items: center; justify-content: flex-end; gap: 6px; margin-top: 2px; font-size: 10px; color: rgba(255,255,255,0.5); }
-        
         .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
-        .status-0 { background: #8f9ca3; } 
-        .status-1 { background: #b38b5a; box-shadow: 0 0 6px #b38b5a;} 
-        .status-2 { background: #ea0038; box-shadow: 0 0 6px #ea0038;} 
-        .status-3 { background: #00a884; box-shadow: 0 0 6px #00a884;} 
+        .status-0 { background: #8f9ca3; } .status-2 { background: #ea0038; box-shadow: 0 0 6px #ea0038;} .status-3 { background: #00a884; box-shadow: 0 0 6px #00a884;} 
         
         .input-area { padding: 8px 16px calc(env(safe-area-inset-bottom) + 8px); background: #202c33; display: flex; gap: 8px; align-items: flex-end; flex-shrink: 0; border-top: 1px solid #2d3f4b; margin: 0;}
         .input-wrapper { flex: 1; position: relative; display: flex; align-items: center; margin-bottom: 2px;}
         .input-wrapper input { width: 100%; background: #2a3942; border: none; color: #fff; padding: 0 46px 0 16px; border-radius: 24px; font-size: 16px; outline: none; height: 42px; margin: 0;}
         .char-count { position: absolute; right: 14px; font-size: 10px; color: #8f9ca3; pointer-events: none; font-family: monospace;}
         
+        /* НОВЫЙ ДИЗАЙН КНОПКИ (ДОЛГИЙ ТАП) */
         .send-btn { width: 44px; height: 44px; border-radius: 50%; background: #00a884; border: none; color: #111b21; font-size: 20px; font-weight: bold; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; transition: 0.2s; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
         .send-btn:active { transform: scale(0.92); opacity: 0.8; }
         .locked-indicator { flex:1; background: #111b21; border: 1px dashed #ea0038; border-radius: 24px; color: #ea0038; display: flex; align-items: center; justify-content: center; height: 44px; margin-bottom:2px; font-size: 12px; font-weight:bold; letter-spacing: 1px;}
         
+        /* ВСПЛЫВАЮЩЕЕ МЕНЮ (ACTION SHEET) */
         .action-sheet-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; display: flex; align-items: flex-end; justify-content: center; visibility: hidden; opacity: 0; transition: 0.2s; backdrop-filter: blur(2px);}
         .action-sheet-overlay.active { visibility: visible; opacity: 1; }
         .action-sheet { background: #111b21; border: 1px solid #2d3f4b; border-bottom: none; width: 100%; max-width: 600px; border-top-left-radius: 20px; border-top-right-radius: 20px; padding: 24px 16px calc(env(safe-area-inset-bottom) + 16px); transform: translateY(100%); transition: 0.3s cubic-bezier(0.3,0,0,1); }
@@ -115,6 +105,7 @@
         .action-sheet-item span:nth-child(2) { margin-left: 12px; flex:1;}
         .action-sheet-cancel { background: #202c33; color: #ea0038; justify-content: center; margin-top: 16px; }
         
+        /* МОДАЛКИ И ПРОФИЛЬ */
         .modal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); z-index: 50; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(3px); padding: 20px; }
         .modal-content { background: #111b21; padding: 24px; border-radius: 16px; width: 100%; max-width: 320px; display: flex; flex-direction: column; gap: 16px; border: 1px solid #2d3f4b; }
         .modal-content input { padding: 14px; border-radius: 8px; border: 1px solid #2d3f4b; background: #202c33; color: #e9edef; outline: none; font-size: 15px;}
@@ -129,19 +120,18 @@
         .logs-overlay { position: absolute; inset:0; background: rgba(0,0,0,0.95); z-index: 200; display: flex; flex-direction: column; padding: calc(env(safe-area-inset-top) + 20px) 20px calc(env(safe-area-inset-bottom) + 20px); }
         .logs-box { flex: 1; background: #000; color: #00a884; font-family: monospace; font-size: 11px; overflow-y: auto; padding: 10px; border-radius: 8px; margin-bottom: 12px; white-space: pre-wrap; word-break: break-all; }
         .log-entry { margin-bottom: 4px; border-bottom: 1px dashed rgba(0,168,132,0.3); padding-bottom: 4px; }
-        
-        .settings-btn { background: #2a3942; color: #e9edef; font-size: 14px; padding: 14px; border-radius: 8px; border: none; text-align: left; cursor: pointer; display: flex; justify-content: space-between; align-items: center; width:100%; margin-bottom: 8px;}
     </style>
 </head>
 <body>
     <div id="app">
+        <!-- ГЕЙТ PWA УСТАНОВКИ -->
         <div v-if="!isPWAInstalled" class="pwa-gate">
             <div class="gate-card">
                 <div style="display:flex; justify-content:center; margin-bottom:16px;">
                     <div class="monad pulse"><div class="monad-dot"></div></div>
                 </div>
                 <h3 style="color:#e9edef; font-size:18px; text-align:center;">Установка Полиса</h3>
-                <p style="color:#8f9ca3; font-size:13px; text-align:center;">Для связи перейди в Изолированный режим.</p>
+                <p style="color:#8f9ca3; font-size:13px; text-align:center;">Для шифрования данных перейди в Изолированный режим.</p>
                 <template v-if="isIOS">
                     <div class="instruct-row"><span style="border:1.5px solid #e9edef; border-radius:4px; padding:1px 3px; font-size:14px;">↑<span style="font-size:10px;">◡</span></span><div>Нажми <b>Поделиться</b><br><span style="font-size:11px; color:#8f9ca3;">внизу браузера</span></div></div>
                     <div style="color:#00a884; font-size:24px; text-align:center; line-height: 0.5;">⬇</div>
@@ -154,7 +144,7 @@
                 </template>
             </div>
         </div>
-
+        <!-- ВВОД ПИНА -->
         <div v-else-if="!loggedIn" class="safe-panel">
             <div class="safe-top">
                 <div class="monad pulse" style="width:48px; height:48px; border-width:3px;"><div class="monad-dot" style="width:12px; height:12px;"></div></div>
@@ -168,24 +158,16 @@
             </div>
             <div class="safe-bottom">
                 <div class="keypad">
-                    <button class="key-btn" @click="addPinDigit(1)">1</button>
-                    <button class="key-btn" @click="addPinDigit(2)">2</button>
-                    <button class="key-btn" @click="addPinDigit(3)">3</button>
-                    <button class="key-btn" @click="addPinDigit(4)">4</button>
-                    <button class="key-btn" @click="addPinDigit(5)">5</button>
-                    <button class="key-btn" @click="addPinDigit(6)">6</button>
-                    <button class="key-btn" @click="addPinDigit(7)">7</button>
-                    <button class="key-btn" @click="addPinDigit(8)">8</button>
-                    <button class="key-btn" @click="addPinDigit(9)">9</button>
-                    <div></div>
-                    <button class="key-btn" @click="addPinDigit(0)">0</button>
-                    <button class="key-btn key-btn-clear" @click="clearLastPin">⌫</button>
+                    <button class="key-btn" @click="addPinDigit(1)">1</button><button class="key-btn" @click="addPinDigit(2)">2</button><button class="key-btn" @click="addPinDigit(3)">3</button>
+                    <button class="key-btn" @click="addPinDigit(4)">4</button><button class="key-btn" @click="addPinDigit(5)">5</button><button class="key-btn" @click="addPinDigit(6)">6</button>
+                    <button class="key-btn" @click="addPinDigit(7)">7</button><button class="key-btn" @click="addPinDigit(8)">8</button><button class="key-btn" @click="addPinDigit(9)">9</button>
+                    <div></div><button class="key-btn" @click="addPinDigit(0)">0</button><button class="key-btn key-btn-clear" @click="clearLastPin">⌫</button>
                 </div>
             </div>
         </div>
-
+        <!-- ОСНОВНОЙ ИНТЕРФЕЙС -->
         <div v-else style="display:flex; flex-direction:column; height:100%;">
-            
+            <!-- ШАПКА СПИСКА КОНТАКТОВ -->
             <div class="header" v-if="!activeThread">
                 <div class="header-left" @dblclick="showLogsPanel = true">
                     <div :class="['monad', mqttOnline ? 'pulse' : '']"><div class="monad-dot"></div></div>
@@ -193,7 +175,7 @@
                 </div>
                 <button class="header-btn" style="color: #00a884;" @click="clickSound(); showSettings = true">⚙️</button>
             </div>
-            
+            <!-- ПАНЕЛЬ КОНТАКТОВ -->
             <div class="messenger-layout" v-if="!activeThread">
                 <div class="threads-panel">
                     <div class="threads-header">
@@ -211,8 +193,9 @@
                     </div>
                 </div>
             </div>
-
+            <!-- ИНТЕРФЕЙС ЧАТА -->
             <div class="chat-panel active" v-if="activeThread">
+                <!-- ШАПКА ЧАТА (С ПЕРЕХОДОМ В ПРОФИЛЬ) -->
                 <div class="chat-header">
                     <button style="background:transparent; border:none; color:#00a884; font-size:32px; padding:0 12px 0 0; cursor:pointer;" @click="closeThread">‹</button>
                     <div :class="['monad', mqttOnline ? 'pulse' : '']" style="width:20px; height:20px; border-width:1px;"><div class="monad-dot" style="width:4px; height:4px;"></div></div>
@@ -227,7 +210,7 @@
                     </div>
                     <button v-if="activeThread.type !== 'citadel'" style="background:transparent; border:none; color:#ea0038; font-size:20px; padding:0 0 0 12px; cursor:pointer;" @click="deleteThread">🗑</button>
                 </div>
-
+                <!-- ОКНО СООБЩЕНИЙ -->
                 <div class="messages-box" ref="msgBox">
                     <template v-if="messages[activeThread.peerId]">
                         <div v-for="msg in messages[activeThread.peerId]" :key="msg.id" :class="['message-row', msg.isMe ? 'my-message-row' : 'other-message-row']" @dblclick="msg.status === 2 ? deleteMsg(msg.id) : null">
@@ -241,6 +224,7 @@
                     </template>
                 </div>
                 
+                <!-- НИЖНЯЯ ПАНЕЛЬ ВВОДА (ТРОЯН) -->
                 <div class="input-area" v-if="activeThread && activeThread.type !== 'citadel'">
                     <template v-if="fieldLocked">
                         <div class="locked-indicator">⏳ КАПСУЛА В ОРБИТЕ</div>
@@ -259,7 +243,7 @@
                                 @contextmenu.prevent>➤</button>
                     </template>
                 </div>
-
+                <!-- ВВОД ДЛЯ ЧЕРТОГА -->
                 <div class="input-area" v-else-if="activeThread && activeThread.type === 'citadel'">
                     <div class="input-wrapper">
                         <input v-model="inputText" @keyup.enter.prevent="saveToCitadel" placeholder="Зашифровать заметку...">
@@ -267,24 +251,40 @@
                     <button class="send-btn" @click="saveToCitadel">💾</button>
                 </div>
             </div>
-
+            <!-- ВСПЛЫВАЮЩЕЕ МЕНЮ (ДОЛГИЙ ТАП) -->
             <div class="action-sheet-overlay" :class="{active: showActionSheet}" @click.self="closeActionSheet">
                 <div class="action-sheet">
-                    <div class="action-sheet-item" @click="copyCipher"><span>⧉</span><span>Скопировать Шифр</span></div>
-                    <div class="action-sheet-item" @click="sendAcoustic"><span>🔊</span><span>Отстрел Звуком</span></div>
-                    <div class="action-sheet-item" @click="sendOptical"><span>💡</span><span>Отстрел Светом</span></div>
-                    <div class="action-sheet-item" @click="toggleAcousticRec" :style="isListeningAc ? 'color:#ea0038;' : ''"><span>🎙</span><span>{{ isListeningAc ? 'Остановить Сонар' : 'Слушать Эфир' }}</span></div>
-                    <div class="action-sheet-item action-sheet-cancel" @click="closeActionSheet"><span>Отмена</span></div>
+                    <div class="action-sheet-item" @click="copyCipher">
+                        <span>⧉</span><span>Кристаллизовать (Скопировать)</span>
+                    </div>
+                    <div class="action-sheet-item" @click="sendAcoustic">
+                        <span>🔊</span><span>Отстрел Звуком (FSK)</span>
+                    </div>
+                    <div class="action-sheet-item" @click="sendOptical">
+                        <span>💡</span><span>Отстрел Светом (Оптика)</span>
+                    </div>
+                    <div class="action-sheet-item" @click="toggleAcousticRec" :style="isListeningAc ? 'color:#ea0038;' : ''">
+                        <span>🎙</span><span>{{ isListeningAc ? 'Остановить Сонар' : 'Слушать Эфир (Микрофон)' }}</span>
+                    </div>
+                    <div class="action-sheet-item action-sheet-cancel" @click="closeActionSheet">
+                        <span>Отмена</span>
+                    </div>
                 </div>
             </div>
             
+            <!-- ПРОФИЛЬ КОНТАКТА И ДИСПЕТЧЕР КОШЕЛЬКА -->
             <div class="modal" v-if="showContactProfile" @click.self="showContactProfile = false">
                 <div class="modal-content">
-                    <h3 style="color:#00a884; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">Диспетчер Узла <span style="font-size:12px; color:#8f9ca3;">Тет-а-Тет</span></h3>
+                    <h3 style="color:#00a884; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+                        Карточка Узла
+                        <span style="font-size:12px; color:#8f9ca3;">Тет-а-Тет</span>
+                    </h3>
+                    
                     <div class="profile-field">
                         <label>Идентификатор (ID)</label>
                         <div class="value" @click="copy(contactProfileThread.peerId, 'ID скопирован')">{{ contactProfileThread ? contactProfileThread.peerId : '' }}</div>
                     </div>
+                    
                     <div class="profile-field" style="margin-top:12px;">
                         <label>Monero (XMR)</label>
                         <input v-model="contactProfileThread.xmr" @blur="save" placeholder="Начинается на 4 или 8...">
@@ -298,11 +298,11 @@
                     <button class="btn-cancel" style="width:100%; margin-top:12px; padding:16px;" @click="showContactProfile = false">Закрыть</button>
                 </div>
             </div>
-
+            <!-- ПРОЧИЕ МОДАЛКИ (Добавление, Мой ID, Логи) -->
             <div class="modal" v-if="showAddModal" @click.self="showAddModal=false">
                 <div class="modal-content">
                     <h3 style="color:#e9edef;">Новая связь</h3>
-                    <input v-model="newThreadName" placeholder="Имя абонента" autocomplete="off">
+                    <input v-model="newThreadName" placeholder="Имя абонента (Видно только тебе)" autocomplete="off">
                     <input v-model="newThreadId" placeholder="Вставь скопированный ID" autocomplete="off">
                     <div class="btn-row">
                         <button class="btn-cancel" @click="showAddModal=false">Отмена</button>
@@ -310,35 +310,39 @@
                     </div>
                 </div>
             </div>
-
             <div class="modal" v-if="showIdCopyModal" @click.self="showIdCopyModal = false">
                 <div class="modal-content">
-                    <h3 style="color: #00a884; margin-bottom: 8px;">Координаты</h3>
+                    <h3 style="color: #00a884; margin-bottom: 8px;">Координаты (Копирование)</h3>
                     <div style="background:#202c33; padding:16px; border-radius:8px; word-break:break-all; font-family:monospace; color:#00a884; text-align:center; font-size: 16px; font-weight:bold; margin-bottom: 12px; letter-spacing: 1px;">{{ myId }}</div>
-                    <button style="background: #2a3942; border: 1px solid #00a884; color: #e9edef; padding: 12px; border-radius: 8px; cursor: pointer; width: 100%;" @click="copy(myId, 'Координаты скопированы')">Скопировать мой ID</button>
-                    <button style="background: transparent; border: none; color: #8f9ca3; padding: 12px; cursor: pointer; font-weight:bold; margin-top: 8px; width: 100%;" @click="sharePolis()">Поделиться ссылкой</button>
+                    <button style="background: #2a3942; border: 1px solid #00a884; color: #e9edef; padding: 12px; border-radius: 8px; cursor: pointer; width: 100%;" @click="copy(myId, 'Координаты скопированы')">
+                        Скопировать мой ID
+                    </button>
+                    <button style="background: transparent; border: none; color: #8f9ca3; padding: 12px; cursor: pointer; font-weight:bold; margin-top: 8px; width: 100%;" @click="sharePolis()">
+                        Поделиться ссылкой-Трояном
+                    </button>
                 </div>
             </div>
-
             <div class="modal" v-if="showSettings" @click.self="clickSound(); save(); showSettings=false">
                 <div class="modal-content">
                     <h3 style="color:#00a884; margin-bottom: 16px;">Щит (Настройки)</h3>
                     <div style="margin-bottom: 16px;">
                         <label style="color:#8f9ca3; font-size:12px; display:block; margin-bottom:4px;">Моё имя (Для Групп):</label>
-                        <input v-model="myName" placeholder="Аноним" style="width:100%; box-sizing:border-box; padding:12px; border-radius:8px; border:1px solid #2d3f4b; background:#202c33; color:#fff;" @blur="save">
+                        <input v-model="myName" placeholder="Аноним" style="width:100%; box-sizing:border-box;" @blur="save">
                     </div>
-                    <button class="settings-btn" @click="reqGyro"><span>🧭 Гироскоп (Сброс)</span> <span style="color:#00a884;">Акт</span></button>
-                    <button class="settings-btn" @click="reqNotif"><span>🔔 Уведомления</span> <span style="color:#00a884;">Акт</span></button>
-                    <button style="background: #111b21; font-size: 14px; padding: 12px; border-radius: 8px; border: 1px solid #ea0038; text-align: center; cursor: pointer; width: 100%; margin-top: 8px;" @click="wipeIdentity"><span style="color:#ea0038; font-weight:bold;">🗑 Сжечь Личность</span></button>
+                    <button class="settings-btn" @click="reqGyro"><span>🧭 Гироскоп (Сброс рывком)</span> <span style="color:#00a884;">Акт</span></button>
+                    <button class="settings-btn" @click="reqNotif"><span>🔔 Уведомления в фоне</span> <span style="color:#00a884;">Акт</span></button>
+                    <button style="background: #111b21; font-size: 14px; padding: 12px; border-radius: 8px; border: 1px solid #8f9ca3; text-align: center; margin-top: 12px; cursor: pointer; width: 100%;" @click="alert('Модуль обновления Ядра закрыт для MVP.')">
+                        <span style="color:#8f9ca3;">⚙️ Системное Ядро (Кузня)</span>
+                    </button>
+                    <button style="background: #111b21; font-size: 14px; padding: 12px; border-radius: 8px; border: 1px solid #ea0038; text-align: center; cursor: pointer; width: 100%; margin-top: 8px;" @click="wipeIdentity">
+                        <span style="color:#ea0038; font-weight:bold;">🗑 Сжечь Личность</span>
+                    </button>
                     <div class="btn-row" style="margin-top: 8px;"><button class="btn-confirm" @click="clickSound(); save(); showSettings=false" style="width:100%;">Закрыть</button></div>
                 </div>
             </div>
-
             <div v-if="showLogsPanel" class="logs-overlay">
                 <h3 style="margin-bottom:12px; color:#fff;">ТЕРМИНАЛ МАТРИЦЫ</h3>
-                <div class="logs-box">
-                    <div v-for="(l,i) in sysLogs" :key="i" class="log-entry">{{ l }}</div>
-                </div>
+                <div class="logs-box"><div v-for="(l,i) in sysLogs" :key="i" class="log-entry">{{ l }}</div></div>
                 <div style="display: flex; gap: 8px;">
                     <button style="flex: 1; background: #00a884; color: #111b21; border: none; padding: 12px; border-radius: 8px; font-weight: bold;" @click="copyLogs">Копировать Логи</button>
                     <button style="background:transparent; color:#00a884; border:1px solid #00a884; padding:12px; border-radius:8px;" @click="showLogsPanel=false">Закрыть</button>
@@ -346,7 +350,7 @@
             </div>
         </div>
     </div>
-<script>
+    <script>
         // =====================================================================
         // [УЗЕЛ 01: КРИСТАЛЛ 108]
         // =====================================================================
@@ -386,6 +390,7 @@
                 while (digs.length < charCount) digs.unshift(0); return digs.map(d=>this.idxToChar[d]).join('');
             }
         }
+
         // =====================================================================
         // [УЗЕЛ 02: БАЗА ПАМЯТИ]
         // =====================================================================
@@ -402,6 +407,7 @@
             wipe() { if (this.currentKey) localStorage.removeItem(this.currentKey); this.currentKey = null; }
             lock() { this.currentKey = null; }
         }
+
         // =====================================================================
         // [УЗЕЛ 03: MQTT РАЦИЯ]
         // =====================================================================
@@ -426,8 +432,9 @@
             send(topic, msg) { if (this.client && this.client.connected) this.client.publish(topic, msg, {qos:1, retain: false}); }
             disconnect() { if (this.client) this.client.end(true); this.onStatus(false); this.activeTopics = []; }
         }
+
         // =====================================================================
-        // [УЗЕЛ 05: ФИЗИКА ЗЕМЛИ]
+        // [УЗЕЛ 05: ФИЗИКА ЗЕМЛИ И ФИНАНСОВ]
         // =====================================================================
         class AcousticModem {
             constructor() {
@@ -500,8 +507,10 @@
             generateXmrLink: (addr, amt) => `monero:${addr}${amt?`?tx_amount=${amt}`:''}`,
             generateUsdtLink: (addr, amt) => `trust://send?asset=c195&address=${addr}&amount=${amt||0}`
         };
+
         const cry = new Crystal108Codec(); const sg = new ShadowGateway();
         const checkPWA = ()=> window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone || document.referrer.includes('android-app://');
+
         // =====================================================================
         // [УЗЕЛ 04: ЯДРО ЛОГИКИ VUE]
         // =====================================================================
@@ -516,7 +525,6 @@
                 sysLogs: [], showLogsPanel: false, settings: { sound: true, notifs: true },
                 sonarStatus: '', sonarTimer: null, fieldLocked: false, mqttReady: false,
                 modem: new AcousticModem(), optic: new OpticalLink(), isListeningAc: false,
-                
                 showActionSheet: false, longPressTimer: null, longPressTriggered: false,
                 showContactProfile: false, contactProfileThread: null
             },
@@ -538,11 +546,12 @@
                     
                     if (val !== clean) { this.inputText = clean; this.clickSound(true); }
                     
+                    // АВТО-РАСШИФРОВКА БУФЕРА
                     if (/^\d{108}$/.test(clean)) {
                         const cipher = clean;
-                        this.inputText = ''; 
+                        this.inputText = ''; // Очищаем поле немедленно
                         this.$nextTick(() => {
-                            this.inputText = cipher; 
+                            this.inputText = cipher; // Временно возвращаем для декодера
                             this.decryptManual();
                         });
                     }
@@ -557,33 +566,18 @@
             
             mounted() {
                 setTimeout(()=>{ this.isPWAInstalled = checkPWA() || (window.innerHeight === screen.height); }, 100);
-                window.addEventListener('visibilitychange', this.onVisibilityChange);
-                window.addEventListener('focus', this.onFocus);
+                window.addEventListener('devicemotion', this.handleShake);
             },
             beforeDestroy() {
                 if (this.mqtt) this.mqtt.disconnect();
                 if (this.sonarTimer) clearTimeout(this.sonarTimer);
-                window.removeEventListener('visibilitychange', this.onVisibilityChange);
-                window.removeEventListener('focus', this.onFocus);
+                window.removeEventListener('devicemotion', this.handleShake);
             },
+
             methods: {
                 log(t) { const time = new Date().toLocaleTimeString().slice(0,8); this.sysLogs.unshift(`[${time}] ${t}`); if (this.sysLogs.length > 80) this.sysLogs.pop(); },
                 copyLogs() { this.copy(this.sysLogs.join('\n'), 'Журнал скопирован'); },
-                onVisibilityChange() {
-                    if (document.visibilityState === 'hidden') { 
-                        this.log('[SYS] Приложение в фоне (Ожидание)'); 
-                    } else { 
-                        this.log('[SYS] Возврат фокуса. Сверка связи...'); 
-                        if (this.mqtt && this.loggedIn && !this.mqttOnline) {
-                            this.mqtt.connect(this.getAllTopics()); 
-                        }
-                    }
-                },
-                onFocus() { 
-                    if (document.visibilityState === 'visible' && this.mqtt && !this.mqttOnline && this.loggedIn) {
-                        this.mqtt.connect(this.getAllTopics()); 
-                    }
-                },
+
                 addPinDigit(d) {
                     if (this.pinDigits.every(x=>x!=='')) return;
                     const idx = this.pinDigits.findIndex(x=>x==='');
@@ -601,6 +595,7 @@
                         osc.start(); osc.stop(ctx.currentTime+0.1);
                     } catch(e){}
                 },
+
                 copy(t, msg='Скопировано') {
                     const el = document.createElement('textarea'); el.value = t; document.body.appendChild(el); 
                     el.select(); document.execCommand('copy'); document.body.removeChild(el); alert(msg); this.clickSound();
@@ -612,6 +607,7 @@
                     else if (navigator.clipboard) { navigator.clipboard.writeText(text).then(() => alert('Код скопирован.')); }
                     this.showIdCopyModal = false;
                 },
+
                 async login() {
                     if (this.masterPin.length !== 6) { this.clickSound(true); this.pinError = true; setTimeout(() => this.pinError = false, 400); this.pinDigits = ['','','','','','']; return; }
                     this.clickSound(); let d = null;
@@ -621,6 +617,7 @@
                         this.threads = [{ name: 'Мой Чертог', peerId: 'citadel', type: 'citadel', unread: 0 }];
                         this.messages = { citadel: [] }; this.outbox = []; this.log('[SYS] Новая Матрица');
                     } else {
+                        // Инициализация старых баз новыми полями
                         this.threads = (d.t || []).map(th => {
                             if(th.type !== 'citadel') { if(typeof th.xmr === 'undefined') th.xmr = ''; if(typeof th.usdt === 'undefined') th.usdt = ''; }
                             return th;
@@ -643,26 +640,38 @@
                     });
                     return subs;
                 },
-                openThread(th) { 
-                    this.activeThread = th; th.unread = 0; this.save(); 
-                    this.$nextTick(() => { this.scrollBot(); this.checkFieldLock(); });
-                },
+                openThread(th) { this.activeThread = th; th.unread = 0; this.save(); this.scrollBot(); this.checkFieldLock(); },
                 closeThread() { this.activeThread = null; },
                 
                 openAddModal() { this.clickSound(); this.newThreadName = ''; this.newThreadId = ''; this.showAddModal = true; },
                 createThread() {
-                    this.clickSound(); let n = this.newThreadName || 'Аноним'; let rawId = this.newThreadId.trim(); let type = 'personal'; let id = '';
-                    if (rawId) { id = rawId.replace(/[^A-Za-z0-9_]/g, ''); if (!id) return alert('Неверный формат ID'); if (id.startsWith('grp_')) type = 'group'; } 
-                    else { id = 'grp_' + Math.random().toString(36).substr(2,8); type = 'group'; n = n === 'Аноним' ? 'Группа' : n; }
+                    this.clickSound(); 
+                    let n = this.newThreadName || 'Аноним'; 
+                    let rawId = this.newThreadId.trim(); 
+                    
+                    // Жесткая валидация: ID не может быть пустым
+                    if (!rawId) { 
+                        alert('Вставьте ID узла (скопируйте у друга)'); 
+                        return; 
+                    }
+                    
+                    let type = 'personal'; 
+                    let id = rawId.replace(/[^A-Za-z0-9_]/g, '');
+                    if (!id) { alert('Неверный формат ID'); return; }
+                    if (id.startsWith('grp_')) type = 'group';
+                    
                     if (this.threads.some(t=>t.peerId===id)) { alert('Узел уже добавлен'); return; }
-                    
                     const newTh = { name: n, peerId:id, type, unread:0, xmr: '', usdt: '' };
-                    this.threads.push(newTh); this.$set(this.messages, id, []); this.save();
+                    this.threads.push(newTh); 
+                    this.$set(this.messages, id, []); 
+                    this.save();
                     if (this.mqtt) this.mqtt.connect(this.getAllTopics()); 
-                    
                     this.showAddModal = false; 
-                    this.$nextTick(() => { this.openThread(newTh); });
+                    // Открываем новый чат в следующем тике, чтобы Vue успел обновить DOM
+                    this.$nextTick(() => this.openThread(newTh));
                 },
+
+                // ===== ЛОГИКА ДОЛГОГО ТАПА (ACTION SHEET) =====
                 longPressStart(e) {
                     this.longPressTriggered = false;
                     this.longPressTimer = setTimeout(() => {
@@ -676,11 +685,13 @@
                 },
                 longPressCancel(e) { clearTimeout(this.longPressTimer); this.longPressTriggered = false; },
                 closeActionSheet() { this.showActionSheet = false; },
+
+                // ===== ПРОФИЛЬ УЗЛА И КОШЕЛЕК (С ЗАЩИТОЙ IOS) =====
                 openContactProfile(thread) { this.contactProfileThread = thread; this.showContactProfile = true; },
                 payFromProfile(currency) {
-                    this.save(); 
+                    this.save(); // Сохраняем адреса перед вызовом
                     let url = currency === 'XMR' ? WalletRouter.generateXmrLink(this.contactProfileThread.xmr)  : WalletRouter.generateUsdtLink(this.contactProfileThread.usdt);
-                    if (url.includes('undefined') || url === 'monero:' || url.includes('address=')) { alert('Сначала введи адрес кошелька в поле'); return; }
+                    if (url.includes('undefined') || url === 'monero:' || url.includes('address=')) { alert('Сначала введи адрес кошелька'); return; }
                     
                     const iframe = document.createElement('iframe'); iframe.style.display = 'none'; iframe.src = url;
                     document.body.appendChild(iframe);
@@ -693,6 +704,8 @@
                         window.removeEventListener('blur', onBlur);
                     });
                 },
+
+                // ===== ОТПРАВКА И ЭФИР =====
                 sendMsg() {
                     if (!this.inputText || !this.activeThread || this.activeThread.type === 'citadel' || this.fieldLocked) return;
                     if (!this.mqttReady) { alert('Радиоканал еще греется...'); return; }
@@ -707,12 +720,13 @@
                         this.mqtt.send(topic, code); this.log(`[>>] Капсула в Эфире. Замок закрыт.`);
                     } catch(e) { this.log('[ERR] Ошибка Кодека'); }
                 },
+
                 copyCipher() {
                     this.closeActionSheet(); if (!this.inputText) return; 
                     const fullText = this.inputText.trim(); const msgId = Date.now(); const targetId = this.activeThread.peerId;
                     try {
                         const code = cry.collapse(`MSG|${this.myId}|${this.myName}|${msgId}|${fullText}`, 0);
-                        this.copy(code, 'Кристалл скопирован в буфер.');
+                        this.copy(code, 'Кристалл скопирован.');
                         const msgObj = { id: msgId, text: fullText, isMe: true, time: new Date().toLocaleTimeString().slice(0,5), status: 1 };
                         this.$set(this.messages, targetId, [...(this.messages[targetId] || []), msgObj]);
                         this.inputText = ''; this.scrollBot(); this.save();
@@ -736,6 +750,7 @@
                         this.modem.listen((code) => { this.inputText = code; this.isListeningAc = false; });
                     }
                 },
+
                 decryptManual() {
                     const cipher = this.inputText.trim();
                     try {
@@ -743,11 +758,13 @@
                         if (parts.length < 5 || parts[0] !== 'MSG') { alert('Код поврежден'); return; }
                         const senderId = parts[1]; const senderName = parts[2]; const originalMsgId = parseInt(parts[3],10); const text = parts.slice(4).join('|');
                         if (senderId === this.myId) { this.inputText = ''; return; } 
+
                         let thread = this.threads.find(t => t.peerId === senderId && t.type === 'personal');
                         if (!thread) {
                             thread = { name: 'Гость (Из буфера)', peerId: senderId, type: 'personal', unread: 0, xmr: '', usdt: '' };
                             this.threads.unshift(thread); this.$set(this.messages, senderId, []);
                         }
+
                         const msgObj = { id: Date.now(), originalId: originalMsgId, text: text, isMe: false, time: new Date().toLocaleTimeString().slice(0,5), status: 3, senderName: senderName };
                         this.$set(this.messages, senderId, [...(this.messages[senderId] || []), msgObj]);
                         
@@ -755,6 +772,7 @@
                         this.inputText = ''; this.scrollBot(); this.save();
                     } catch(e) { this.log(`[ERR] Сбой дешифратора: ${e.message}`); this.inputText = '';}
                 },
+
                 handleMsg(payload, topic) {
                     try {
                         const decrypted = cry.resonate(payload, 0); const parts = decrypted.split('|'); const type = parts[0];
@@ -771,9 +789,11 @@
                             const senderId = parts[1]; const senderName = parts[2]; const msgId = parseInt(parts[3],10); const text = parts.slice(4).join('|');
                             if (senderId === this.myId) return; 
                             let thread = this.threads.find(t => t.peerId === senderId);
-                            if (!thread) { this.log(`[ERR] Спам-блок от ${senderId}`); return; } 
+                            if (!thread) { this.log(`[ERR] Спам-блок от ${senderId}`); return; } // Взаимность
+
                             if (this.mqttOnline) { this.mqtt.send(topic, cry.collapse(`ACK|${this.myId}|${msgId}`, 0)); }
                             if (this.messages[senderId] && this.messages[senderId].some(m => !m.isMe && m.originalId === msgId)) { return; }
+
                             const msgObj = { id: Date.now(), originalId: msgId, text: text, isMe: false, time: new Date().toLocaleTimeString().slice(0,5), status: 3, senderName: senderName };
                             this.$set(this.messages, senderId, [...(this.messages[senderId] || []), msgObj]);
                             if (this.activeThread?.peerId !== senderId) { thread.unread = (thread.unread || 0) + 1; }
@@ -781,24 +801,38 @@
                         }
                     } catch(e) {}
                 },
+
                 saveToCitadel() { if (!this.inputText) return; this.$set(this.messages, 'citadel', [...(this.messages.citadel || []), { id: Date.now(), text: this.inputText.trim(), isMe: true, time: new Date().toLocaleTimeString().slice(0,5), status: 0 }]); this.inputText = ''; this.scrollBot(); this.save(); },
                 checkFieldLock() { if (!this.activeThread || this.activeThread.type === 'citadel') { this.fieldLocked = false; return; } const myL = (this.messages[this.activeThread.peerId] || []).filter(m => m.isMe).slice(-1)[0]; this.fieldLocked = myL && myL.status === 2; },
                 scrollBot() { this.$nextTick(()=>{ const b = this.$refs.msgBox; if(b) b.scrollTop = b.scrollHeight + 100; }); },
+
+                // ===== НОВЫЙ МЕТОД ГИРОСКОПА (СБРОС ПРИ РЫВКЕ) =====
+                handleShake(e) {
+                    if (!this.loggedIn) return;
+                    let acc = e.acceleration || e.accelerationIncludingGravity;
+                    if (!acc) return;
+                    // Сумма ускорений по трём осям (в м/с²) больше 15 – резкий рывок
+                    if (Math.abs(acc.x||0) + Math.abs(acc.y||0) + Math.abs(acc.z||0) > 15) {
+                        sg.lock();
+                        window.location.reload();
+                    }
+                },
                 
-                reqGyro() {
+                wipeIdentity() { 
+                    if (confirm('УНИЧТОЖИТЬ ЛИЧНОСТЬ И ВСЕ ДАННЫЕ?')) { 
+                        sg.wipe(); 
+                        window.location.reload(); 
+                    } 
+                },
+                
+                async reqGyro() {
                     if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
-                        try { DeviceMotionEvent.requestPermission().then(res => { if (res === 'granted') alert('Гироскоп активен'); }); } catch(e) {}
+                        try { const res = await DeviceMotionEvent.requestPermission(); if (res === 'granted') alert('Гироскоп активен'); } catch(e) {}
                     } else alert('Доступ уже открыт');
                 },
                 reqNotif() {
                     if (Notification.permission === 'default') Notification.requestPermission().then(p => { if(p==='granted') alert('Уведомления ВКЛ'); });
                     else alert(Notification.permission === 'granted' ? 'Уже ВКЛ' : 'Включи в настройках телефона');
-                },
-                wipeIdentity() { 
-                    if (confirm('🔥 УНИЧТОЖИТЬ ЛИЧНОСТЬ И БАЗУ?')) { 
-                        sg.wipe(); 
-                        window.location.reload(); 
-                    } 
                 }
             }
         });
