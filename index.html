@@ -120,19 +120,17 @@
         .logs-overlay { position: absolute; inset:0; background: rgba(0,0,0,0.95); z-index: 200; display: flex; flex-direction: column; padding: calc(env(safe-area-inset-top) + 20px) 20px calc(env(safe-area-inset-bottom) + 20px); }
         .logs-box { flex: 1; background: #000; color: #00a884; font-family: monospace; font-size: 11px; overflow-y: auto; padding: 10px; border-radius: 8px; margin-bottom: 12px; white-space: pre-wrap; word-break: break-all; }
         .log-entry { margin-bottom: 4px; border-bottom: 1px dashed rgba(0,168,132,0.3); padding-bottom: 4px; }
-        .settings-btn { background: #202c33; color: #e9edef; font-size: 14px; padding: 12px; border-radius: 8px; border: 1px solid #2d3f4b; text-align: left; cursor: pointer; display: flex; justify-content: space-between; align-items: center;}
     </style>
 </head>
 <body>
     <div id="app">
         <!-- ГЕЙТ PWA УСТАНОВКИ -->
+<div id="app">
         <div v-if="!isPWAInstalled" class="pwa-gate">
             <div class="gate-card">
-                <div style="display:flex; justify-content:center; margin-bottom:16px;">
-                    <div class="monad pulse"><div class="monad-dot"></div></div>
-                </div>
+                <div style="display:flex; justify-content:center; margin-bottom:16px;"><div class="monad pulse"><div class="monad-dot"></div></div></div>
                 <h3 style="color:#e9edef; font-size:18px; text-align:center;">Установка Полиса</h3>
-                <p style="color:#8f9ca3; font-size:13px; text-align:center;">Для шифрования данных перейди в Изолированный режим.</p>
+                <p style="color:#8f9ca3; font-size:13px; text-align:center;">Для связи перейди в Изолированный режим.</p>
                 <template v-if="isIOS">
                     <div class="instruct-row"><span style="border:1.5px solid #e9edef; border-radius:4px; padding:1px 3px; font-size:14px;">↑<span style="font-size:10px;">◡</span></span><div>Нажми <b>Поделиться</b><br><span style="font-size:11px; color:#8f9ca3;">внизу браузера</span></div></div>
                     <div style="color:#00a884; font-size:24px; text-align:center; line-height: 0.5;">⬇</div>
@@ -145,16 +143,11 @@
                 </template>
             </div>
         </div>
-        <!-- ВВОД ПИНА -->
         <div v-else-if="!loggedIn" class="safe-panel">
             <div class="safe-top">
                 <div class="monad pulse" style="width:48px; height:48px; border-width:3px;"><div class="monad-dot" style="width:12px; height:12px;"></div></div>
                 <div style="display:flex; flex-direction:column; align-items:center; gap:8px;">
-                    <div class="pin-grid">
-                        <div v-for="(digit, index) in 6" :key="index" class="pin-slot" :class="{'filled': pinDigits[index] !== '', 'error': pinError}">
-                            {{ pinDigits[index] }}
-                        </div>
-                    </div>
+                    <div class="pin-grid"><div v-for="(digit, index) in 6" :key="index" class="pin-slot" :class="{'filled': pinDigits[index] !== '', 'error': pinError}">{{ pinDigits[index] }}</div></div>
                 </div>
             </div>
             <div class="safe-bottom">
@@ -166,9 +159,7 @@
                 </div>
             </div>
         </div>
-        <!-- ОСНОВНОЙ ИНТЕРФЕЙС -->
         <div v-else style="display:flex; flex-direction:column; height:100%;">
-            <!-- ШАПКА СПИСКА КОНТАКТОВ -->
             <div class="header" v-if="!activeThread">
                 <div class="header-left" @dblclick="showLogsPanel = true">
                     <div :class="['monad', mqttOnline ? 'pulse' : '']"><div class="monad-dot"></div></div>
@@ -176,7 +167,6 @@
                 </div>
                 <button class="header-btn" style="color: #00a884;" @click="clickSound(); showSettings = true">⚙️</button>
             </div>
-            <!-- ПАНЕЛЬ КОНТАКТОВ -->
             <div class="messenger-layout" v-if="!activeThread">
                 <div class="threads-panel">
                     <div class="threads-header">
@@ -194,134 +184,73 @@
                     </div>
                 </div>
             </div>
-            <!-- ИНТЕРФЕЙС ЧАТА -->
             <div class="chat-panel active" v-if="activeThread">
-                <!-- ШАПКА ЧАТА (С ПЕРЕХОДОМ В ПРОФИЛЬ) -->
                 <div class="chat-header">
                     <button style="background:transparent; border:none; color:#00a884; font-size:32px; padding:0 12px 0 0; cursor:pointer;" @click="closeThread">‹</button>
                     <div :class="['monad', mqttOnline ? 'pulse' : '']" style="width:20px; height:20px; border-width:1px;"><div class="monad-dot" style="width:4px; height:4px;"></div></div>
-                    
                     <div style="flex:1; overflow:hidden; cursor:pointer;" @click="activeThread.type !== 'citadel' ? openContactProfile(activeThread) : null">
-                        <div style="font-weight:600; font-size:16px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#e9edef;">
-                            {{ activeThread.name }}
-                        </div>
-                        <div style="font-size:11px; color:#8f9ca3;">
-                            {{ activeThread.type === 'citadel' ? 'Секретные записи' : (activeThread.type==='system' ? 'Группа' : 'Нажми для открытия Профиля') }}
-                        </div>
+                        <div style="font-weight:600; font-size:16px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#e9edef;">{{ activeThread.name }}</div>
+                        <div style="font-size:11px; color:#8f9ca3;">{{ activeThread.type === 'citadel' ? 'Секретные записи' : 'Нажми для открытия Профиля' }}</div>
                     </div>
                     <button v-if="activeThread.type !== 'citadel'" style="background:transparent; border:none; color:#ea0038; font-size:20px; padding:0 0 0 12px; cursor:pointer;" @click="deleteThread">🗑</button>
                 </div>
-                <!-- ОКНО СООБЩЕНИЙ -->
                 <div class="messages-box" ref="msgBox">
                     <template v-if="messages[activeThread.peerId]">
                         <div v-for="msg in messages[activeThread.peerId]" :key="msg.id" :class="['message-row', msg.isMe ? 'my-message-row' : 'other-message-row']" @dblclick="msg.status === 2 ? deleteMsg(msg.id) : null">
-                            <div v-if="!msg.isMe && activeThread.type==='system' && msg.senderName" style="font-size:11px; color:#00a884; margin-bottom:2px; margin-left:4px;">{{ msg.senderName }}</div>
                             <div :class="['message', msg.isMe ? 'my-message' : 'other-message']">{{ msg.text }}</div>
-                            <div class="msg-footer">
-                                <span class="status-dot" :class="'status-'+ msg.status"></span>
-                                <span>{{ msg.time }}</span>
-                            </div>
+                            <div class="msg-footer"><span class="status-dot" :class="'status-'+ msg.status"></span><span>{{ msg.time }}</span></div>
                         </div>
                     </template>
                 </div>
                 
-                <!-- НИЖНЯЯ ПАНЕЛЬ ВВОДА (ТРОЯН) -->
                 <div class="input-area" v-if="activeThread && activeThread.type !== 'citadel'">
-                    <template v-if="fieldLocked">
-                        <div class="locked-indicator">⏳ КАПСУЛА В ОРБИТЕ</div>
-                    </template>
+                    <template v-if="fieldLocked"><div class="locked-indicator">⏳ КАПСУЛА В ОРБИТЕ</div></template>
                     <template v-else>
-                        <div class="input-wrapper">
-                            <input v-model="inputText" autocomplete="off" placeholder="Сообщение или Шифр...">
-                        </div>
-                        <button class="send-btn" 
-                                @touchstart="longPressStart" 
-                                @touchend="longPressEnd" 
-                                @touchcancel="longPressCancel"
-                                @mousedown="longPressStart"
-                                @mouseup="longPressEnd"
-                                @mouseleave="longPressCancel"
-                                @contextmenu.prevent>➤</button>
+                        <div class="input-wrapper"><input v-model="inputText" autocomplete="off" placeholder="Сообщение или Шифр..."></div>
+                        <button class="send-btn" @touchstart="longPressStart" @touchend="longPressEnd" @touchcancel="longPressCancel" @mousedown="longPressStart" @mouseup="longPressEnd" @mouseleave="longPressCancel" @contextmenu.prevent>➤</button>
                     </template>
                 </div>
-                <!-- ВВОД ДЛЯ ЧЕРТОГА -->
                 <div class="input-area" v-else-if="activeThread && activeThread.type === 'citadel'">
-                    <div class="input-wrapper">
-                        <input v-model="inputText" @keyup.enter.prevent="saveToCitadel" placeholder="Зашифровать заметку...">
-                    </div>
+                    <div class="input-wrapper"><input v-model="inputText" @keyup.enter.prevent="saveToCitadel" placeholder="Зашифровать заметку..."></div>
                     <button class="send-btn" @click="saveToCitadel">💾</button>
                 </div>
             </div>
-            <!-- ВСПЛЫВАЮЩЕЕ МЕНЮ (ДОЛГИЙ ТАП) -->
             <div class="action-sheet-overlay" :class="{active: showActionSheet}" @click.self="closeActionSheet">
                 <div class="action-sheet">
-                    <div class="action-sheet-item" @click="copyCipher">
-                        <span>⧉</span><span>Кристаллизовать (Скопировать)</span>
-                    </div>
-                    <div class="action-sheet-item" @click="sendAcoustic">
-                        <span>🔊</span><span>Отстрел Звуком (FSK)</span>
-                    </div>
-                    <div class="action-sheet-item" @click="sendOptical">
-                        <span>💡</span><span>Отстрел Светом (Оптика)</span>
-                    </div>
-                    <div class="action-sheet-item" @click="toggleAcousticRec" :style="isListeningAc ? 'color:#ea0038;' : ''">
-                        <span>🎙</span><span>{{ isListeningAc ? 'Остановить Сонар' : 'Слушать Эфир (Микрофон)' }}</span>
-                    </div>
-                    <div class="action-sheet-item action-sheet-cancel" @click="closeActionSheet">
-                        <span>Отмена</span>
-                    </div>
+                    <div class="action-sheet-item" @click="copyCipher"><span>⧉</span><span>Кристаллизовать (Скопировать)</span></div>
+                    <div class="action-sheet-item" @click="sendAcoustic"><span>🔊</span><span>Отстрел Звуком (FSK)</span></div>
+                    <div class="action-sheet-item" @click="sendOptical"><span>💡</span><span>Отстрел Светом (Оптика)</span></div>
+                    <div class="action-sheet-item" @click="toggleAcousticRec" :style="isListeningAc ? 'color:#ea0038;' : ''"><span>🎙</span><span>{{ isListeningAc ? 'Остановить Сонар' : 'Слушать Эфир (Микрофон)' }}</span></div>
+                    <div class="action-sheet-item action-sheet-cancel" @click="closeActionSheet"><span>Отмена</span></div>
                 </div>
             </div>
             
-            <!-- ПРОФИЛЬ КОНТАКТА И ДИСПЕТЧЕР КОШЕЛЬКА -->
             <div class="modal" v-if="showContactProfile" @click.self="showContactProfile = false">
                 <div class="modal-content">
-                    <h3 style="color:#00a884; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
-                        Карточка Узла
-                        <span style="font-size:12px; color:#8f9ca3;">Тет-а-Тет</span>
-                    </h3>
-                    <div class="profile-field">
-                        <label>Идентификатор (ID)</label>
-                        <div class="value" @click="copy(contactProfileThread.peerId, 'ID скопирован')">{{ contactProfileThread ? contactProfileThread.peerId : '' }}</div>
-                    </div>
-                    <div class="profile-field" style="margin-top:12px;">
-                        <label>Monero (XMR)</label>
-                        <input v-model="contactProfileThread.xmr" @blur="save" placeholder="Начинается на 4 или 8...">
-                        <button class="btn-confirm" style="width:100%; margin-top:8px; background: #2a3942; color:#fff;" @click="payFromProfile('XMR')">Перевести XMR</button>
-                    </div>
-                    <div class="profile-field" style="margin-top:4px;">
-                        <label>Tether (USDT TRC20)</label>
-                        <input v-model="contactProfileThread.usdt" @blur="save" placeholder="Начинается на T...">
-                        <button class="btn-confirm" style="width:100%; margin-top:8px;" @click="payFromProfile('USDT')">Перевести USDT</button>
-                    </div>
+                    <h3 style="color:#00a884; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">Карточка Узла <span style="font-size:12px; color:#8f9ca3;">Тет-а-Тет</span></h3>
+                    <div class="profile-field"><label>Идентификатор (ID)</label><div class="value" @click="copy(contactProfileThread.peerId, 'ID скопирован')">{{ contactProfileThread ? contactProfileThread.peerId : '' }}</div></div>
+                    <div class="profile-field" style="margin-top:12px;"><label>Monero (XMR)</label><input v-model="contactProfileThread.xmr" @blur="save"><button class="btn-confirm" style="width:100%; margin-top:8px; background: #2a3942; color:#fff;" @click="payFromProfile('XMR')">Перевести XMR</button></div>
+                    <div class="profile-field" style="margin-top:4px;"><label>Tether (USDT TRC20)</label><input v-model="contactProfileThread.usdt" @blur="save"><button class="btn-confirm" style="width:100%; margin-top:8px;" @click="payFromProfile('USDT')">Перевести USDT</button></div>
                     <button class="btn-cancel" style="width:100%; margin-top:12px; padding:16px;" @click="showContactProfile = false">Закрыть</button>
                 </div>
             </div>
-            <!-- ПРОЧИЕ МОДАЛКИ (Добавление, Мой ID, Логи, Щит) -->
             <div class="modal" v-if="showAddModal" @click.self="showAddModal=false">
                 <div class="modal-content">
                     <h3 style="color:#e9edef;">Новая связь</h3>
-                    <input v-model="newThreadName" placeholder="Имя абонента (Видно только тебе)" autocomplete="off">
+                    <input v-model="newThreadName" placeholder="Имя абонента" autocomplete="off">
                     <input v-model="newThreadId" placeholder="Вставь скопированный ID" autocomplete="off">
-                    <div class="btn-row">
-                        <button class="btn-cancel" @click="showAddModal=false">Отмена</button>
-                        <button class="btn-confirm" @click="createThread">Создать</button>
-                    </div>
+                    <div class="btn-row"><button class="btn-cancel" @click="showAddModal=false">Отмена</button><button class="btn-confirm" @click="createThread">Создать</button></div>
                 </div>
             </div>
             <div class="modal" v-if="showIdCopyModal" @click.self="showIdCopyModal = false">
                 <div class="modal-content">
-                    <h3 style="color: #00a884; margin-bottom: 8px;">Координаты (Копирование)</h3>
+                    <h3 style="color: #00a884; margin-bottom: 8px;">Мои Координаты</h3>
                     <div style="background:#202c33; padding:16px; border-radius:8px; word-break:break-all; font-family:monospace; color:#00a884; text-align:center; font-size: 16px; font-weight:bold; margin-bottom: 12px; letter-spacing: 1px;">{{ myId }}</div>
-                    <button style="background: #2a3942; border: 1px solid #00a884; color: #e9edef; padding: 12px; border-radius: 8px; cursor: pointer; width: 100%;" @click="copy(myId, 'Координаты скопированы')">
-                        Скопировать мой ID
-                    </button>
-                    <button style="background: transparent; border: none; color: #8f9ca3; padding: 12px; cursor: pointer; font-weight:bold; margin-top: 8px; width: 100%;" @click="sharePolis()">
-                        Поделиться ссылкой-Трояном
-                    </button>
+                    <button style="background: #2a3942; border: 1px solid #00a884; color: #e9edef; padding: 12px; border-radius: 8px; cursor: pointer; width: 100%;" @click="copy(myId, 'Координаты скопированы')">Скопировать мой ID</button>
+                    <button style="background: transparent; border: none; color: #8f9ca3; padding: 12px; font-weight:bold; margin-top: 8px; width: 100%;" @click="sharePolis()">Поделиться ссылкой</button>
                 </div>
             </div>
-            <!-- ВОТ ЭТО ПРОПУЩЕННАЯ МОДАЛКА "ЩИТ/НАСТРОЙКИ" ВНУТРИ ВЬЮ -->
+            <!-- ИСПРАВЛЕННЫЙ БЛОК НАСТРОЕК (ТЕПЕРЬ ОН ВНУТРИ V-ELSE) -->
             <div class="modal" v-if="showSettings" @click.self="clickSound(); save(); showSettings=false">
                 <div class="modal-content">
                     <h3 style="color:#00a884; margin-bottom: 16px;">Щит (Настройки)</h3>
@@ -331,9 +260,7 @@
                     </div>
                     <button class="settings-btn" @click="reqGyro"><span>🧭 Гироскоп (Сброс рывком)</span> <span style="color:#00a884;">Акт</span></button>
                     <button class="settings-btn" @click="reqNotif"><span>🔔 Уведомления в фоне</span> <span style="color:#00a884;">Акт</span></button>
-                    <button style="background: #111b21; font-size: 14px; padding: 12px; border-radius: 8px; border: 1px solid #ea0038; text-align: center; cursor: pointer; width: 100%; margin-top: 8px;" @click="wipeIdentity">
-                        <span style="color:#ea0038; font-weight:bold;">🗑 Сжечь Личность</span>
-                    </button>
+                    <button style="background: #111b21; font-size: 14px; padding: 12px; border-radius: 8px; border: 1px solid #ea0038; text-align: center; cursor: pointer; width: 100%; margin-top: 8px;" @click="wipeIdentity"><span style="color:#ea0038; font-weight:bold;">🗑 Сжечь Личность</span></button>
                     <div class="btn-row" style="margin-top: 8px;"><button class="btn-confirm" @click="clickSound(); save(); showSettings=false" style="width:100%;">Закрыть</button></div>
                 </div>
             </div>
@@ -347,7 +274,7 @@
             </div>
         </div>
     </div>
-<script>
+    <script>
         // =====================================================================
         // [УЗЕЛ 01: КРИСТАЛЛ 108]
         // =====================================================================
@@ -387,6 +314,7 @@
                 while (digs.length < charCount) digs.unshift(0); return digs.map(d=>this.idxToChar[d]).join('');
             }
         }
+
         // =====================================================================
         // [УЗЕЛ 02: БАЗА ПАМЯТИ]
         // =====================================================================
@@ -403,6 +331,7 @@
             wipe() { if (this.currentKey) localStorage.removeItem(this.currentKey); this.currentKey = null; }
             lock() { this.currentKey = null; }
         }
+
         // =====================================================================
         // [УЗЕЛ 03: MQTT РАЦИЯ]
         // =====================================================================
@@ -427,6 +356,7 @@
             send(topic, msg) { if (this.client && this.client.connected) this.client.publish(topic, msg, {qos:1, retain: false}); }
             disconnect() { if (this.client) this.client.end(true); this.onStatus(false); this.activeTopics = []; }
         }
+
         // =====================================================================
         // [УЗЕЛ 05: ФИЗИКА ЗЕМЛИ И ФИНАНСОВ]
         // =====================================================================
@@ -501,8 +431,10 @@
             generateXmrLink: (addr, amt) => `monero:${addr}${amt?`?tx_amount=${amt}`:''}`,
             generateUsdtLink: (addr, amt) => `trust://send?asset=c195&address=${addr}&amount=${amt||0}`
         };
+
         const cry = new Crystal108Codec(); const sg = new ShadowGateway();
         const checkPWA = ()=> window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone || document.referrer.includes('android-app://');
+
         // =====================================================================
         // [УЗЕЛ 04: ЯДРО ЛОГИКИ VUE]
         // =====================================================================
@@ -517,7 +449,7 @@
                 sysLogs: [], showLogsPanel: false, settings: { sound: true, notifs: true },
                 sonarStatus: '', sonarTimer: null, fieldLocked: false, mqttReady: false,
                 modem: new AcousticModem(), optic: new OpticalLink(), isListeningAc: false,
-                
+                // Новые переменные Трояна (Такт 1)
                 showActionSheet: false, longPressTimer: null, longPressTriggered: false,
                 showContactProfile: false, contactProfileThread: null
             },
@@ -539,11 +471,12 @@
                     
                     if (val !== clean) { this.inputText = clean; this.clickSound(true); }
                     
+                    // АВТО-РАСШИФРОВКА БУФЕРА
                     if (/^\d{108}$/.test(clean)) {
                         const cipher = clean;
-                        this.inputText = ''; 
+                        this.inputText = ''; // Очищаем поле немедленно
                         this.$nextTick(() => {
-                            this.inputText = cipher; 
+                            this.inputText = cipher; // Временно возвращаем для декодера
                             this.decryptManual();
                         });
                     }
@@ -563,6 +496,7 @@
                 if (this.mqtt) this.mqtt.disconnect();
                 if (this.sonarTimer) clearTimeout(this.sonarTimer);
             },
+
             methods: {
                 log(t) { const time = new Date().toLocaleTimeString().slice(0,8); this.sysLogs.unshift(`[${time}] ${t}`); if (this.sysLogs.length > 80) this.sysLogs.pop(); },
                 copyLogs() { this.copy(this.sysLogs.join('\n'), 'Журнал скопирован'); },
@@ -747,7 +681,7 @@
                             const senderId = parts[1]; const senderName = parts[2]; const msgId = parseInt(parts[3],10); const text = parts.slice(4).join('|');
                             if (senderId === this.myId) return; 
                             let thread = this.threads.find(t => t.peerId === senderId);
-                            if (!thread) { this.log(`[ERR] Спам-блок от ${senderId}`); return; } // Взаимность
+                            if (!thread) { this.log(`[ERR] Спам-блок от ${senderId}`); return; } 
                             if (this.mqttOnline) { this.mqtt.send(topic, cry.collapse(`ACK|${this.myId}|${msgId}`, 0)); }
                             if (this.messages[senderId] && this.messages[senderId].some(m => !m.isMe && m.originalId === msgId)) { return; }
                             const msgObj = { id: Date.now(), originalId: msgId, text: text, isMe: false, time: new Date().toLocaleTimeString().slice(0,5), status: 3, senderName: senderName };
@@ -761,7 +695,6 @@
                 checkFieldLock() { if (!this.activeThread || this.activeThread.type === 'citadel') { this.fieldLocked = false; return; } const myL = (this.messages[this.activeThread.peerId] || []).filter(m => m.isMe).slice(-1)[0]; this.fieldLocked = myL && myL.status === 2; },
                 scrollBot() { this.$nextTick(()=>{ const b = this.$refs.msgBox; if(b) b.scrollTop = b.scrollHeight + 100; }); },
                 
-                // ИСПРАВЛЕНИЕ 3: МЕТОДЫ ДОБАВЛЕНЫ ОБРАТНО, ЗАПЯТЫЕ СОБЛЮДЕНЫ
                 reqGyro() {
                     if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
                         try { DeviceMotionEvent.requestPermission().then(res => { if (res === 'granted') alert('Гироскоп активен'); }); } catch(e) {}
