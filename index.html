@@ -3,166 +3,209 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>ХРАМ 5.5 | СРЕТЕНИЕ</title>
+    <title>ХРАМ 5.6 | ПОЛИС</title>
     <script src="https://unpkg.com"></script>
     <script src="https://cloudflare.com"></script>
     <script src="https://unpkg.com"></script>
     <style>
         :root { --bg: #0b141a; --panel: #111b21; --accent: #00a884; --text: #e9edef; --dim: #8696a0; --danger: #f15c6d; --blue: #34b7f1; }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         body { margin: 0; background: var(--bg); color: var(--text); font-family: -apple-system, sans-serif; height: 100vh; overflow: hidden; }
         #app { display: flex; flex-direction: column; height: 100vh; padding-top: env(safe-area-inset-top); }
+        
+        /* Стартовая страница */
+        .intro { padding: 30px; text-align: center; display: flex; flex-direction: column; justify-content: center; height: 100%; }
+        .pwa-hint { background: var(--panel); padding: 20px; border-radius: 15px; margin-top: 20px; border: 1px dashed var(--accent); }
+        
         .header { background: var(--panel); padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
         .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 5px; background: #555; }
         .online { background: var(--accent); box-shadow: 0 0 10px var(--accent); }
-        .main { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
-        .card { background: var(--panel); padding: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05); position: relative; }
-        .msg-own { align-self: flex-end; border-right: 3px solid var(--accent); background: #054740; }
-        .msg-ext { align-self: flex-start; border-left: 3px solid var(--blue); }
-        .btn { background: var(--accent); color: white; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; margin: 4px 0; }
-        .btn:active { opacity: 0.7; }
-        .btn-blue { background: var(--blue); }
-        .terminal { background: #000; color: #0f0; font-family: monospace; padding: 8px; border-radius: 6px; font-size: 11px; max-height: 100px; overflow-y: auto; margin-top: 5px; }
+        
+        .main { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 10px; }
+        .card { background: var(--panel); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); }
+        .msg-own { align-self: flex-end; border-right: 4px solid var(--accent); background: #054740; max-width: 85%; }
+        .msg-ext { align-self: flex-start; border-left: 4px solid var(--blue); max-width: 85%; }
+        
+        .btn { background: var(--accent); color: white; border: none; padding: 14px; border-radius: 10px; font-weight: bold; cursor: pointer; width: 100%; margin: 8px 0; font-size: 16px; }
+        .btn:active { transform: scale(0.97); opacity: 0.8; }
+        .btn-outline { background: transparent; border: 1px solid var(--accent); color: var(--accent); }
+        
+        .terminal { background: #000; color: #0f0; font-family: monospace; padding: 10px; border-radius: 8px; font-size: 11px; max-height: 120px; overflow-y: auto; border: 1px solid #333; text-align: left; }
+        
         .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 100; padding: 20px; display: flex; flex-direction: column; justify-content: center; }
-        input, select { background: #2a3942; border: none; color: white; padding: 12px; border-radius: 8px; width: 100%; margin: 8px 0; outline: none; }
-        .badge { font-size: 9px; padding: 2px 5px; border-radius: 4px; background: rgba(0,0,0,0.3); color: var(--dim); }
+        input { background: #2a3942; border: none; color: white; padding: 14px; border-radius: 10px; width: 100%; margin: 10px 0; font-size: 16px; }
     </style>
 </head>
 <body>
     <div id="app">
-        <div v-if="!isLogged" class="modal">
-            <h2 style="text-align:center">ХРАМ 5.5</h2>
-            <button class="btn" @click="entropyBoot">🌀 Вход по гироскопу</button>
-            <div class="terminal" v-if="logs.length"><div v-for="log in logs">> {{ log }}</div></div>
+        <!-- 0. ИНСТРУКЦИЯ PWA -->
+        <div v-if="!isStandalone && !isLogged" class="intro">
+            <h1>ХРАМ 5.6</h1>
+            <p>Система должна быть изолирована от браузера.</p>
+            <div class="pwa-hint">
+                <p>Нажми <strong>«Поделиться»</strong> <br> (квадрат со стрелкой)</p>
+                <p>Выбери <strong>«На экран Домой»</strong></p>
+            </div>
+            <button class="btn btn-outline" style="margin-top:20px" @click="isStandalone = true">Я уже зашел из Домой</button>
         </div>
 
-        <template v-else>
+        <!-- 1. АВТОРИЗАЦИЯ -->
+        <div v-if="isStandalone && !isLogged" class="modal">
+            <h2>ВХОД В ХРАМ</h2>
+            <button class="btn" @click="entropyBoot">🌀 Снять ритм гироскопа</button>
+            <div class="terminal" v-if="logs.length">
+                <div v-for="log in logs">> {{ log }}</div>
+            </div>
+        </div>
+
+        <!-- 2. ОСНОВНОЙ ХРАМ -->
+        <template v-else-if="isLogged">
             <div class="header">
                 <div><span class="status-dot" :class="{online: connected}"></span> {{ nodeId }}</div>
-                <div @click="showSettings = !showSettings">⚙️</div>
+                <div @click="showSettings = !showSettings" style="font-size: 20px;">⚙️</div>
             </div>
 
             <div class="main">
+                <!-- Настройки -->
                 <div v-if="showSettings" class="card">
-                    <button class="btn btn-blue" @click="startEmpathy">🧠 Проверка Эмпатии</button>
-                    <button class="btn" @click="showSlotModal = true">📦 Создать Слот (Товар)</button>
-                    <button class="btn" style="background:#444" @click="isLogged = false">Выход</button>
+                    <h3>Управление Узлом</h3>
+                    <button class="btn btn-outline" @click="startEmpathy">🧠 Детектор Эмпатии</button>
+                    <button class="btn" @click="showSlotModal = true">📦 Создать Слот</button>
+                    <button class="btn btn-outline" style="color:var(--danger); border-color:var(--danger)" @click="burn">🗑 Сжечь сессию</button>
                 </div>
 
+                <!-- Сообщения и Слоты -->
                 <div v-for="m in messages" :key="m.id" class="card" :class="m.sender === nodeId ? 'msg-own' : 'msg-ext'">
-                    <div style="font-size:10px; color:var(--dim); margin-bottom:4px;">{{ m.sender }} <span class="badge">{{ m.type }}</span></div>
+                    <div style="font-size:10px; color:var(--dim); margin-bottom:5px;">{{ m.sender }}</div>
                     <div v-if="m.type === 'SLOT'">
-                        <div style="color:var(--accent); font-weight:bold">🛒 {{ m.title }}</div>
-                        <div>{{ m.body }}</div>
-                        <div style="margin-top:5px; font-size:1.2em">{{ m.price }} XMR</div>
-                        <button v-if="m.sender !== nodeId" class="btn" style="margin-top:10px" @click="buySlot(m)">КУПИТЬ</button>
+                        <h4 style="margin:0; color:var(--accent)">🛒 {{ m.title }}</h4>
+                        <p style="margin:5px 0">{{ m.body }}</p>
+                        <div style="font-size:1.2em; font-weight:bold">{{ m.price }} XMR</div>
+                        <button v-if="m.sender !== nodeId" class="btn" style="margin-top:10px" @click="buy(m)">Вступить в сделку</button>
                     </div>
                     <div v-else>{{ m.body }}</div>
-                    <div v-if="m.truth" style="font-size:10px; color:#0f0">Искренность: {{ m.truth }}%</div>
+                    <div v-if="m.truth" style="font-size:11px; color:#0f0; margin-top:5px">✓ Искренность: {{ m.truth }}%</div>
                 </div>
             </div>
 
             <div class="header" style="border-top:1px solid rgba(255,255,255,0.1)">
-                <input v-model="input" @keyup.enter="sendMsg" placeholder="Сообщение или Слот...">
+                <input v-model="input" @keyup.enter="send('TEXT')" placeholder="Введите сообщение...">
             </div>
         </template>
 
+        <!-- МОДАЛКИ -->
         <div v-if="showSlotModal" class="modal">
-            <h3>Новый Слот</h3>
-            <input v-model="slotData.title" placeholder="Название товара">
-            <input v-model="slotData.body" placeholder="Описание и доставка">
-            <input type="number" v-model="slotData.price" placeholder="Цена в XMR">
-            <button class="btn" @click="createSlot">Опубликовать в ХРАМ</button>
-            <button class="btn" style="background:#444" @click="showSlotModal = false">Отмена</button>
+            <h3>НОВЫЙ СЛОТ</h3>
+            <input v-model="slot.title" placeholder="Что предлагаете?">
+            <input v-model="slot.body" placeholder="Описание и условия">
+            <input type="number" v-model="slot.price" placeholder="Цена в XMR">
+            <button class="btn" @click="publishSlot">Опубликовать</button>
+            <button class="btn btn-outline" @click="showSlotModal = false">Отмена</button>
         </div>
 
-        <div v-if="empathyActive" class="modal" style="text-align:center">
-            <h3>{{ empStep === 'target' ? 'ЦЕЛЬ' : `Калибровка ${empStep+1}/3` }}</h3>
-            <h2 style="margin:20px 0">{{ empQuest }}</h2>
-            <div style="display:flex; gap:10px">
-                <button class="btn" @click="recEmp(true)">ДА</button>
-                <button class="btn" style="background:var(--danger)" @click="recEmp(false)">НЕТ</button>
+        <div v-if="empActive" class="modal" style="text-align:center">
+            <h3>{{ empStep === 'target' ? 'ЦЕЛЕВОЙ ВОПРОС' : `КАЛИБРОВКА ${empStep+1}/3` }}</h3>
+            <h2 style="margin:30px 0">{{ empQuest }}</h2>
+            <div style="display:flex; gap:15px">
+                <button class="btn" @click="handleEmp(true)">✅ ДА</button>
+                <button class="btn" style="background:var(--danger)" @click="handleEmp(false)">❌ НЕТ</button>
             </div>
         </div>
     </div>
 
     <script>
-        const { createApp, ref } = Vue;
+        const { createApp, ref, onMounted } = Vue;
         createApp({
             setup() {
-                const isLogged = ref(false), nodeId = ref(''), connected = ref(false), input = ref(''), logs = ref([]), messages = ref([]), showSettings = ref(false);
-                const showSlotModal = ref(false), slotData = ref({title:'', body:'', price:''}), empathyActive = ref(false), empStep = ref(0), empQuest = ref(''), baseJ = ref(0), calib = [];
-                let client, secretKey = '';
+                const isStandalone = ref(window.navigator.standalone || false);
+                const isLogged = ref(false), nodeId = ref(''), connected = ref(false);
+                const input = ref(''), logs = ref([]), messages = ref([]), showSettings = ref(false);
+                const showSlotModal = ref(false), slot = ref({title:'', body:'', price:''});
+                const empActive = ref(false), empStep = ref(0), empQuest = ref(''), baseJ = ref(0), calib = [];
+                let client, secret = '';
 
-                const log = m => { logs.value.unshift(m); if(logs.value.length>5) logs.value.pop(); };
+                const log = m => { logs.value.unshift(m); if(logs.value.length>6) logs.value.pop(); };
 
                 const entropyBoot = async () => {
-                    log("Замер энтропии...");
-                    if(window.DeviceMotionEvent?.requestPermission) await DeviceMotionEvent.requestPermission();
+                    log("Инициация... Держите телефон 3 сек.");
+                    if(window.DeviceMotionEvent?.requestPermission) {
+                        const res = await DeviceMotionEvent.requestPermission();
+                        if(res !== 'granted') return log("Нет доступа к гироскопу");
+                    }
                     let s = [];
-                    const h = e => s.push(Math.sqrt(e.accelerationIncludingGravity.x**2 + e.accelerationIncludingGravity.y**2 + e.accelerationIncludingGravity.z**2));
+                    const h = e => {
+                        const a = e.accelerationIncludingGravity;
+                        if(a) s.push(Math.sqrt(a.x**2 + a.y**2 + a.z**2));
+                    };
                     window.addEventListener('devicemotion', h);
                     setTimeout(() => {
                         window.removeEventListener('devicemotion', h);
                         let d = 0; for(let i=1; i<s.length; i++) d += Math.abs(s[i]-s[i-1]);
-                        secretKey = CryptoJS.SHA256(d.toString()).toString();
-                        nodeId.value = 'NODE_' + secretKey.substring(0,4);
+                        if(d === 0) return log("Ошибка: телефон был неподвижен");
+                        secret = CryptoJS.SHA256(d.toString()).toString();
+                        nodeId.value = 'NODE_' + secret.substring(0,6).toUpperCase();
                         isLogged.value = true;
-                        initMQTT();
-                    }, 2000);
+                        init();
+                    }, 3000);
                 };
 
-                const initMQTT = () => {
+                const init = () => {
                     client = mqtt.connect('wss://broker.emqx.io:8084/mqtt');
-                    client.on('connect', () => { connected.value = true; client.subscribe('hram_108_global'); log("Эфир активен"); });
+                    client.on('connect', () => { 
+                        connected.value = true; 
+                        client.subscribe('hram_global_v56'); 
+                        log("Эфир синхронизирован");
+                    });
                     client.on('message', (t, m) => {
-                        try {
-                            const d = JSON.parse(m.toString());
-                            messages.value.push(d);
-                        } catch(e) {}
+                        try { messages.value.push(JSON.parse(m.toString())); } catch(e) {}
                     });
                 };
 
-                const sendMsg = (type = 'TEXT', customData = null) => {
-                    if(!input.value && !customData) return;
-                    const payload = customData || { id: Date.now(), sender: nodeId.value, type, body: input.value };
-                    client.publish('hram_108_global', JSON.stringify(payload));
+                const send = (type, data = null) => {
+                    const p = data || { id: Date.now(), sender: nodeId.value, type, body: input.value };
+                    client.publish('hram_global_v56', JSON.stringify(p));
                     input.value = '';
                 };
 
-                const createSlot = () => {
-                    sendMsg('SLOT', { id: Date.now(), sender: nodeId.value, type: 'SLOT', ...slotData.value });
+                const publishSlot = () => {
+                    send('SLOT', { id: Date.now(), sender: nodeId.value, type: 'SLOT', ...slot.value });
                     showSlotModal.value = false;
                     log("Слот опубликован");
                 };
 
                 const startEmpathy = () => {
-                    empStep.value = 0; empQuest.value = "1+1=2?"; calib.length = 0; empathyActive.value = true;
+                    empStep.value = 0; empQuest.value = "1 + 1 = 2?"; calib.length = 0; empActive.value = true;
                 };
 
-                const recEmp = (ans) => {
-                    let m = 0; const h = e => m = Math.sqrt(e.accelerationIncludingGravity.x**2 + e.accelerationIncludingGravity.y**2 + e.accelerationIncludingGravity.z**2);
+                const handleEmp = (ans) => {
+                    let m = 0;
+                    const h = e => {
+                        const a = e.accelerationIncludingGravity;
+                        if(a) m = Math.sqrt(a.x**2 + a.y**2 + a.z**2);
+                    };
                     window.addEventListener('devicemotion', h);
                     setTimeout(() => {
                         window.removeEventListener('devicemotion', h);
                         if(empStep.value === 'target') {
-                            const p = Math.max(0, Math.min(100, 100 - (Math.abs(m-baseJ.value)*60)));
-                            sendMsg('TEXT', { id: Date.now(), sender: nodeId.value, type: 'VERIFY', body: 'Верификация пройдена', truth: p.toFixed(0) });
-                            empathyActive.value = false; return;
+                            const diff = Math.abs(m - baseJ.value);
+                            const truth = Math.max(0, Math.min(100, 100 - (diff * 70))).toFixed(0);
+                            send('TEXT', { id: Date.now(), sender: nodeId.value, type: 'VERIFY', body: 'ПОДТВЕРЖДЕНО ЭМПАТИЕЙ', truth });
+                            empActive.value = false; return;
                         }
                         calib.push(m); empStep.value++;
-                        if(empStep.value < 3) empQuest.value = "Вы человек?";
-                        else { baseJ.value = calib.reduce((a,b)=>a+b,0)/3; empStep.value = 'target'; empQuest.value = "СДЕЛКА ЧЕСТНАЯ?"; }
-                    }, 200);
+                        if(empStep.value < 3) empQuest.value = (empStep.value === 1) ? "Вы человек?" : "Сейчас май?";
+                        else { 
+                            baseJ.value = calib.reduce((a,b)=>a+b,0)/calib.length; 
+                            empStep.value = 'target'; 
+                            empQuest.value = "ВАШИ НАМЕРЕНИЯ ЧИСТЫ?"; 
+                        }
+                    }, 300);
                 };
 
-                const buySlot = (slot) => {
-                    input.value = `ЗАПРОС НА ПОКУПКУ: ${slot.title}`;
-                    sendMsg('ORDER');
-                    log("Запрос отправлен");
-                };
+                const buy = (s) => { input.value = `СДЕЛКА: Хочу купить ${s.title}`; send('TEXT'); };
+                const burn = () => location.reload();
 
-                return { isLogged, nodeId, connected, input, logs, messages, showSettings, showSlotModal, slotData, empathyActive, empStep, empQuest, entropyBoot, sendMsg, createSlot, startEmpathy, recEmp, buySlot };
+                return { isStandalone, isLogged, nodeId, connected, input, logs, messages, showSettings, showSlotModal, slot, empActive, empStep, empQuest, entropyBoot, send, publishSlot, startEmpathy, handleEmp, buy, burn };
             }
         }).mount('#app');
     </script>
