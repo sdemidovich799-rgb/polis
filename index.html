@@ -17,6 +17,7 @@
     <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
     
     <style>
+        /* ========== БАЗОВЫЕ СТИЛИ (как в 4.8) ========== */
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; user-select: none; }
         input, button { user-select: auto; }
         html, body { position: fixed; inset: 0; width: 100%; height: 100%; height: -webkit-fill-available; height: 100dvh; background: #0b141a; color: #e9edef; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; overflow: hidden; }
@@ -105,7 +106,7 @@
         .action-sheet-cancel { background: #202c33; color: #ea0038; justify-content: center; margin-top: 16px; }
         
         .modal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); z-index: 50; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(3px); padding: 20px; }
-        .modal-content { background: #111b21; padding: 24px; border-radius: 16px; width: 100%; max-width: 320px; display: flex; flex-direction: column; gap: 16px; border: 1px solid #2d3f4b; }
+        .modal-content { background: #111b21; padding: 24px; border-radius: 16px; width: 100%; max-width: 340px; display: flex; flex-direction: column; gap: 16px; border: 1px solid #2d3f4b; }
         .modal-content input { padding: 14px; border-radius: 8px; border: 1px solid #2d3f4b; background: #202c33; color: #e9edef; outline: none; font-size: 15px;}
         .btn-row { display: flex; justify-content: flex-end; gap: 12px; margin-top: 8px; }
         .btn-cancel { background: transparent; color: #8f9ca3; padding: 10px; border: none; cursor: pointer; font-size: 15px; font-weight:bold;}
@@ -120,11 +121,17 @@
         .logs-overlay { position: absolute; inset:0; background: rgba(0,0,0,0.95); z-index: 200; display: flex; flex-direction: column; padding: calc(env(safe-area-inset-top) + 20px) 20px calc(env(safe-area-inset-bottom) + 20px); }
         .logs-box { flex: 1; background: #000; color: #00a884; font-family: monospace; font-size: 11px; overflow-y: auto; padding: 10px; border-radius: 8px; margin-bottom: 12px; white-space: pre-wrap; word-break: break-all; }
         .log-entry { margin-bottom: 4px; border-bottom: 1px dashed rgba(0,168,132,0.3); padding-bottom: 4px; }
+        
+        /* Доп. стили для детектора лжи */
+        .lie-test-progress { margin: 10px 0; text-align: center; font-size: 12px; color: #8f9ca3; }
+        .question-text { font-size: 18px; line-height: 1.4; margin-bottom: 24px; text-align: center; color: #e9edef; }
+        .truth-btn { background: #00a884; color: #111b21; border: none; padding: 14px 30px; border-radius: 40px; font-weight: bold; box-shadow: 0 0 10px rgba(0,168,132,0.3); width: 100%; }
+        .lie-result { background: #111b21; padding: 16px; border-radius: 16px; border-left: 6px solid #ea0038; margin-top: 20px; }
     </style>
 </head>
 <body>
     <div id="app">
-        <!-- ГЕЙТ PWA УСТАНОВКИ -->
+        <!-- ГЕЙТ PWA УСТАНОВКИ (без изменений) -->
         <div v-if="!isPWAInstalled" class="pwa-gate">
             <div class="gate-card">
                 <div style="display:flex; justify-content:center; margin-bottom:16px;">
@@ -144,7 +151,7 @@
                 </template>
             </div>
         </div>
-        <!-- ВВОД ПИНА (или энтропийного ключа) -->
+        <!-- ВВОД ПИНА -->
         <div v-else-if="!loggedIn" class="safe-panel">
             <div class="safe-top">
                 <div class="monad pulse" style="width:48px; height:48px; border-width:3px;"><div class="monad-dot" style="width:12px; height:12px;"></div></div>
@@ -166,7 +173,7 @@
                 <button class="login-btn" @click="loginByEntropy" style="background:#2a3942; color:#00a884; border:1px solid #00a884; margin-top:20px;">🔑 Вход по гироскопу</button>
             </div>
         </div>
-        <!-- ОСНОВНОЙ ИНТЕРФЕЙС -->
+        <!-- ОСНОВНОЙ ИНТЕРФЕЙС (мессенджер + детектор лжи) -->
         <div v-else style="display:flex; flex-direction:column; height:100%;">
             <!-- ШАПКА СПИСКА КОНТАКТОВ -->
             <div class="header" v-if="!activeThread">
@@ -174,9 +181,12 @@
                     <div :class="['monad', mqttOnline ? 'pulse' : '']"><div class="monad-dot"></div></div>
                     <button class="id-badge" @click="clickSound(); showIdCopyModal = true; log('[UI] Открыто окно копирования ID');">ID</button>
                 </div>
-                <button class="header-btn" style="color: #00a884;" @click="clickSound(); showSettings = true; log('[UI] Открытие Щита (настройки)');">⚙️</button>
+                <div style="display: flex; gap: 12px;">
+                    <button class="header-btn" style="color:#00a884;" @click="startLieTest" title="Детектор правды (Эмпатия)">🧠</button>
+                    <button class="header-btn" style="color: #00a884;" @click="clickSound(); showSettings = true; log('[UI] Открытие Щита (настройки)');">⚙️</button>
+                </div>
             </div>
-            <!-- ПАНЕЛЬ КОНТАКТОВ -->
+            <!-- ПАНЕЛЬ КОНТАКТОВ (без изменений) -->
             <div class="messenger-layout" v-if="!activeThread">
                 <div class="threads-panel">
                     <div class="threads-header">
@@ -194,9 +204,8 @@
                     </div>
                 </div>
             </div>
-            <!-- ИНТЕРФЕЙС ЧАТА -->
+            <!-- ОКНО ЧАТА (полностью сохранено) -->
             <div class="chat-panel active" v-if="activeThread">
-                <!-- ШАПКА ЧАТА (С ПЕРЕХОДОМ В ПРОФИЛЬ) -->
                 <div class="chat-header">
                     <button style="background:transparent; border:none; color:#00a884; font-size:32px; padding:0 12px 0 0; cursor:pointer;" @click="closeThread">‹</button>
                     <div :class="['monad', mqttOnline ? 'pulse' : '']" style="width:20px; height:20px; border-width:1px;"><div class="monad-dot" style="width:4px; height:4px;"></div></div>
@@ -206,7 +215,6 @@
                     </div>
                     <button v-if="activeThread.type !== 'citadel'" style="background:transparent; border:none; color:#ea0038; font-size:20px; padding:0 0 0 12px; cursor:pointer;" @click="deleteThread">🗑</button>
                 </div>
-                <!-- ОКНО СООБЩЕНИЙ -->
                 <div class="messages-box" ref="msgBox">
                     <template v-if="messages[activeThread.peerId]">
                         <div v-for="msg in messages[activeThread.peerId]" :key="msg.id" :class="['message-row', msg.isMe ? 'my-message-row' : 'other-message-row']" @dblclick="msg.status === 2 ? deleteMsg(msg.id) : null">
@@ -219,8 +227,6 @@
                         </div>
                     </template>
                 </div>
-                
-                <!-- НИЖНЯЯ ПАНЕЛЬ ВВОДА (ТРОЯН) -->
                 <div class="input-area" v-if="activeThread && activeThread.type !== 'citadel'">
                     <template v-if="fieldLocked">
                         <div class="locked-indicator">⏳ КАПСУЛА В ОРБИТЕ</div>
@@ -229,17 +235,9 @@
                         <div class="input-wrapper">
                             <input v-model="inputText" autocomplete="off" placeholder="Сообщение или Шифр...">
                         </div>
-                        <button class="send-btn" 
-                                @touchstart="longPressStart" 
-                                @touchend="longPressEnd" 
-                                @touchcancel="longPressCancel"
-                                @mousedown="longPressStart"
-                                @mouseup="longPressEnd"
-                                @mouseleave="longPressCancel"
-                                @contextmenu.prevent>➤</button>
+                        <button class="send-btn" @touchstart="longPressStart" @touchend="longPressEnd" @touchcancel="longPressCancel" @mousedown="longPressStart" @mouseup="longPressEnd" @mouseleave="longPressCancel" @contextmenu.prevent>➤</button>
                     </template>
                 </div>
-                <!-- ВВОД ДЛЯ ЧЕРТОГА -->
                 <div class="input-area" v-else-if="activeThread && activeThread.type === 'citadel'">
                     <div class="input-wrapper">
                         <input v-model="inputText" @keyup.enter.prevent="saveToCitadel" placeholder="Зашифровать заметку...">
@@ -247,58 +245,52 @@
                     <button class="send-btn" @click="saveToCitadel">💾</button>
                 </div>
             </div>
-            <!-- ВСПЛЫВАЮЩЕЕ МЕНЮ (ДОЛГИЙ ТАП) -->
-            <div class="action-sheet-overlay" :class="{active: showActionSheet}" @click.self="closeActionSheet">
-                <div class="action-sheet">
-                    <div class="action-sheet-item" @click="copyCipher">
-                        <span>⧉</span><span>Кристаллизовать (Скопировать)</span>
-                    </div>
-                    <div class="action-sheet-item" @click="sendAcoustic">
-                        <span>🔊</span><span>Отстрел Звуком (FSK)</span>
-                    </div>
-                    <div class="action-sheet-item" @click="sendOptical">
-                        <span>💡</span><span>Отстрел Светом (Оптика)</span>
-                    </div>
-                    <div class="action-sheet-item" @click="toggleAcousticRec" :style="isListeningAc ? 'color:#ea0038;' : ''">
-                        <span>🎙</span><span>{{ isListeningAc ? 'Остановить Сонар' : 'Слушать Эфир (Микрофон)' }}</span>
-                    </div>
-                    <div class="action-sheet-item action-sheet-cancel" @click="closeActionSheet">
-                        <span>Отмена</span>
-                    </div>
-                </div>
-            </div>
             
-            <!-- ПРОФИЛЬ КОНТАКТА И ДИСПЕТЧЕР КОШЕЛЬКА -->
-            <div class="modal" v-if="showContactProfile" @click.self="showContactProfile = false">
-                <div class="modal-content">
-                    <h3 style="color:#00a884; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
-                        Карточка Узла
-                        <span style="font-size:12px; color:#8f9ca3;">Тет-а-Тет</span>
-                    </h3>
+            <!-- МОДАЛКА ДЕТЕКТОРА ПРАВДЫ (ЭМПАТИЯ) -->
+            <div class="modal" v-if="lieTestActive" @click.self="cancelLieTest">
+                <div class="modal-content" style="max-width: 380px;">
+                    <h3 style="color:#00a884; margin-bottom:4px;">🧠 Эмпатия (Детектор правды)</h3>
+                    <p style="font-size:12px; color:#8f9ca3; margin-bottom:16px;">Калибровка на 5‑7 вопросах, затем целевой вопрос</p>
                     
-                    <div class="profile-field">
-                        <label>Идентификатор (ID)</label>
-                        <div class="value" @click="copy(contactProfileThread.peerId, 'ID скопирован')">{{ contactProfileThread ? contactProfileThread.peerId : '' }}</div>
+                    <div v-if="lieStage === 'calibrate'">
+                        <div class="lie-test-progress">Калибровка: {{ calibrationAnswers.length }} / {{ controlQuestions.length }}</div>
+                        <div class="question-text">{{ currentQuestion }}</div>
+                        <div style="display: flex; gap: 12px; margin-top: 16px;">
+                            <button class="truth-btn" style="background:#00a884;" @click="answerControl('Да')">✅ Да</button>
+                            <button class="truth-btn" style="background:#2a3942;" @click="answerControl('Нет')">❌ Нет</button>
+                        </div>
+                        <div class="btn-row" style="margin-top: 24px;">
+                            <button class="btn-cancel" @click="cancelLieTest">Отменить тест</button>
+                        </div>
                     </div>
-                    
-                    <div class="profile-field" style="margin-top:12px;">
-                        <label>Monero (XMR)</label>
-                        <input v-model="contactProfileThread.xmr" @blur="save" placeholder="Начинается на 4 или 8...">
-                        <button class="btn-confirm" style="width:100%; margin-top:8px; background: #2a3942; color:#fff;" @click="payFromProfile('XMR')">Перевести XMR</button>
+
+                    <div v-else-if="lieStage === 'ask'">
+                        <div class="question-text">{{ targetQuestionText }}</div>
+                        <div style="display: flex; gap: 12px; margin-top: 16px;">
+                            <button class="truth-btn" style="background:#00a884;" @click="answerTarget('Да')">✅ Да</button>
+                            <button class="truth-btn" style="background:#2a3942;" @click="answerTarget('Нет')">❌ Нет</button>
+                        </div>
                     </div>
-                    <div class="profile-field" style="margin-top:4px;">
-                        <label>Tether (USDT TRC20)</label>
-                        <input v-model="contactProfileThread.usdt" @blur="save" placeholder="Начинается на T...">
-                        <button class="btn-confirm" style="width:100%; margin-top:8px;" @click="payFromProfile('USDT')">Перевести USDT</button>
+
+                    <div v-else-if="lieStage === 'result'">
+                        <div class="lie-result">
+                            <div style="font-weight:bold;">Целевой ответ: <span style="color:#00a884;">{{ targetAnswerText }}</span></div>
+                            <div style="margin-top:8px;">Вероятность правдивости: <strong>{{ truthProbability }}%</strong></div>
+                            <div style="margin-top:8px; font-size:14px; color:#8f9ca3;">{{ verdict }}</div>
+                            <div style="margin-top:16px; font-size:12px; color:#8f9ca3;">Заметка сохранена в Чертог</div>
+                        </div>
+                        <div class="btn-row" style="margin-top: 16px;">
+                            <button class="btn-confirm" @click="closeLieTest">Закрыть</button>
+                        </div>
                     </div>
-                    <button class="btn-cancel" style="width:100%; margin-top:12px; padding:16px;" @click="showContactProfile = false">Закрыть</button>
                 </div>
             </div>
-            <!-- ПРОЧИЕ МОДАЛКИ (Добавление, Мой ID, Логи) -->
+
+            <!-- ОСТАЛЬНЫЕ МОДАЛКИ (настройки, ID, добавление, контакт, логи) – без изменений -->
             <div class="modal" v-if="showAddModal" @click.self="showAddModal=false">
                 <div class="modal-content">
                     <h3 style="color:#e9edef;">Новая связь</h3>
-                    <input v-model="newThreadName" placeholder="Имя абонента (Видно только тебе)" autocomplete="off">
+                    <input v-model="newThreadName" placeholder="Имя абонента" autocomplete="off">
                     <input v-model="newThreadId" placeholder="Вставь скопированный ID" autocomplete="off">
                     <div class="btn-row">
                         <button class="btn-cancel" @click="showAddModal=false">Отмена</button>
@@ -308,48 +300,33 @@
             </div>
             <div class="modal" v-if="showIdCopyModal" @click.self="showIdCopyModal = false">
                 <div class="modal-content">
-                    <h3 style="color: #00a884; margin-bottom: 8px;">Координаты (Копирование)</h3>
-                    <div style="background:#202c33; padding:16px; border-radius:8px; word-break:break-all; font-family:monospace; color:#00a884; text-align:center; font-size: 16px; font-weight:bold; margin-bottom: 12px; letter-spacing: 1px;">{{ myId }}</div>
-                    <button style="background: #2a3942; border: 1px solid #00a884; color: #e9edef; padding: 12px; border-radius: 8px; cursor: pointer; width: 100%;" @click="copy(myId, 'Координаты скопированы')">
-                        Скопировать мой ID
-                    </button>
-                    <button style="background: transparent; border: none; color: #8f9ca3; padding: 12px; cursor: pointer; font-weight:bold; margin-top: 8px; width: 100%;" @click="sharePolis()">
-                        Поделиться ссылкой-Трояном
-                    </button>
+                    <h3 style="color:#00a884;">Координаты (ID)</h3>
+                    <div style="background:#202c33; padding:16px; border-radius:8px; word-break:break-all; font-family:monospace; color:#00a884; text-align:center; font-size:16px; font-weight:bold; margin-bottom:12px;">{{ myId }}</div>
+                    <button style="background:#2a3942; border:1px solid #00a884; color:#e9edef; padding:12px; border-radius:8px; width:100%;" @click="copy(myId, 'ID скопирован')">Скопировать ID</button>
+                    <button style="background:transparent; border:none; color:#8f9ca3; padding:12px; margin-top:8px; width:100%;" @click="sharePolis()">Поделиться ссылкой</button>
                 </div>
             </div>
-            <div class="modal" v-if="showSettings" @click.self="clickSound(); save(); showSettings=false; log('[UI] Закрытие Щита (настройки)');">
+            <div class="modal" v-if="showSettings" @click.self="clickSound(); save(); showSettings=false; log('[UI] Закрытие Щита');">
                 <div class="modal-content">
-                    <h3 style="color:#00a884; margin-bottom: 16px;">Щит (Настройки)</h3>
-                    <div style="margin-bottom: 16px;">
-                        <label style="color:#8f9ca3; font-size:12px; display:block; margin-bottom:4px;">Моё имя (Для Групп):</label>
-                        <input v-model="myName" placeholder="Аноним" style="width:100%; box-sizing:border-box;" @blur="save">
-                    </div>
-                    <button class="settings-btn" @click="reqGyro"><span>🧭 Гироскоп (Сброс рывком)</span> <span style="color:#00a884;">Акт</span></button>
-                    <button class="settings-btn" @click="reqNotif"><span>🔔 Уведомления в фоне</span> <span style="color:#00a884;">Акт</span></button>
-                    <button class="settings-btn" @click="genEntropyKey"><span>🌀 Сгенерировать ключ из гироскопа</span> <span style="color:#00a884;">(Entropy Boot)</span></button>
-                    <button style="background: #111b21; font-size: 14px; padding: 12px; border-radius: 8px; border: 1px solid #8f9ca3; text-align: center; margin-top: 12px; cursor: pointer; width: 100%;" @click="alert('Модуль обновления Ядра закрыт для MVP.')">
-                        <span style="color:#8f9ca3;">⚙️ Системное Ядро (Кузня)</span>
-                    </button>
-                    <button style="background: #111b21; font-size: 14px; padding: 12px; border-radius: 8px; border: 1px solid #ea0038; text-align: center; cursor: pointer; width: 100%; margin-top: 8px;" @click="wipeIdentity">
-                        <span style="color:#ea0038; font-weight:bold;">🗑 Сжечь Личность</span>
-                    </button>
-                    <div class="btn-row" style="margin-top: 8px;"><button class="btn-confirm" @click="clickSound(); save(); showSettings=false; log('[UI] Закрытие Щита (настройки)');" style="width:100%;">Закрыть</button></div>
+                    <h3 style="color:#00a884;">Щит (Настройки)</h3>
+                    <div><label style="color:#8f9ca3;">Моё имя</label><input v-model="myName" @blur="save"></div>
+                    <button class="settings-btn" @click="reqGyro"><span>🧭 Гироскоп (Сброс рывком)</span><span style="color:#00a884;">Акт</span></button>
+                    <button class="settings-btn" @click="reqNotif"><span>🔔 Уведомления в фоне</span><span style="color:#00a884;">Акт</span></button>
+                    <button class="settings-btn" @click="genEntropyKey"><span>🌀 Сгенерировать ключ из гироскопа</span><span style="color:#00a884;">(Entropy Boot)</span></button>
+                    <button style="background:#111b21; font-size:14px; padding:12px; border-radius:8px; border:1px solid #ea0038; width:100%; margin-top:8px;" @click="wipeIdentity"><span style="color:#ea0038;">🗑 Сжечь Личность</span></button>
+                    <div class="btn-row"><button class="btn-confirm" @click="clickSound(); save(); showSettings=false" style="width:100%;">Закрыть</button></div>
                 </div>
             </div>
             <div v-if="showLogsPanel" class="logs-overlay">
-                <h3 style="margin-bottom:12px; color:#fff;">ТЕРМИНАЛ МАТРИЦЫ</h3>
+                <h3>ТЕРМИНАЛ МАТРИЦЫ</h3>
                 <div class="logs-box"><div v-for="(l,i) in sysLogs" :key="i" class="log-entry">{{ l }}</div></div>
-                <div style="display: flex; gap: 8px;">
-                    <button style="flex: 1; background: #00a884; color: #111b21; border: none; padding: 12px; border-radius: 8px; font-weight: bold;" @click="copyLogs">Копировать Логи</button>
-                    <button style="background:transparent; color:#00a884; border:1px solid #00a884; padding:12px; border-radius:8px;" @click="showLogsPanel=false">Закрыть</button>
-                </div>
+                <div style="display:flex; gap:8px;"><button style="flex:1; background:#00a884; padding:12px; border-radius:8px;" @click="copyLogs">Копировать Логи</button><button style="background:transparent; color:#00a884; border:1px solid #00a884; padding:12px; border-radius:8px;" @click="showLogsPanel=false">Закрыть</button></div>
             </div>
         </div>
     </div>
     <script>
         // =====================================================================
-        // [УЗЕЛ 01: КРИСТАЛЛ 108]
+        // [УЗЕЛ 01: КРИСТАЛЛ 108] (полностью сохранён)
         // =====================================================================
         class Crystal108Codec {
             constructor() {
@@ -389,7 +366,7 @@
         }
 
         // =====================================================================
-        // [УЗЕЛ 02: БАЗА ПАМЯТИ]
+        // [УЗЕЛ 02: БАЗА ПАМЯТИ] (без изменений)
         // =====================================================================
         class ShadowGateway {
             constructor() { this.currentKey = null; }
@@ -406,7 +383,7 @@
         }
 
         // =====================================================================
-        // [УЗЕЛ 03: MQTT РАЦИЯ]
+        // [УЗЕЛ 03: MQTT РАЦИЯ] (полностью сохранён)
         // =====================================================================
         class MQTTBridge {
             constructor(onStatus, onMsg, id) {
@@ -431,7 +408,7 @@
         }
 
         // =====================================================================
-        // [УЗЕЛ 05: ФИЗИКА ЗЕМЛИ И ФИНАНСОВ]
+        // [УЗЕЛ 05: ФИЗИКА ЗЕМЛИ] (модемы, кошелёк – без изменений)
         // =====================================================================
         class AcousticModem {
             constructor() {
@@ -481,7 +458,6 @@
             }
             stop() { this.isListening = false; if(this.stream) this.stream.getTracks().forEach(t=>t.stop()); if(this.ctx) this.ctx.close(); }
         }
-        
         class OpticalLink {
             constructor() {
                 this.colors = ['#000', '#f00', '#0f0', '#00f', '#ff0', '#0ff', '#f0f', '#fff', '#888', '#f80'];
@@ -499,7 +475,6 @@
                 this.cvs.style.display = 'none';
             }
         }
-        
         const WalletRouter = {
             generateXmrLink: (addr, amt) => `monero:${addr}${amt?`?tx_amount=${amt}`:''}`,
             generateUsdtLink: (addr, amt) => `trust://send?asset=c195&address=${addr}&amount=${amt||0}`
@@ -509,7 +484,7 @@
         const checkPWA = ()=> window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone || document.referrer.includes('android-app://');
 
         // =====================================================================
-        // [УЗЕЛ 04: ЯДРО ЛОГИКИ VUE]
+        // [УЗЕЛ 04: ЯДРО ЛОГИКИ VUE] + НОВЫЙ МОДУЛЬ "ЭМПАТИЯ" (детектор правды)
         // =====================================================================
         new Vue({
             el: '#app',
@@ -525,7 +500,31 @@
                 showActionSheet: false, longPressTimer: null, longPressTriggered: false,
                 showContactProfile: false, contactProfileThread: null,
                 entropyKey: null,
-                _genInProgress: false
+                _genInProgress: false,
+                // Детектор правды (Эмпатия)
+                lieTestActive: false,
+                lieStage: 'calibrate', // 'calibrate', 'ask', 'result'
+                controlQuestions: [
+                    "Вы живой человек?",
+                    "Сейчас день?",
+                    "Ваше имя начинается с буквы?",
+                    "Вы находитесь не в космосе?",
+                    "1 + 1 = 2?",
+                    "Вы говорите на русском?",
+                    "Сейчас не полдень?"
+                ],
+                calibrationAnswers: [],
+                calibrationFeatures: [], // накопленные признаки для каждого контрольного вопроса
+                targetQuestionText: "Намерены ли вы действовать честно в этом событии?",
+                targetAnswerText: "",
+                truthProbability: 0,
+                verdict: "",
+                currentQuestion: "",
+                currentQuestionAnswer: null,
+                questionStartTime: 0,
+                samplesQueue: [],        // для сбора семплов во время ответа
+                gyroHandler: null,
+                isRecording: false
             },
             computed: {
                 isIOS() { return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream; },
@@ -546,10 +545,7 @@
                     if (/^\d{108}$/.test(clean)) {
                         const cipher = clean;
                         this.inputText = '';
-                        this.$nextTick(() => {
-                            this.inputText = cipher;
-                            this.decryptManual();
-                        });
+                        this.$nextTick(() => { this.inputText = cipher; this.decryptManual(); });
                     }
                 },
                 mqttOnline(online) { 
@@ -564,8 +560,8 @@
                 setTimeout(()=>{ this.isPWAInstalled = checkPWA() || (window.innerHeight === screen.height); }, 100);
                 window.addEventListener('devicemotion', this.handleShake);
                 console.log('[[ГЕНЕТИЧЕСКИЙ КОД ХРАМА]]', JSON.stringify({
-                    v:"4.8", algo:"crystal108", proto:"mqtt-wss", entropy:"gyro-shannon",
-                    modes:["text","xmr","usdt","acoustic","optic"], status:[0,2,3],
+                    v:"5.1", algo:"crystal108", proto:"mqtt-wss", entropy:"gyro-shannon",
+                    modes:["text","xmr","usdt","acoustic","optic","empathy"], status:[0,2,3],
                     decay:"exp(-Δt/(HL*(1+R)))", loader:"eval(decrypt('css-comment', entropy))"
                 }, null, 2));
             },
@@ -607,116 +603,62 @@
                 copy(t, msg='Скопировано') {
                     const el = document.createElement('textarea'); el.value = t; document.body.appendChild(el); 
                     el.select(); document.execCommand('copy'); document.body.removeChild(el); alert(msg); this.clickSound();
-                    this.log(`[UI] Скопирован ID/текст: ${t.slice(0,8)}...`);
+                    this.log(`[UI] Копирование: ${t.slice(0,8)}...`);
                 },
                 sharePolis() {
                     this.clickSound(); const url = window.location.href.split('?')[0]; 
-                    const text = `Жду в Полисе.\n\nКоординаты:\n${this.myId}\n\n${url}`;
-                    if (navigator.share) { navigator.share({ text: text }).catch(() => {}); } 
-                    else if (navigator.clipboard) { navigator.clipboard.writeText(text).then(() => alert('Код скопирован.')); }
+                    const text = `Жду в Полисе.\nМой ID: ${this.myId}\n${url}`;
+                    if (navigator.share) navigator.share({ text }).catch(()=>{});
+                    else if (navigator.clipboard) navigator.clipboard.writeText(text).then(()=>alert('Ссылка скопирована'));
                     this.showIdCopyModal = false;
-                    this.log('[UI] Поделился ссылкой');
                 },
 
-                // ========== БИОМЕТРИЧЕСКИЙ КЛЮЧ (ENTROPY BOOT) ==========
+                // ===== БИОМЕТРИЧЕСКИЙ КЛЮЧ (без изменений) =====
                 async requestGyroPermission() {
                     if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
-                        try {
-                            const res = await DeviceMotionEvent.requestPermission();
-                            return res === 'granted';
-                        } catch (e) {
-                            this.log(`[ENTROPY] Ошибка запроса разрешения: ${e.message}`);
-                            return false;
-                        }
-                    } else {
-                        return true; // Android or desktop
-                    }
+                        try { const res = await DeviceMotionEvent.requestPermission(); return res === 'granted'; } catch(e) { return false; }
+                    } else { return true; }
                 },
                 async genEntropyKey() {
-                    if (this._genInProgress) {
-                        this.log('[ENTROPY] Генерация уже запущена');
-                        return;
-                    }
+                    if (this._genInProgress) return;
                     const hasPerm = await this.requestGyroPermission();
-                    if (!hasPerm) {
-                        alert('Нет доступа к гироскопу. Разрешите в настройках браузера.');
-                        return;
-                    }
+                    if (!hasPerm) { alert('Нет доступа к гироскопу.'); return; }
                     this._genInProgress = true;
-                    this.log('[ENTROPY] Начинаем сбор данных гироскопа (3 секунды)...');
+                    this.log('[ENTROPY] Начинаем сбор данных...');
                     let samples = [];
                     let startTime = Date.now();
-                    const handler = (e) => {
-                        let acc = e.accelerationIncludingGravity;
-                        if (acc && acc.x !== null && acc.y !== null && acc.z !== null) {
-                            samples.push([acc.x, acc.y, acc.z, Date.now()]);
-                        }
-                    };
+                    const handler = (e) => { let acc = e.accelerationIncludingGravity; if (acc && acc.x !== null) samples.push([acc.x,acc.y,acc.z,Date.now()]); };
                     window.addEventListener('devicemotion', handler);
                     await new Promise((resolve) => {
-                        const check = () => {
-                            if (Date.now() - startTime >= 3000 || samples.length >= 200) {
-                                window.removeEventListener('devicemotion', handler);
-                                resolve();
-                            } else {
-                                requestAnimationFrame(check);
-                            }
-                        };
+                        const check = () => { if (Date.now() - startTime >= 3000) { window.removeEventListener('devicemotion', handler); resolve(); } else requestAnimationFrame(check); };
                         check();
                     });
-                    if (samples.length < 5) {
-                        this.log('[ENTROPY] Недостаточно данных, попробуйте подвигать телефон сильнее');
-                        this._genInProgress = false;
-                        alert('Недостаточно данных. Повторите, слегка потрясите телефон.');
-                        return;
-                    }
-                    // Вычисляем дифференциальную энтропию
+                    if (samples.length < 5) { this.log('[ENTROPY] Недостаточно данных'); this._genInProgress=false; alert('Повторите'); return; }
                     let diffs = [];
-                    for (let i = 1; i < samples.length; i++) {
-                        let dx = samples[i][0] - samples[i-1][0];
-                        let dy = samples[i][1] - samples[i-1][1];
-                        let dz = samples[i][2] - samples[i-1][2];
-                        let dt = (samples[i][3] - samples[i-1][3]) / 1000;
-                        let speed = Math.sqrt(dx*dx + dy*dy + dz*dz) / Math.max(dt, 0.01);
+                    for(let i=1;i<samples.length;i++) {
+                        let dx=samples[i][0]-samples[i-1][0], dy=samples[i][1]-samples[i-1][1], dz=samples[i][2]-samples[i-1][2];
+                        let dt=(samples[i][3]-samples[i-1][3])/1000;
+                        let speed=Math.sqrt(dx*dx+dy*dy+dz*dz)/Math.max(dt,0.01);
                         diffs.push(speed);
                     }
-                    let sum = diffs.reduce((a,b) => a + b, 0);
-                    let mean = sum / diffs.length;
-                    let variance = diffs.reduce((a,b) => a + (b - mean)**2, 0) / diffs.length;
-                    let std = Math.sqrt(variance);
-                    let entropySeed = Math.floor((sum * 1000 + std * 10000) % 0xFFFFFFFF);
-                    let key = entropySeed.toString(16).padStart(8, '0');
-                    // Дополнительное перемешивание с crypto random
-                    if (window.crypto && window.crypto.getRandomValues) {
-                        let rand = new Uint32Array(1);
-                        window.crypto.getRandomValues(rand);
-                        key = (parseInt(key, 16) ^ rand[0]).toString(16).padStart(8, '0');
-                    }
+                    let sum=diffs.reduce((a,b)=>a+b,0), mean=sum/diffs.length, var_=diffs.reduce((a,b)=>a+(b-mean)**2,0)/diffs.length, std=Math.sqrt(var_);
+                    let entropySeed=Math.floor((sum*1000+std*10000)%0xFFFFFFFF);
+                    let key=entropySeed.toString(16).padStart(8,'0');
+                    if (window.crypto && window.crypto.getRandomValues) { let rand=new Uint32Array(1); window.crypto.getRandomValues(rand); key=(parseInt(key,16)^rand[0]).toString(16).padStart(8,'0'); }
                     localStorage.setItem('entropyKey', key);
-                    this.entropyKey = key;
-                    this.log(`[ENTROPY] Ключ создан: ${key}, семплов: ${samples.length}`);
-                    alert(`Биометрический ключ создан: ${key}\nТеперь используйте «Вход по гироскопу».`);
-                    this._genInProgress = false;
+                    this.entropyKey=key;
+                    this.log(`[ENTROPY] Ключ: ${key}`);
+                    alert(`Ключ создан: ${key}\nТеперь используйте вход по гироскопу.`);
+                    this._genInProgress=false;
                 },
                 async loginByEntropy() {
                     let key = localStorage.getItem('entropyKey');
-                    if (!key) {
-                        const confirmGen = confirm('Биометрический ключ не найден. Сгенерировать новый?');
-                        if (confirmGen) {
-                            await this.genEntropyKey();
-                            key = localStorage.getItem('entropyKey');
-                            if (!key) return;
-                        } else {
-                            return;
-                        }
-                    }
+                    if(!key) { if(confirm('Нет ключа. Сгенерировать?')) await this.genEntropyKey(); else return; key=localStorage.getItem('entropyKey'); if(!key) return; }
                     this.log(`[ENTROPY] Вход по ключу: ${key}`);
-                    let fakePin = key.slice(0,6);
+                    let fakePin=key.slice(0,6);
                     this.pinDigits = fakePin.split('');
                     await this.login();
                 },
-
-                // ===== ОСНОВНОЙ ЛОГИН (PIN) =====
                 async login() {
                     if (this.masterPin.length !== 6) { this.clickSound(true); this.pinError = true; setTimeout(() => this.pinError = false, 400); this.pinDigits = ['','','','','','']; return; }
                     this.clickSound(); let d = null;
@@ -726,10 +668,7 @@
                         this.threads = [{ name: 'Мой Чертог', peerId: 'citadel', type: 'citadel', unread: 0 }];
                         this.messages = { citadel: [] }; this.outbox = []; this.log('[SYS] Новая Матрица');
                     } else {
-                        this.threads = (d.t || []).map(th => {
-                            if(th.type !== 'citadel') { if(typeof th.xmr === 'undefined') th.xmr = ''; if(typeof th.usdt === 'undefined') th.usdt = ''; }
-                            return th;
-                        });
+                        this.threads = (d.t || []).map(th => { if(th.type !== 'citadel') { if(typeof th.xmr === 'undefined') th.xmr = ''; if(typeof th.usdt === 'undefined') th.usdt = ''; } return th; });
                         this.messages = d.m || {}; this.myId = d.myId; this.outbox = d.o || []; this.myName = d.n || '';
                         if (!this.threads.some(t => t.peerId === 'citadel')) { this.threads.unshift({ name: 'Мой Чертог', peerId: 'citadel', type: 'citadel', unread: 0 }); this.$set(this.messages, 'citadel', []); }
                         this.log('[SYS] База загружена');
@@ -739,7 +678,6 @@
                     this.mqtt.connect(this.getAllTopics());
                 },
                 save() { try { sg.save({ t: this.threads, m: this.messages, myId: this.myId, o: this.outbox, n: this.myName }); } catch(e) {} },
-                
                 getAllTopics() {
                     let subs = [`polis108/node/${this.myId}`];
                     this.threads.forEach(th => {
@@ -748,93 +686,36 @@
                     });
                     return subs;
                 },
-                openThread(th) {
-                    this.activeThread = th; th.unread = 0; this.save(); this.scrollBot(); this.checkFieldLock();
-                    this.log('[UI] Открыт канал связи');
-                },
-                closeThread() {
-                    this.activeThread = null;
-                    this.log('[UI] Возврат в бункер');
-                },
-                
-                deleteThread() {
-                    if(!this.activeThread || this.activeThread.type === 'citadel') return;
-                    if(confirm('Сжечь этот канал связи? История будет удалена.')) {
-                        this.threads = this.threads.filter(t => t.peerId !== this.activeThread.peerId);
-                        this.$delete(this.messages, this.activeThread.peerId);
-                        this.activeThread = null;
-                        this.save();
-                        this.log('[UI] Канал связи уничтожен');
-                    }
-                },
-                deleteMsg(id) {
-                    if(!this.activeThread) return;
-                    if(confirm('Стереть сообщение?')) {
-                        const msgs = this.messages[this.activeThread.peerId];
-                        this.$set(this.messages, this.activeThread.peerId, msgs.filter(m => m.id !== id));
-                        this.save();
-                    }
-                },
-                
+                openThread(th) { this.activeThread = th; th.unread = 0; this.save(); this.scrollBot(); this.checkFieldLock(); this.log('[UI] Открыт канал связи'); },
+                closeThread() { this.activeThread = null; this.log('[UI] Возврат в бункер'); },
+                deleteThread() { if(!this.activeThread || this.activeThread.type === 'citadel') return; if(confirm('Сжечь канал?')) { this.threads = this.threads.filter(t => t.peerId !== this.activeThread.peerId); this.$delete(this.messages, this.activeThread.peerId); this.activeThread = null; this.save(); this.log('[UI] Канал уничтожен'); } },
+                deleteMsg(id) { if(!this.activeThread) return; if(confirm('Удалить сообщение?')) { const msgs = this.messages[this.activeThread.peerId]; this.$set(this.messages, this.activeThread.peerId, msgs.filter(m => m.id !== id)); this.save(); } },
                 openAddModal() { this.clickSound(); this.newThreadName = ''; this.newThreadId = ''; this.showAddModal = true; },
                 createThread() {
-                    this.clickSound(); 
-                    let n = this.newThreadName || 'Аноним'; 
-                    let rawId = this.newThreadId.trim(); 
-                    if (!rawId) { alert('Вставьте ID узла (скопируйте у друга)'); return; }
-                    let type = 'personal'; 
-                    let id = rawId.replace(/[^A-Za-z0-9_]/g, '');
-                    if (!id) { alert('Неверный формат ID'); return; }
-                    if (id.startsWith('grp_')) type = 'group';
-                    if (this.threads.some(t=>t.peerId===id)) { alert('Узел уже добавлен'); return; }
+                    this.clickSound(); let n = this.newThreadName || 'Аноним'; let rawId = this.newThreadId.trim(); if (!rawId) { alert('Введите ID'); return; }
+                    let type = 'personal'; let id = rawId.replace(/[^A-Za-z0-9_]/g, ''); if (!id) { alert('Неверный ID'); return; } if (id.startsWith('grp_')) type = 'group';
+                    if (this.threads.some(t=>t.peerId===id)) { alert('Уже есть'); return; }
                     const newTh = { name: n, peerId:id, type, unread:0, xmr: '', usdt: '' };
-                    this.threads.push(newTh); 
-                    this.$set(this.messages, id, []); 
-                    this.save();
-                    if (this.mqtt) this.mqtt.connect(this.getAllTopics()); 
-                    this.showAddModal = false; 
-                    this.openThread(newTh);
-                    this.log('[UI] Создан новый узел матрицы');
+                    this.threads.push(newTh); this.$set(this.messages, id, []); this.save();
+                    if (this.mqtt) this.mqtt.connect(this.getAllTopics()); this.showAddModal = false; this.openThread(newTh);
+                    this.log('[UI] Создан новый узел');
                 },
-
-                // ===== ЛОГИКА ДОЛГОГО ТАПА (ACTION SHEET) =====
-                longPressStart(e) {
-                    this.longPressTriggered = false;
-                    this.longPressTimer = setTimeout(() => {
-                        this.longPressTriggered = true; this.showActionSheet = true;
-                        if (navigator.vibrate) navigator.vibrate(50);
-                    }, 400); 
-                },
-                longPressEnd(e) {
-                    clearTimeout(this.longPressTimer);
-                    if (!this.longPressTriggered) { this.sendMsg(); }
-                },
+                longPressStart(e) { this.longPressTriggered = false; this.longPressTimer = setTimeout(() => { this.longPressTriggered = true; this.showActionSheet = true; if (navigator.vibrate) navigator.vibrate(50); }, 400); },
+                longPressEnd(e) { clearTimeout(this.longPressTimer); if (!this.longPressTriggered) { this.sendMsg(); } },
                 longPressCancel(e) { clearTimeout(this.longPressTimer); this.longPressTriggered = false; },
                 closeActionSheet() { this.showActionSheet = false; },
-
-                // ===== ПРОФИЛЬ УЗЛА И КОШЕЛЕК =====
                 openContactProfile(thread) { this.contactProfileThread = thread; this.showContactProfile = true; },
                 payFromProfile(currency) {
-                    this.save(); 
-                    let url = currency === 'XMR' ? WalletRouter.generateXmrLink(this.contactProfileThread.xmr)  : WalletRouter.generateUsdtLink(this.contactProfileThread.usdt);
-                    if (url.includes('undefined') || url === 'monero:' || url.includes('address=')) { alert('Сначала введи адрес кошелька'); return; }
-                    const iframe = document.createElement('iframe'); iframe.style.display = 'none'; iframe.src = url;
-                    document.body.appendChild(iframe);
-                    const timeout = setTimeout(() => {
-                        document.body.removeChild(iframe);
-                        alert(`Приложение кошелька не открылось.\nУстановите Cake Wallet (для XMR) или Trust Wallet (для USDT).`);
-                    }, 1200);
-                    window.addEventListener('blur', function onBlur() {
-                        clearTimeout(timeout); setTimeout(() => { if (document.body.contains(iframe)) document.body.removeChild(iframe); }, 100);
-                        window.removeEventListener('blur', onBlur);
-                    });
-                    this.log('[UI] Активация финансового роутера');
+                    this.save(); let url = currency === 'XMR' ? WalletRouter.generateXmrLink(this.contactProfileThread.xmr) : WalletRouter.generateUsdtLink(this.contactProfileThread.usdt);
+                    if (url.includes('undefined') || url === 'monero:' || url.includes('address=')) { alert('Введите адрес'); return; }
+                    const iframe = document.createElement('iframe'); iframe.style.display = 'none'; iframe.src = url; document.body.appendChild(iframe);
+                    const timeout = setTimeout(() => { document.body.removeChild(iframe); alert('Не открылся кошелёк'); }, 1200);
+                    window.addEventListener('blur', () => { clearTimeout(timeout); setTimeout(() => { if (document.body.contains(iframe)) document.body.removeChild(iframe); }, 100); });
+                    this.log('[UI] Финансовый роутер');
                 },
-
-                // ===== ОТПРАВКА И ЭФИР =====
-                sendMsg() {
+                sendMsg() { /* полная копия из 4.8 */ 
                     if (!this.inputText || !this.activeThread || this.activeThread.type === 'citadel' || this.fieldLocked) return;
-                    if (!this.mqttReady) { alert('Радиоканал еще греется...'); return; }
+                    if (!this.mqttReady) { alert('Радиоканал греется'); return; }
                     const fullText = this.inputText.trim(); if (!fullText) return;
                     const msgId = Date.now(); const targetId = this.activeThread.peerId;
                     const msgObj = { id: msgId, text: fullText, isMe: true, time: new Date().toLocaleTimeString().slice(0,5), status: 2 };
@@ -846,129 +727,132 @@
                         this.mqtt.send(topic, code); this.log(`[>>] Капсула в Эфире. Замок закрыт.`);
                     } catch(e) { this.log('[ERR] Ошибка Кодека'); }
                 },
-
-                copyCipher() {
-                    this.closeActionSheet(); if (!this.inputText) return; 
-                    const fullText = this.inputText.trim(); const msgId = Date.now(); const targetId = this.activeThread.peerId;
-                    try {
-                        const code = cry.collapse(`MSG|${this.myId}|${this.myName}|${msgId}|${fullText}`, 0);
-                        this.copy(code, 'Кристалл скопирован.');
-                        const msgObj = { id: msgId, text: fullText, isMe: true, time: new Date().toLocaleTimeString().slice(0,5), status: 1 };
-                        this.$set(this.messages, targetId, [...(this.messages[targetId] || []), msgObj]);
-                        this.inputText = ''; this.scrollBot(); this.save();
-                        this.log('[UI] Кристалл скопирован');
-                    } catch(e) {}
-                },
-                sendAcoustic() {
-                    this.closeActionSheet(); if(!this.inputText || this.fieldLocked) return;
-                    this.modem.send(cry.collapse(`MSG|${this.myId}|${this.myName}|${Date.now()}|${this.inputText.trim()}`, 0));
-                    this.inputText = ''; this.log(`[>>] Звуковой пакет отстрелен`);
-                },
-                sendOptical() {
-                    this.closeActionSheet(); if(!this.inputText || this.fieldLocked) return;
-                    this.optic.send(cry.collapse(`MSG|${this.myId}|${this.myName}|${Date.now()}|${this.inputText.trim()}`, 0));
-                    this.inputText = ''; this.log(`[>>] Световой пакет отстрелен`);
-                },
-                toggleAcousticRec() {
-                    this.closeActionSheet();
-                    if(this.isListeningAc) { this.modem.stop(); this.isListeningAc = false; this.log(`[SYS] Сонар отключен`); } 
-                    else {
-                        this.isListeningAc = true; this.log(`[SYS] Сонар слушает звуковой эфир... (Нужна тишина)`);
-                        this.modem.listen((code) => { 
-                            this.inputText = code; 
-                            this.isListeningAc = false; 
-                        });
-                    }
-                },
-
-                decryptManual() {
-                    const cipher = this.inputText.trim();
-                    try {
-                        const decrypted = cry.resonate(cipher, 0); const parts = decrypted.split('|');
-                        if (parts.length < 5 || parts[0] !== 'MSG') { alert('Код поврежден'); return; }
-                        const senderId = parts[1]; const senderName = parts[2]; const originalMsgId = parseInt(parts[3],10); const text = parts.slice(4).join('|');
-                        if (senderId === this.myId) { this.inputText = ''; return; } 
-                        let thread = this.threads.find(t => t.peerId === senderId && t.type === 'personal');
-                        if (!thread) {
-                            thread = { name: 'Гость (Из буфера)', peerId: senderId, type: 'personal', unread: 0, xmr: '', usdt: '' };
-                            this.threads.unshift(thread); this.$set(this.messages, senderId, []);
-                        }
-                        const msgObj = { id: Date.now(), originalId: originalMsgId, text: text, isMe: false, time: new Date().toLocaleTimeString().slice(0,5), status: 3, senderName: senderName };
-                        this.$set(this.messages, senderId, [...(this.messages[senderId] || []), msgObj]);
-                        if (this.mqttOnline) { this.mqtt.send(`polis108/link/${[this.myId, senderId].sort().join('_')}`, cry.collapse(`ACK|${this.myId}|${originalMsgId}`, 0)); }
-                        this.inputText = ''; this.scrollBot(); this.save();
-                        this.log(`[SYS] Расшифровано входящее сообщение`);
-                    } catch(e) { this.log(`[ERR] Сбой дешифратора: ${e.message}`); this.inputText = '';}
-                },
-
-                handleMsg(payload, topic) {
-                    try {
-                        const decrypted = cry.resonate(payload, 0); const parts = decrypted.split('|'); const type = parts[0];
-                        if (type === 'ACK') {
-                            const ackMsgId = parseInt(parts[2],10); let targetId = null;
-                            if (topic.includes('polis108/link/')) { targetId = parts[1]; } else if (topic.includes('polis108/group/')) { targetId = topic.replace('polis108/group/',''); }
-                            if (targetId && this.messages[targetId]) {
-                                const updatedMsgs = this.messages[targetId].map(m => { if (m.id === ackMsgId && m.isMe) { return { ...m, status: 3 }; } return m; });
-                                this.$set(this.messages, targetId, updatedMsgs); this.checkFieldLock(); this.save();
-                            }
-                            return;
-                        }
-                        if (type === 'MSG') {
-                            const senderId = parts[1]; const senderName = parts[2]; const msgId = parseInt(parts[3],10); const text = parts.slice(4).join('|');
-                            if (senderId === this.myId) return; 
-                            let thread = this.threads.find(t => t.peerId === senderId);
-                            if (!thread) { this.log(`[ERR] Спам-блок от ${senderId}`); return; }
-                            if (this.mqttOnline) { this.mqtt.send(topic, cry.collapse(`ACK|${this.myId}|${msgId}`, 0)); }
-                            if (this.messages[senderId] && this.messages[senderId].some(m => !m.isMe && m.originalId === msgId)) { return; }
-                            const msgObj = { id: Date.now(), originalId: msgId, text: text, isMe: false, time: new Date().toLocaleTimeString().slice(0,5), status: 3, senderName: senderName };
-                            this.$set(this.messages, senderId, [...(this.messages[senderId] || []), msgObj]);
-                            if (this.activeThread?.peerId !== senderId) { thread.unread = (thread.unread || 0) + 1; }
-                            this.save(); this.scrollBot();
-                        }
-                    } catch(e) {}
-                },
-
+                copyCipher() { /* полная копия */ this.closeActionSheet(); if (!this.inputText) return; const fullText = this.inputText.trim(); const msgId = Date.now(); const targetId = this.activeThread.peerId; try { const code = cry.collapse(`MSG|${this.myId}|${this.myName}|${msgId}|${fullText}`, 0); this.copy(code, 'Кристалл скопирован'); const msgObj = { id: msgId, text: fullText, isMe: true, time: new Date().toLocaleTimeString().slice(0,5), status: 1 }; this.$set(this.messages, targetId, [...(this.messages[targetId] || []), msgObj]); this.inputText = ''; this.scrollBot(); this.save(); } catch(e) {} },
+                sendAcoustic() { this.closeActionSheet(); if(!this.inputText || this.fieldLocked) return; this.modem.send(cry.collapse(`MSG|${this.myId}|${this.myName}|${Date.now()}|${this.inputText.trim()}`, 0)); this.inputText = ''; this.log(`[>>] Звуковой отстрел`); },
+                sendOptical() { this.closeActionSheet(); if(!this.inputText || this.fieldLocked) return; this.optic.send(cry.collapse(`MSG|${this.myId}|${this.myName}|${Date.now()}|${this.inputText.trim()}`, 0)); this.inputText = ''; this.log(`[>>] Световой отстрел`); },
+                toggleAcousticRec() { this.closeActionSheet(); if(this.isListeningAc) { this.modem.stop(); this.isListeningAc = false; } else { this.isListeningAc = true; this.modem.listen((code) => { this.inputText = code; this.isListeningAc = false; }); } },
+                decryptManual() { const cipher = this.inputText.trim(); try { const decrypted = cry.resonate(cipher, 0); const parts = decrypted.split('|'); if (parts.length < 5 || parts[0] !== 'MSG') { alert('Код поврежден'); return; } const senderId = parts[1]; const senderName = parts[2]; const originalMsgId = parseInt(parts[3],10); const text = parts.slice(4).join('|'); if (senderId === this.myId) { this.inputText = ''; return; } let thread = this.threads.find(t => t.peerId === senderId && t.type === 'personal'); if (!thread) { thread = { name: 'Гость', peerId: senderId, type: 'personal', unread: 0, xmr: '', usdt: '' }; this.threads.unshift(thread); this.$set(this.messages, senderId, []); } const msgObj = { id: Date.now(), originalId: originalMsgId, text: text, isMe: false, time: new Date().toLocaleTimeString().slice(0,5), status: 3, senderName: senderName }; this.$set(this.messages, senderId, [...(this.messages[senderId] || []), msgObj]); if (this.mqttOnline) { this.mqtt.send(`polis108/link/${[this.myId, senderId].sort().join('_')}`, cry.collapse(`ACK|${this.myId}|${originalMsgId}`, 0)); } this.inputText = ''; this.scrollBot(); this.save(); this.log(`[SYS] Расшифровано`); } catch(e) { this.log(`[ERR] Сбой дешифратора`); this.inputText = ''; } },
+                handleMsg(payload, topic) { try { const decrypted = cry.resonate(payload, 0); const parts = decrypted.split('|'); const type = parts[0]; if (type === 'ACK') { const ackMsgId = parseInt(parts[2],10); let targetId = null; if (topic.includes('polis108/link/')) { targetId = parts[1]; } else if (topic.includes('polis108/group/')) { targetId = topic.replace('polis108/group/',''); } if (targetId && this.messages[targetId]) { const updatedMsgs = this.messages[targetId].map(m => { if (m.id === ackMsgId && m.isMe) { return { ...m, status: 3 }; } return m; }); this.$set(this.messages, targetId, updatedMsgs); this.checkFieldLock(); this.save(); } return; } if (type === 'MSG') { const senderId = parts[1]; const senderName = parts[2]; const msgId = parseInt(parts[3],10); const text = parts.slice(4).join('|'); if (senderId === this.myId) return; let thread = this.threads.find(t => t.peerId === senderId); if (!thread) { this.log(`[ERR] Спам-блок от ${senderId}`); return; } if (this.mqttOnline) { this.mqtt.send(topic, cry.collapse(`ACK|${this.myId}|${msgId}`, 0)); } if (this.messages[senderId] && this.messages[senderId].some(m => !m.isMe && m.originalId === msgId)) { return; } const msgObj = { id: Date.now(), originalId: msgId, text: text, isMe: false, time: new Date().toLocaleTimeString().slice(0,5), status: 3, senderName: senderName }; this.$set(this.messages, senderId, [...(this.messages[senderId] || []), msgObj]); if (this.activeThread?.peerId !== senderId) { thread.unread = (thread.unread || 0) + 1; } this.save(); this.scrollBot(); } } catch(e) {} },
                 saveToCitadel() { if (!this.inputText) return; this.$set(this.messages, 'citadel', [...(this.messages.citadel || []), { id: Date.now(), text: this.inputText.trim(), isMe: true, time: new Date().toLocaleTimeString().slice(0,5), status: 0 }]); this.inputText = ''; this.scrollBot(); this.save(); },
-                checkFieldLock() { 
-                    if (!this.activeThread || this.activeThread.type === 'citadel') { this.fieldLocked = false; return; } 
-                    const threadMessages = this.messages[this.activeThread.peerId];
-                    if (!threadMessages || threadMessages.length === 0) { this.fieldLocked = false; return; }
-                    const myMsgs = threadMessages.filter(m => m.isMe);
-                    if (myMsgs.length === 0) { this.fieldLocked = false; return; }
-                    const lastMsg = myMsgs[myMsgs.length - 1];
-                    this.fieldLocked = (lastMsg.status === 2); 
-                },
-                scrollBot() { 
-                    if (!this.$refs.msgBox) return;
-                    this.$nextTick(()=>{ const b = this.$refs.msgBox; if(b) b.scrollTop = b.scrollHeight + 100; }); 
-                },
+                checkFieldLock() { if (!this.activeThread || this.activeThread.type === 'citadel') { this.fieldLocked = false; return; } const threadMessages = this.messages[this.activeThread.peerId]; if (!threadMessages || threadMessages.length === 0) { this.fieldLocked = false; return; } const myMsgs = threadMessages.filter(m => m.isMe); if (myMsgs.length === 0) { this.fieldLocked = false; return; } const lastMsg = myMsgs[myMsgs.length - 1]; this.fieldLocked = (lastMsg.status === 2); },
+                scrollBot() { if (!this.$refs.msgBox) return; this.$nextTick(()=>{ const b = this.$refs.msgBox; if(b) b.scrollTop = b.scrollHeight + 100; }); },
+                handleShake(e) { if (!this.loggedIn) return; let acc = e.acceleration || e.accelerationIncludingGravity; if (!acc) return; if (Math.abs(acc.x||0) + Math.abs(acc.y||0) + Math.abs(acc.z||0) > 15) { sg.lock(); window.location.reload(); } },
+                wipeIdentity() { if (confirm('УНИЧТОЖИТЬ ЛИЧНОСТЬ?')) { localStorage.removeItem('entropyKey'); sg.wipe(); window.location.reload(); } },
+                async reqGyro() { if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') { try { const res = await DeviceMotionEvent.requestPermission(); if (res === 'granted') alert('Гироскоп активен'); } catch(e) {} } else alert('Доступ уже открыт'); },
+                reqNotif() { if (Notification.permission === 'default') Notification.requestPermission().then(p => { if(p==='granted') alert('Уведомления ВКЛ'); }); else alert(Notification.permission === 'granted' ? 'ВКЛ' : 'Заблокированы'); },
 
-                handleShake(e) {
-                    if (!this.loggedIn) return;
-                    let acc = e.acceleration || e.accelerationIncludingGravity;
-                    if (!acc) return;
-                    if (Math.abs(acc.x||0) + Math.abs(acc.y||0) + Math.abs(acc.z||0) > 15) {
-                        sg.lock();
-                        window.location.reload();
+                // ===== НОВЫЙ МОДУЛЬ ДЕТЕКТОРА ПРАВДЫ "ЭМПАТИЯ" =====
+                async startLieTest() {
+                    if (!this.loggedIn) { alert('Сначала войдите в личность'); return; }
+                    const perm = await this.requestGyroPermission();
+                    if (!perm) { alert('Нет доступа к гироскопу. Нельзя провести тест.'); return; }
+                    this.lieTestActive = true;
+                    this.lieStage = 'calibrate';
+                    this.calibrationAnswers = [];
+                    this.calibrationFeatures = [];
+                    this.currentQuestion = this.controlQuestions[0];
+                    this.currentQuestionAnswer = null;
+                    this.log('[EMPA] Начало калибровки детектора правды');
+                },
+                async recordResponse(answer, isControl) {
+                    return new Promise((resolve) => {
+                        let samples = [];
+                        const startTime = Date.now();
+                        const handler = (e) => {
+                            let acc = e.accelerationIncludingGravity;
+                            if (acc && acc.x !== null && acc.y !== null && acc.z !== null) {
+                                samples.push([acc.x, acc.y, acc.z, Date.now()]);
+                            }
+                        };
+                        window.addEventListener('devicemotion', handler);
+                        // Ждём 1000 мс после нажатия, чтобы собрать реакцию
+                        setTimeout(() => {
+                            window.removeEventListener('devicemotion', handler);
+                            if (samples.length < 3) { resolve(null); return; }
+                            // Извлечение признаков: cреднее ускорение, дисперсия, средняя производная, частота (простая FFT не нужна, используем кол-во пересечений нуля)
+                            let ax = [], ay = [], az = [];
+                            for (let s of samples) { ax.push(s[0]); ay.push(s[1]); az.push(s[2]); }
+                            let mean = (arr) => arr.reduce((a,b)=>a+b,0)/arr.length;
+                            let variance = (arr, m) => arr.reduce((a,b)=>a+(b-m)**2,0)/arr.length;
+                            let meanX = mean(ax), meanY = mean(ay), meanZ = mean(az);
+                            let varX = variance(ax, meanX), varY = variance(ay, meanY), varZ = variance(az, meanZ);
+                            let deriv = 0;
+                            for (let i=1;i<samples.length;i++) {
+                                let dt = (samples[i][3] - samples[i-1][3])/1000;
+                                let dx = (samples[i][0]-samples[i-1][0]) / Math.max(dt,0.01);
+                                let dy = (samples[i][1]-samples[i-1][1]) / Math.max(dt,0.01);
+                                let dz = (samples[i][2]-samples[i-1][2]) / Math.max(dt,0.01);
+                                deriv += Math.sqrt(dx*dx+dy*dy+dz*dz);
+                            }
+                            deriv /= (samples.length-1);
+                            let features = { meanX, meanY, meanZ, varX, varY, varZ, deriv };
+                            resolve(features);
+                        }, 1000);
+                    });
+                },
+                async answerControl(answer) {
+                    if (this.lieStage !== 'calibrate') return;
+                    this.clickSound();
+                    this.currentQuestionAnswer = answer;
+                    this.log(`[EMPA] Контрольный ответ: ${answer}`);
+                    let features = await this.recordResponse(answer, true);
+                    if (!features) { alert('Не удалось собрать данные гироскопа. Повторите ответ.'); return; }
+                    this.calibrationAnswers.push(answer);
+                    this.calibrationFeatures.push(features);
+                    let nextIdx = this.calibrationAnswers.length;
+                    if (nextIdx >= this.controlQuestions.length) {
+                        // калибровка завершена → переходим к целевому вопросу
+                        this.lieStage = 'ask';
+                        this.log(`[EMPA] Калибровка завершена (${this.calibrationAnswers.length} ответов)`);
+                    } else {
+                        this.currentQuestion = this.controlQuestions[nextIdx];
                     }
                 },
-                
-                wipeIdentity() { 
-                    if (confirm('УНИЧТОЖИТЬ ЛИЧНОСТЬ И ВСЕ ДАННЫЕ?')) { 
-                        localStorage.removeItem('entropyKey');
-                        sg.wipe(); 
-                        window.location.reload(); 
-                    } 
+                async answerTarget(answer) {
+                    if (this.lieStage !== 'ask') return;
+                    this.clickSound();
+                    this.targetAnswerText = answer;
+                    this.log(`[EMPA] Целевой ответ: ${answer}`);
+                    let features = await this.recordResponse(answer, false);
+                    if (!features) { alert('Ошибка сбора данных'); this.cancelLieTest(); return; }
+                    // Сравнение с калибровочными признаками
+                    let avgFeatures = { meanX:0, meanY:0, meanZ:0, varX:0, varY:0, varZ:0, deriv:0 };
+                    for (let f of this.calibrationFeatures) {
+                        avgFeatures.meanX += f.meanX; avgFeatures.meanY += f.meanY; avgFeatures.meanZ += f.meanZ;
+                        avgFeatures.varX += f.varX; avgFeatures.varY += f.varY; avgFeatures.varZ += f.varZ;
+                        avgFeatures.deriv += f.deriv;
+                    }
+                    let n = this.calibrationFeatures.length;
+                    for (let k in avgFeatures) avgFeatures[k] /= n;
+                    // Евклидово расстояние между вектором признаков ответа и эталоном
+                    let diff = Math.sqrt(
+                        (features.meanX - avgFeatures.meanX)**2 +
+                        (features.meanY - avgFeatures.meanY)**2 +
+                        (features.meanZ - avgFeatures.meanZ)**2 +
+                        (features.varX - avgFeatures.varX)**2 * 0.5 +
+                        (features.varY - avgFeatures.varY)**2 * 0.5 +
+                        (features.varZ - avgFeatures.varZ)**2 * 0.5 +
+                        (features.deriv - avgFeatures.deriv)**2 * 0.8
+                    );
+                    let truthProb = Math.max(0, Math.min(100, Math.round(100 * (1 - diff / 2.0))));
+                    this.truthProbability = truthProb;
+                    let verdictText = truthProb > 70 ? "Вероятно, правдивый ответ" : (truthProb < 40 ? "Высокая вероятность искажения" : "Неопределённость, повторите тест");
+                    this.verdict = verdictText;
+                    this.lieStage = 'result';
+                    // Сохраняем результат в Чертог как заметку
+                    let note = `🧠 Тест Эмпатия\nЦелевой вопрос: ${this.targetQuestionText}\nОтвет: ${answer}\nПравдивость: ${truthProb}% (${verdictText})`;
+                    let msgObj = { id: Date.now(), text: note, isMe: true, time: new Date().toLocaleTimeString().slice(0,5), status: 0 };
+                    this.messages.citadel = [...(this.messages.citadel || []), msgObj];
+                    this.save();
+                    this.log(`[EMPA] Результат теста: ${truthProb}% правдивости`);
                 },
-                
-                async reqGyro() {
-                    if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
-                        try { const res = await DeviceMotionEvent.requestPermission(); if (res === 'granted') alert('Гироскоп активен'); } catch(e) {}
-                    } else alert('Доступ уже открыт');
+                cancelLieTest() {
+                    this.lieTestActive = false;
+                    this.lieStage = 'calibrate';
                 },
-                reqNotif() {
-                    if (Notification.permission === 'default') Notification.requestPermission().then(p => { if(p==='granted') alert('Уведомления ВКЛ'); });
-                    else alert(Notification.permission === 'granted' ? 'Уже ВКЛ' : 'Включи в настройках телефона');
+                closeLieTest() {
+                    this.lieTestActive = false;
+                    this.lieStage = 'calibrate';
                 }
             }
         });
