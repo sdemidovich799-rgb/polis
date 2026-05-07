@@ -6,276 +6,268 @@
     <meta name="theme-color" content="#0b141a">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="ХРАМ 6.2">
-    <title>ХРАМ 6.2 · Кинетический вход</title>
+    <meta name="apple-mobile-web-app-title" content="ХРАМ 6.3">
+    <title>ХРАМ 6.3 · Пять ступеней</title>
     <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.min.js"></script>
     <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+    <!-- CryptoJS для хэшей, если потребуется -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; user-select: none; }
         input, button { user-select: auto; }
         html, body { position: fixed; inset: 0; width: 100%; height: 100dvh; background: #0b141a; color: #e9edef; font-family: system-ui, 'Segoe UI', Roboto, sans-serif; overflow: hidden; }
         #app { width: 100%; max-width: 700px; margin: 0 auto; height: 100dvh; display: flex; flex-direction: column; background: #0b141a; }
-
-        .safe-top { padding-top: env(safe-area-inset-top); }
-        .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
-
-        .flex-row { display: flex; align-items: center; gap: 8px; }
-        .btn { background: #00a884; color: #111b21; border: none; padding: 8px 16px; border-radius: 24px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .flex-row { display: flex; align-items: center; gap: 12px; }
+        .btn { background: #00a884; color: #111b21; border: none; padding: 10px 20px; border-radius: 30px; font-weight: bold; cursor: pointer; transition: transform 0.1s; }
+        .btn:active { transform: scale(0.97); }
         .btn-outline { background: transparent; border: 1px solid #00a884; color: #00a884; }
-        .btn-cancel { background: transparent; color: #8f9ca3; padding: 8px 12px; border: none; cursor: pointer; }
-
+        .monad { width: 32px; height: 32px; border: 2px solid rgba(0,168,132,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .monad-dot { width: 8px; height: 8px; background: #00a884; border-radius: 50%; box-shadow: 0 0 8px #00a884; }
         /* калибровка */
-        .gesture-canvas { background: #000; border-radius: 24px; width: 100%; height: 280px; touch-action: none; margin-bottom: 16px; border: 1px solid #2d3f4b; }
-        .gesture-dot { position: absolute; width: 12px; height: 12px; background: #00a884; border-radius: 50%; }
-
-        /* табы */
-        .tab-bar { display: flex; background: #202c33; border-radius: 30px; margin: 12px 16px; }
-        .tab { flex: 1; text-align: center; padding: 10px; border-radius: 30px; cursor: pointer; font-weight: 600; color: #8f9ca3; }
+        .gesture-layer { position: fixed; inset:0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 100; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+        .gesture-card { background: #111b21; border-radius: 32px; padding: 24px; width: 90%; max-width: 500px; border: 1px solid #2d3f4b; }
+        .gesture-canvas { background: #000; border-radius: 24px; width: 100%; height: 300px; touch-action: none; margin: 16px 0; border: 1px solid #2d3f4b; }
+        .point-dot { width: 20px; height: 20px; background: #00a884; border-radius: 50%; position: absolute; transform: translate(-50%, -50%); box-shadow: 0 0 12px #00a884; transition: all 0.1s; }
+        .tab-bar { display: flex; background: #202c33; border-radius: 40px; margin: 12px 16px; }
+        .tab { flex: 1; text-align: center; padding: 10px; border-radius: 40px; font-weight: 600; color: #8f9ca3; cursor: pointer; }
         .tab.active { background: #00a884; color: #111b21; }
-
-        /* лента */
         .feed { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 12px; }
         .card { background: #111b21; border-radius: 20px; padding: 12px 16px; border-left: 4px solid #00a884; }
         .card-meta { font-size: 11px; color: #8f9ca3; display: flex; justify-content: space-between; margin-bottom: 6px; }
         .deal-badge { color: #00a884; font-weight: bold; }
-        .slot-detail { font-size: 13px; margin: 8px 0; }
-        .slot-price { color: #ffcc00; font-weight: bold; }
-
-        /* инпуты */
-        .input-area { padding: 8px 16px calc(env(safe-area-inset-bottom) + 8px); background: #202c33; display: flex; gap: 8px; align-items: center; border-top: 1px solid #2d3f4b; }
+        .slot-price { color: #ffcc00; }
+        .input-area { padding: 8px 16px calc(env(safe-area-inset-bottom) + 8px); background: #202c33; display: flex; gap: 8px; border-top: 1px solid #2d3f4b; }
         .input-wrapper { flex: 1; }
-        .input-wrapper input { width: 100%; background: #2a3942; border: none; color: #fff; padding: 0 16px; border-radius: 24px; height: 44px; font-size: 16px; outline: none; }
-
-        .modal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); z-index: 50; display: flex; align-items: center; justify-content: center; padding: 20px; }
-        .modal-content { background: #111b21; padding: 24px; border-radius: 20px; width: 100%; max-width: 380px; display: flex; flex-direction: column; gap: 16px; max-height: 80vh; overflow-y: auto; }
-
-        .log-panel { position: fixed; bottom: 0; left: 0; right: 0; background: #000; color: #0f0; font-family: monospace; font-size: 10px; height: 200px; overflow-y: auto; padding: 8px; z-index: 100; border-top: 1px solid #00a884; transition: 0.3s; }
+        .input-wrapper input { width: 100%; background: #2a3942; border: none; color: #fff; padding: 0 16px; border-radius: 28px; height: 44px; font-size: 16px; outline: none; }
+        .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); z-index: 80; display: flex; align-items: center; justify-content: center; }
+        .modal-card { background: #111b21; padding: 24px; border-radius: 28px; width: 90%; max-width: 360px; display: flex; flex-direction: column; gap: 16px; }
+        .log-panel { position: fixed; bottom: 0; left:0; right:0; background: #000; color: #0f0; font-family: monospace; font-size: 10px; height: 200px; overflow-y: auto; z-index: 200; border-top: 2px solid #00a884; transition: 0.3s; }
         .log-hide { transform: translateY(100%); }
-        .breathing { animation: breathe 2s infinite alternate; }
-        @keyframes breathe { 0% { opacity: 0.4; } 100% { opacity: 1; } }
+        .glow-gold { box-shadow: 0 0 20px #ffcc00; transition: 0.1s; }
+        .glow-red { box-shadow: 0 0 20px #ea0038; }
     </style>
 </head>
 <body>
 <div id="app">
-    <!-- PWA заглушка -->
-    <div v-if="!isPWAInstalled" class="modal" style="background:#0b141a;">
-        <div class="modal-content"><p>📱 Установите на экран «Домой»</p><button class="btn" @click="isPWAInstalled=true">Продолжить</button></div>
-    </div>
-    <!-- Кинетический вход (5 ступеней) -->
-    <div v-else-if="!calibrated" class="modal" style="justify-content:center;">
-        <div class="modal-content">
-            <h3>🔐 Кинетический вход</h3>
-            <p>{{ stepName }} ({{ levelName }}) · {{ currentRepeat+1 }}/{{ maxRepeats[stepIndex] || 3 }}</p>
-            <canvas ref="gestureCanvas" class="gesture-canvas" @touchstart="startGesture" @touchmove="trackGesture" @touchend="endGesture" @mousedown="startGestureMouse" @mousemove="trackGestureMouse" @mouseup="endGestureMouse"></canvas>
-            <div class="breathing" style="text-align:center; font-size:12px;">{{ instruction }}</div>
-            <div class="flex-row" style="justify-content:space-between; margin-top:8px;">
+    <!-- Основной UI появляется только после калибровки, блокировка решена через requestPermission -->
+    <div v-if="!calibrated" class="gesture-layer">
+        <div class="gesture-card">
+            <h3 style="text-align:center;">🔐 {{ stepName }}</h3>
+            <p style="text-align:center; font-size:14px; color:#8f9ca3;">{{ levelDesc }}</p>
+            <!-- канвас для жестов/точек -->
+            <div style="position:relative;">
+                <canvas ref="gestureCanvas" class="gesture-canvas" @touchstart="startGesture" @touchmove="trackGesture" @touchend="endGesture" @mousedown="startGestureMouse" @mousemove="trackGestureMouse" @mouseup="endGestureMouse"></canvas>
+                <div v-for="(pt,idx) in randomPoints" :key="idx" class="point-dot" :style="{top: pt.y+'%', left: pt.x+'%'}"></div>
+            </div>
+            <div style="text-align:center; font-size:13px;">{{ instruction }} ({{ currentRepeat+1 }}/{{ maxRepeats }})</div>
+            <div class="flex-row" style="justify-content:space-between; margin-top:16px;">
                 <button class="btn-outline" @click="resetCalibration">↺ Сброс</button>
-                <button class="btn" v-if="isDev" @click="skipCalibration">⚡ Пропустить (dev)</button>
+                <button class="btn" v-if="isDev" @click="skipCalibration">⚡ Пропустить</button>
             </div>
         </div>
     </div>
-    <!-- Основной интерфейс после калибровки (с уровнями доступа) -->
-    <div v-else style="display:flex; flex-direction: column; height:100%;">
-        <div class="safe-top"></div>
-        <!-- шапка -->
+
+    <!-- Ядро ХРАМА после входа -->
+    <div v-else style="display:flex; flex-direction:column; height:100%;">
         <div class="flex-row" style="justify-content:space-between; padding:12px 16px; background:#202c33; border-bottom:1px solid #2d3f4b;">
-            <div class="flex-row"><div class="monad-mini" style="width:28px;height:28px;border:1px solid #00a884;border-radius:50%;display:flex;align-items:center;justify-content:center;"><div style="width:6px;height:6px;background:#00a884;border-radius:50%;"></div></div><span style="margin-left:8px;">{{ myId.slice(0,8) }}</span></div>
-            <div class="flex-row"><span class="btn-outline" style="padding:4px 12px; font-size:12px;">Уровень: {{ accessLevelName }}</span><button class="btn-cancel" @click="showSettings=true">⚙️</button></div>
+            <div class="flex-row"><div class="monad"><div class="monad-dot"></div></div><span style="margin-left:8px;">{{ myId.slice(0,8) }}</span></div>
+            <div class="flex-row"><span class="btn-outline" style="padding:4px 12px; font-size:11px;">{{ levelName }}</span><button class="btn-cancel" @click="showSettings=true">⚙️</button></div>
         </div>
-        <!-- Табы -->
         <div class="tab-bar">
-            <div class="tab" :class="{active: activeTab === 'chat'}" @click="activeTab='chat'">📨 Ближний круг</div>
+            <div class="tab" :class="{active: activeTab === 'chat'}" @click="activeTab='chat'">📨 Тет-а-тет</div>
             <div class="tab" :class="{active: activeTab === 'market'}" @click="activeTab='market'">🏪 Слоты</div>
             <div class="tab" :class="{active: activeTab === 'artel'}" @click="activeTab='artel'">👥 Артели</div>
         </div>
-        <!-- Лента контента -->
+        <!-- Лента событий -->
         <div class="feed" ref="feed">
-            <!-- Чат (личные + групповые сообщения) -->
             <div v-if="activeTab === 'chat'">
-                <div v-for="item in feedItems.filter(i => i.type==='message')" :key="item.id" class="card">
-                    <div class="card-meta"><span>{{ item.senderName || (item.isMe?'Я':'Контакт') }}</span><span>{{ item.time }}</span></div>
-                    <div>{{ item.text }}</div>
+                <div v-for="msg in feedMessages" :key="msg.id" class="card">
+                    <div class="card-meta"><span>{{ msg.isMe? 'Я' : (msg.senderName || 'Контакт') }}</span><span>{{ msg.time }}</span></div>
+                    <div>{{ msg.text }}</div>
                 </div>
-                <div v-if="accessLevel < 1" class="card" style="text-align:center; background:#2a2a2a;">✋ Уровень 1 необходим для отправки сообщений</div>
+                <div v-if="accessLevel < 1" class="card" style="text-align:center; background:#2a2a2a;">✋ Уровень 1 (Крест) для сообщений</div>
             </div>
-            <!-- Маркетплейс (слоты) -->
             <div v-if="activeTab === 'market'">
                 <div v-for="slot in slots" :key="slot.id" class="card">
                     <div class="card-meta"><span>{{ slot.authorName }}</span><span>{{ slot.time }}</span></div>
                     <div><strong>{{ slot.title }}</strong></div>
-                    <div class="slot-detail">{{ slot.desc }}</div>
+                    <div>{{ slot.desc }}</div>
                     <div class="slot-price">{{ slot.price }} XMR</div>
-                    <div class="slot-detail">📍 {{ slot.location || 'любое' }}</div>
-                    <button v-if="accessLevel >= 2 && slot.authorId !== myId" class="btn" style="margin-top:8px;" @click="applySlot(slot)">💎 Откликнуться</button>
+                    <div>📍 {{ slot.location || 'любое' }}</div>
+                    <button v-if="accessLevel >= 2 && slot.authorId !== myId" class="btn" style="margin-top:8px;" @click="acceptSlot(slot)">💎 Откликнуться</button>
                 </div>
-                <div v-if="accessLevel >= 2">
-                    <div class="card" style="background:#202c33; cursor:pointer;" @click="showCreateSlot=true">+ Создать Слот</div>
-                </div>
+                <div v-if="accessLevel >= 2" class="card" style="background:#202c33; cursor:pointer;" @click="openSlotModal">+ Создать Слот</div>
             </div>
-            <!-- Артели (группы с иерархией) -->
             <div v-if="activeTab === 'artel'">
                 <div v-for="artel in artels" :key="artel.id" class="card">
                     <div class="card-meta"><span>{{ artel.name }}</span><span>Мастер: {{ artel.masterId.slice(0,6) }}</span></div>
                     <div>Участников: {{ artel.members.length }} | Репутация: {{ artel.rep }}</div>
-                    <div style="margin-top:4px; font-size:12px; color:#8f9ca3;">{{ artel.desc }}</div>
+                    <div style="font-size:12px; color:#8f9ca3;">{{ artel.desc }}</div>
                     <button v-if="accessLevel >= 3 && artel.masterId !== myId && !artel.members.includes(myId)" class="btn-outline" style="margin-top:8px;" @click="joinArtel(artel)">➕ Вступить</button>
-                    <button v-if="accessLevel >= 4 && artel.masterId === myId" class="btn-cancel" style="margin-top:8px;" @click="manageArtel(artel)">⚙️ Управление</button>
                 </div>
-                <div v-if="accessLevel >= 3">
-                    <div class="card" style="background:#202c33; cursor:pointer;" @click="showCreateArtel=true">+ Создать Артель</div>
-                </div>
+                <div v-if="accessLevel >= 3" class="card" style="background:#202c33; cursor:pointer;" @click="openArtelModal">+ Создать Артель</div>
             </div>
         </div>
-        <!-- Универсальный ввод (зависит от активного таба) -->
+        <!-- Универсальный ввод -->
         <div class="input-area">
-            <div class="input-wrapper">
-                <input v-model="universalInput" @keyup.enter="processUniversal" :placeholder="inputPlaceholder">
-            </div>
+            <div class="input-wrapper"><input v-model="universalInput" @keyup.enter="processUniversal" :placeholder="inputPlaceholder"></div>
             <button class="btn" @click="processUniversal">➤</button>
         </div>
-        <!-- Модалки -->
-        <div class="modal" v-if="showSettings" @click.self="showSettings=false">
-            <div class="modal-content">
-                <h3>⚙️ Щит</h3>
-                <button class="btn" @click="recalibrate">🔄 Перекалибровка</button>
-                <button class="btn-outline" @click="showLogs=!showLogs">{{ showLogs? 'Скрыть логи' : 'Показать логи' }}</button>
-                <button class="btn-cancel" @click="wipeIdentity">🗑 Сжечь личность</button>
-                <div class="btn-row"><button class="btn-outline" @click="showSettings=false">Закрыть</button></div>
-            </div>
-        </div>
-        <div class="modal" v-if="showCreateSlot" @click.self="showCreateSlot=false">
-            <div class="modal-content">
-                <input v-model="newSlotTitle" placeholder="Название">
-                <input v-model="newSlotDesc" placeholder="Описание">
-                <input v-model="newSlotPrice" placeholder="Цена в XMR">
-                <input v-model="newSlotLocation" placeholder="Место встречи (опционально)">
-                <button class="btn" @click="createSlot">Опубликовать</button>
-                <button class="btn-cancel" @click="showCreateSlot=false">Отмена</button>
-            </div>
-        </div>
-        <div class="modal" v-if="showCreateArtel" @click.self="showCreateArtel=false">
-            <div class="modal-content">
-                <input v-model="newArtelName" placeholder="Название Артели">
-                <input v-model="newArtelDesc" placeholder="Описание">
-                <button class="btn" @click="createArtel">Создать</button>
-                <button class="btn-cancel" @click="showCreateArtel=false">Отмена</button>
-            </div>
-        </div>
-        <!-- Логи (показываются снизу) -->
-        <div :class="['log-panel', showLogs ? '' : 'log-hide']">
-            <div v-for="l in logs" :key="l.id">{{ l.text }}</div>
-        </div>
+    </div>
+
+    <!-- Модалки -->
+    <div v-if="showSettings" class="modal-overlay" @click.self="showSettings=false">
+        <div class="modal-card"><h3>⚙️ Щит</h3><button class="btn" @click="recalibrate">🔄 Перекалибровка</button><button class="btn-outline" @click="showLogs=!showLogs">{{ showLogs?'Скрыть':'Показать' }} логи</button><button class="btn-cancel" @click="wipeIdentity">🗑 Сжечь личность</button><div class="flex-row"><button class="btn" @click="showSettings=false">Закрыть</button></div></div>
+    </div>
+    <div v-if="showSlotModal" class="modal-overlay" @click.self="showSlotModal=false">
+        <div class="modal-card"><h3>Новый слот</h3><input v-model="newSlotTitle" placeholder="Название"><input v-model="newSlotPrice" placeholder="Цена в XMR"><input v-model="newSlotDesc" placeholder="Описание"><input v-model="newSlotLocation" placeholder="Место встречи"><button class="btn" @click="createSlot">Опубликовать</button><button class="btn-cancel" @click="showSlotModal=false">Отмена</button></div>
+    </div>
+    <div v-if="showArtelModal" class="modal-overlay" @click.self="showArtelModal=false">
+        <div class="modal-card"><h3>Новая артель</h3><input v-model="newArtelName" placeholder="Название"><input v-model="newArtelDesc" placeholder="Описание"><button class="btn" @click="createArtel">Создать</button><button class="btn-cancel" @click="showArtelModal=false">Отмена</button></div>
+    </div>
+    <div :class="['log-panel', showLogs ? '' : 'log-hide']">
+        <div v-for="l in logs" :key="l.id">{{ l.text }}</div>
     </div>
 </div>
 <script>
-// ========== КРИСТАЛЛ 108 (сжатие текста/чисел) ==========
+// ========== КРИСТАЛЛ 108 ==========
 class Crystal108 {
-    constructor(){ this.alphabet=' abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZабвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ0123456789-/:;(),.?!|~@#$%^&*=+<>'; this.char={}; for(let i=0;i<this.alphabet.length;i++) this.char[this.alphabet[i]]=i; this.base=BigInt(this.alphabet.length); this.PI=Math.PI; this.PHI=(1+Math.sqrt(5))/2; }
+    constructor(){ this.alphabet=' abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZабвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ0123456789-/:;().,?!|~@#$%^&*=+<>'; this.char={}; for(let i=0;i<this.alphabet.length;i++) this.char[this.alphabet[i]]=i; this.base=BigInt(this.alphabet.length); this.PI=Math.PI; this.PHI=(1+Math.sqrt(5))/2; }
     _prng(seed){ return function(){ seed|=0; seed=(seed+0x6D2B79F5)|0; let t=Math.imul(seed^seed>>>15,1|seed); t=(t+Math.imul(t^t>>>7,61|t))^t; return ((t^t>>>14)>>>0)/4294967296; }; }
     _norm(t){ let r=''; for(let i=0;i<t.length;i++) r+=this.char.hasOwnProperty(t[i])?t[i]:' '; return r; }
     collapse(text,astro=0){ let clean=this._norm(text); if(!clean.length) throw 'Пусто'; let num=0n; for(let i=0;i<clean.length;i++) num=num*this.base+BigInt(this.char[clean[i]]); let plain=clean.length.toString().padStart(4,'0')+num.toString(); let len=plain.length; let r=this._prng(Math.floor(astro*this.PI*this.PHI*10000)); let mask='', enc=''; for(let i=0;i<len;i++) mask+=Math.floor(r()*10).toString(); for(let i=0;i<len;i++) enc+=((parseInt(plain[i],10)+parseInt(mask[i],10))%10).toString(); return enc; }
     resonate(code,astro=0){ let len=code.length; if(len<5) throw 'Сбой'; let r=this._prng(Math.floor(astro*this.PI*this.PHI*10000)); let mask='', plain=''; for(let i=0;i<len;i++) mask+=Math.floor(r()*10).toString(); for(let i=0;i<len;i++) plain+=((parseInt(code[i],10)-parseInt(mask[i],10)+10)%10).toString(); let cnt=parseInt(plain.slice(0,4),10); let n=BigInt(plain.slice(4).replace(/^0+/,'')||'0'); let digs=[]; while(n>0n){ digs.unshift(Number(n%this.base)); n/=this.base; } while(digs.length<cnt) digs.unshift(0); return digs.map(i=>Object.keys(this.char).find(k=>this.char[k]===i)).join(''); }
 }
-// ========== ShadowGateway (сохранение данных) ==========
+// ========== ShadowGateway (сохранение) ==========
 class Shadow { constructor(){ this.key=null; }
     async enter(pin){ let h=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(pin+"_p108_salt")); let arr=Array.from(new Uint8Array(h)); this.key='p108_'+arr.map(b=>b.toString(16).padStart(2,'0')).join('').slice(0,32); let data=localStorage.getItem(this.key); return data?JSON.parse(data):null; }
     save(d){ if(this.key) localStorage.setItem(this.key,JSON.stringify(d)); }
     wipe(){ if(this.key) localStorage.removeItem(this.key); this.key=null; }
 }
-// ========== MQTT (маскировка под IoT) ==========
+// ========== MQTT ==========
 class MQTTBridge {
-    constructor(onStatus,onMsg,id){ this.onStatus=onStatus; this.onMsg=onMsg; this.client=null; this.url='wss://broker.emqx.io:8084/mqtt'; this.clientId='hram62_'+id; }
+    constructor(onStatus,onMsg,id){ this.onStatus=onStatus; this.onMsg=onMsg; this.client=null; this.url='wss://broker.emqx.io:8084/mqtt'; this.clientId='hram63_'+id; }
     connect(topics){ if(this.client) this.client.end(true); this.client=mqtt.connect(this.url,{clientId:this.clientId,keepalive:45,reconnectPeriod:3000,clean:false}); this.client.on('connect',()=>{ this.onStatus(true); topics.forEach(t=>this.client.subscribe(t,{qos:1})); }); this.client.on('close',()=>this.onStatus(false)); this.client.on('message',(t,p)=>this.onMsg(p.toString(),t)); }
     send(t,m){ if(this.client&&this.client.connected) this.client.publish(t,m,{qos:1,retain:false}); }
     disconnect(){ if(this.client) this.client.end(true); this.onStatus(false); }
 }
+// ========== ФИЗИЧЕСКИЕ МОДЕМЫ (Acoustic / Optical) ==========
+class AcousticModem {
+    constructor(){ this.freqs=[600,800,1000,1200,1400,1600,1800,2000,2200,2400]; this.preamble=2800; this.dur=0.15; }
+    send(code108){ let ctx=new (window.AudioContext||window.webkitAudioContext)(); let t=ctx.currentTime; let tone=(f,t)=> { let o=ctx.createOscillator(); let g=ctx.createGain(); o.frequency.value=f; g.gain.setValueAtTime(0.5,t); g.gain.setTargetAtTime(0.001,t+this.dur-0.02,0.015); o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t+this.dur); }; tone(this.preamble,t); t+=this.dur; tone(this.preamble,t); t+=this.dur; for(let i=0;i<code108.length;i++){ tone(this.freqs[parseInt(code108[i])],t); t+=this.dur; } setTimeout(()=>ctx.close(), (t-ctx.currentTime)*1000+500); }
+    listen(onData){ navigator.mediaDevices.getUserMedia({audio:true}).then(stream=>{ let ctx=new AudioContext(); let src=ctx.createMediaStreamSource(stream); let an=ctx.createAnalyser(); an.fftSize=2048; src.connect(an); let buffer=''; let loop=()=>{ let arr=new Float32Array(an.frequencyBinCount); an.getFloatFrequencyData(arr); let max=-Infinity,idx=-1; for(let i=20;i<arr.length/2;i++) if(arr[i]>max){ max=arr[i]; idx=i; } let hz=idx*ctx.sampleRate/an.fftSize; if(max>-40){ if(Math.abs(hz-this.preamble)<100) buffer=''; for(let i=0;i<10;i++) if(Math.abs(hz-this.freqs[i])<50){ if(buffer.length<108) buffer+=i; } } if(buffer.length===108){ onData(buffer); stream.getTracks().forEach(t=>t.stop()); ctx.close(); return; } requestAnimationFrame(loop); }; loop(); }).catch(e=>alert('Microphone error')); }
+}
+class OpticalLink {
+    constructor(){ this.colors=['#000','#f00','#0f0','#00f','#ff0','#0ff','#f0f','#fff','#888','#f80']; this.cvs=document.createElement('canvas'); this.cvs.style.cssText='position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:9999;pointer-events:none;display:none;'; document.body.appendChild(this.cvs); this.dur=150; }
+    async send(code108){ this.cvs.style.display='block'; let ctx=this.cvs.getContext('2d'); ctx.fillStyle='#fff'; ctx.fillRect(0,0,10000,10000); await new Promise(r=>setTimeout(r,500)); for(let i=0;i<code108.length;i++){ ctx.fillStyle=this.colors[parseInt(code108[i])]; ctx.fillRect(0,0,10000,10000); await new Promise(r=>setTimeout(r,this.dur)); ctx.fillStyle='#000'; ctx.fillRect(0,0,10000,10000); await new Promise(r=>setTimeout(r,50)); } this.cvs.style.display='none'; }
+}
+// ========== WalletRouter ==========
+const WalletRouter = {
+    generateXmrLink: (addr, amt) => `monero:${addr}${amt?`?tx_amount=${amt}`:''}`,
+    generateUsdtLink: (addr, amt) => `trust://send?asset=c195&address=${addr}&amount=${amt||0}`
+};
+
 const cry = new Crystal108();
 const sg = new Shadow();
-// ========== VUE ==========
+const modem = new AcousticModem();
+const optic = new OpticalLink();
+
 new Vue({
     el: '#app',
     data: {
-        isPWAInstalled: false, calibrated: false, stepIndex: 0, stepNames: ["Точка", "Крест", "Круг", "Бесконечность", "Личная Печать"], levelNames: ["Камень", "Крест", "Круг", "Бесконечность", "Печать"],
-        currentRepeat: 0, maxRepeats: [3,3,3,3,3], gesturePoints: [], instruction: "Прикоснитесь и выполните жест", accessLevel: 0,
-        myId: '', myName: 'Хранитель', mqtt: null, mqttOnline: false, activeTab: 'chat', feedItems: [], slots: [], artels: [],
-        universalInput: '', showSettings: false, showCreateSlot: false, showCreateArtel: false,
-        newSlotTitle: '', newSlotDesc: '', newSlotPrice: '', newSlotLocation: '',
-        newArtelName: '', newArtelDesc: '',
-        logs: [], showLogs: false, isDev: true // для тестов можно отключить
+        calibrated: false, step:0, steps:['points','cross','circle','infinity','signature'],
+        stepName: "1/5 · Точки", levelDesc: "Тапните по пяти пульсирующим точкам",
+        instruction: "Нажмите на каждую точку", currentRepeat:0, maxRepeats:3, randomPoints:[],
+        gesturePoints:[], isDrawing:false, accessLevel:0,
+        myId: '', myName: 'Хранитель', mqtt: null, mqttOnline: false, activeTab:'chat',
+        feedMessages:[], slots:[], artels:[],
+        universalInput:'', showSettings:false, showSlotModal:false, showArtelModal:false,
+        newSlotTitle:'', newSlotPrice:'', newSlotDesc:'', newSlotLocation:'',
+        newArtelName:'', newArtelDesc:'',
+        logs:[], showLogs:false, isDev:true,
+        // для калибровки
+        calibPointsTouched:0,
+        crossTemplate:null, circleTemplate:null, infinityTemplate:null,
+        recordedFeatures:[], freeSignatures:[]
     },
     computed: {
-        stepName(){ return this.stepNames[this.stepIndex] },
-        levelName(){ return this.levelNames[this.accessLevel] },
-        accessLevelName(){ return this.levelNames[this.accessLevel] },
-        inputPlaceholder(){ 
-            if(this.activeTab==='chat') return (this.accessLevel>=1?"Сообщение...":"Уровень 1 нужен");
-            if(this.activeTab==='market') return (this.accessLevel>=2?"Название товара / XMR":"Уровень 2 нужен");
-            return (this.accessLevel>=3?"Команда артели":"Уровень 3 нужен");
-        }
-    },
-    watch: {
-        activeTab(tab){
-            this.logEvent(`Переключение на вкладку ${tab}`, { level: this.accessLevel });
-        }
+        levelName(){ return ['Камень','Крест','Круг','Бесконечность','Печать'][this.accessLevel]; },
+        inputPlaceholder(){ if(this.activeTab=='chat') return this.accessLevel>=1?"Сообщение...":"Уровень 1 нужен"; if(this.activeTab=='market') return this.accessLevel>=2?"Товар | Цена | Описание":"Уровень 2 нужен"; return this.accessLevel>=3?"Команда артели":"Уровень 3 нужен"; }
     },
     mounted(){
-        setTimeout(()=>{ this.isPWAInstalled = window.matchMedia('(display-mode:standalone)').matches || window.navigator.standalone; },100);
         this.initLog();
+        // запрос разрешения на гироскоп по первому клику – ждём калибровку
+        this.randomPoints = this.generateRandomPoints(5);
+        window.addEventListener('resize', ()=>this.drawCanvas());
     },
     methods: {
-        // Логирование с миллисекундами и контекстом
-        logEvent(msg, extra={}){
-            let entry = { id: Date.now(), text: `[${new Date().toISOString().slice(11,23)}] ${msg} ${Object.keys(extra).length?JSON.stringify(extra):''}` };
-            this.logs.unshift(entry);
-            if(this.logs.length>200) this.logs.pop();
-            console.log(entry.text);
+        // === логирование ===
+        initLog(){ this.logEvent('ХРАМ 6.3 запущен', {}); },
+        logEvent(msg, extra={}){ let entry={id:Date.now(), text:`[${new Date().toISOString().slice(11,23)}] ${msg} ${Object.keys(extra).length?JSON.stringify(extra):''}`}; this.logs.unshift(entry); if(this.logs.length>150) this.logs.pop(); console.log(entry.text); },
+        // === калибровка ===
+        generateRandomPoints(n){ let pts=[]; for(let i=0;i<n;i++){ pts.push({x:20+Math.random()*60, y:20+Math.random()*60}); } return pts; },
+        startGesture(e){ e.preventDefault(); if(this.step===0){ // точки
+            let rect=this.$refs.gestureCanvas.getBoundingClientRect();
+            let touch=e.touches[0];
+            let x=(touch.clientX-rect.left)/rect.width*100, y=(touch.clientY-rect.top)/rect.height*100;
+            let hit=false;
+            for(let i=0;i<this.randomPoints.length;i++){
+                let pt=this.randomPoints[i];
+                if(Math.hypot(x-pt.x, y-pt.y)<8 && !pt.touched){
+                    pt.touched=true; hit=true; this.calibPointsTouched++;
+                    this.logEvent(`Точка ${i+1} нажата`, {x,y});
+                    this.$forceUpdate();
+                    break;
+                }
+            }
+            if(hit && this.calibPointsTouched===this.randomPoints.length){
+                this.nextRepeat();
+            } else if(!hit){ this.instruction="Попади в пульсирующую точку!"; }
+        } else {
+            this.isDrawing=true; this.gesturePoints=[];
+            let rect=this.$refs.gestureCanvas.getBoundingClientRect(); let touch=e.touches[0];
+            this.gesturePoints.push({x:touch.clientX-rect.left, y:touch.clientY-rect.top});
+        }
         },
-        initLog(){ this.logEvent('ХРАМ 6.2 инициализирован'); },
-        // Калибровка жестов (5 ступеней, адаптивное число повторений)
-        startGesture(e){ e.preventDefault(); this.gesturePoints=[]; this.instruction="Рисуйте..."; let rect=this.$refs.gestureCanvas.getBoundingClientRect(); let touch=e.touches[0]; this.gesturePoints.push({x:touch.clientX-rect.left, y:touch.clientY-rect.top}); },
-        trackGesture(e){ e.preventDefault(); let rect=this.$refs.gestureCanvas.getBoundingClientRect(); let touch=e.touches[0]; let x=touch.clientX-rect.left, y=touch.clientY-rect.top; this.gesturePoints.push({x,y}); this.drawCanvas(); },
-        drawCanvas(){ let canvas=this.$refs.gestureCanvas; if(!canvas) return; let ctx=canvas.getContext('2d'); ctx.fillStyle='#000'; ctx.fillRect(0,0,canvas.width,canvas.height); ctx.strokeStyle='#00a884'; ctx.lineWidth=3; ctx.beginPath(); for(let i=0;i<this.gesturePoints.length;i++){ if(i===0) ctx.moveTo(this.gesturePoints[i].x,this.gesturePoints[i].y); else ctx.lineTo(this.gesturePoints[i].x,this.gesturePoints[i].y); } ctx.stroke(); },
-        endGesture(){ let canvas=this.$refs.gestureCanvas; if(!canvas) return; let rawHash=this.hashGesture(this.gesturePoints); let expected=this.getExpectedHash(this.stepIndex); let similarity=Math.abs(rawHash-expected); let pass = similarity<0.12; this.logEvent(`Жест ${this.stepName}, сходство ${similarity.toFixed(3)}`, {points:this.gesturePoints.length, hash:rawHash}); if(pass || this.isDev){ this.currentRepeat++; if(this.currentRepeat >= this.maxRepeats[this.stepIndex] || (this.isDev && this.currentRepeat>=1)){ this.nextStep(); } else { this.instruction=`Отлично! Повторите еще ${this.maxRepeats[this.stepIndex]-this.currentRepeat} раз`; this.gesturePoints=[]; this.drawCanvas(); setTimeout(()=>{ this.instruction="Нарисуйте жест"; }, 800); } } else { this.instruction="Не совпало, попробуйте снова"; this.gesturePoints=[]; this.drawCanvas(); this.logEvent(`Жест не пройден`); } },
-        hashGesture(points){ if(points.length<10) return 0; let sumX=0,sumY=0,sumLen=0; for(let i=1;i<points.length;i++){ let dx=points[i].x-points[i-1].x, dy=points[i].y-points[i-1].y; sumX+=dx; sumY+=dy; sumLen+=Math.hypot(dx,dy); } let avgLen=sumLen/points.length; let complexity=(sumX/points.length+sumY/points.length+points.length/200+avgLen*0.3)%1; return complexity; },
-        getExpectedHash(step){ return [0.12,0.31,0.55,0.78,0.91][step]; }, // предварительные эталоны
-        nextStep(){ this.stepIndex++; this.currentRepeat=0; if(this.stepIndex>=5){ this.calibrated=true; this.accessLevel=4; this.logEvent(`Калибровка завершена, уровень доступа ${this.accessLevel}`); this.initSystem(); } else { this.instruction=`Жест: ${this.stepNames[this.stepIndex]}`; this.gesturePoints=[]; this.drawCanvas(); this.logEvent(`Переход к ${this.stepNames[this.stepIndex]}`); } },
-        resetCalibration(){ this.stepIndex=0; this.currentRepeat=0; this.gesturePoints=[]; this.drawCanvas(); this.instruction=`Жест: ${this.stepNames[0]}`; this.logEvent('Сброс калибровки'); },
-        skipCalibration(){ if(this.isDev){ this.calibrated=true; this.accessLevel=4; this.initSystem(); this.logEvent('Пропуск калибровки (dev)'); } },
-        // Инициализация после калибровки (загрузка данных, MQTT)
-        initSystem(){
-            this.myId = 'id_' + Math.random().toString(36).substr(2,8);
-            this.mqtt = new MQTTBridge((s)=>{ this.mqttOnline=s; this.logEvent(`MQTT статус: ${s?'подключён':'отключён'}`); }, this.onMqttMessage, this.myId);
+        trackGesture(e){ if(!this.isDrawing) return; e.preventDefault(); let rect=this.$refs.gestureCanvas.getBoundingClientRect(); let touch=e.touches[0]; this.gesturePoints.push({x:touch.clientX-rect.left, y:touch.clientY-rect.top}); this.drawCanvas(); },
+        endGesture(){ if(this.step===0) return; this.isDrawing=false; let similarity=this.analyzeGesture(this.gesturePoints, this.step); let canvas=this.$refs.gestureCanvas; if(similarity>0.7){ this.currentRepeat++; this.logEvent(`Жест ${this.stepNames[this.step]} пройден`, {similarity}); if(this.currentRepeat>=this.maxRepeats){ this.nextStep(); } else { this.instruction=`Отлично! Повторите (${this.currentRepeat+1}/${this.maxRepeats})`; this.gesturePoints=[]; this.drawCanvas(); } } else { this.instruction="Не совпало, попробуйте снова"; this.gesturePoints=[]; this.drawCanvas(); this.logEvent(`Жест отклонён`, {similarity}); } },
+        analyzeGesture(points, step){ if(points.length<10) return 0; let hash=this.calcHash(points); let expected=[0.12,0.31,0.55,0.78,0.91][step-1]; return 1-Math.min(1, Math.abs(hash-expected)/0.2); },
+        calcHash(p){ let sum=0; for(let i=1;i<p.length;i++) sum+=Math.hypot(p[i].x-p[i-1].x, p[i].y-p[i-1].y); let avg=sum/p.length; let spread=0; for(let i=1;i<p.length;i++) spread+=Math.abs(Math.hypot(p[i].x-p[i-1].x, p[i].y-p[i-1].y)-avg); return (avg/50 + spread/1000 + p.length/1000)%1; },
+        drawCanvas(){ let canvas=this.$refs.gestureCanvas; if(!canvas) return; let ctx=canvas.getContext('2d'); ctx.fillStyle='#000'; ctx.fillRect(0,0,canvas.width,canvas.height); if(this.step===1) this.drawTemplate(ctx,'cross'); else if(this.step===2) this.drawTemplate(ctx,'circle'); else if(this.step===3) this.drawTemplate(ctx,'infinity'); else if(this.step===4) ctx.strokeStyle='#00a884'; if(this.gesturePoints.length>1){ ctx.beginPath(); ctx.moveTo(this.gesturePoints[0].x,this.gesturePoints[0].y); for(let i=1;i<this.gesturePoints.length;i++) ctx.lineTo(this.gesturePoints[i].x,this.gesturePoints[i].y); ctx.stroke(); } },
+        drawTemplate(ctx,type){ ctx.save(); ctx.strokeStyle='rgba(0,168,132,0.3)'; ctx.lineWidth=2; ctx.beginPath(); let w=canvas.width, h=canvas.height; if(type==='cross'){ ctx.moveTo(w*0.2,h*0.5); ctx.lineTo(w*0.8,h*0.5); ctx.moveTo(w*0.5,h*0.2); ctx.lineTo(w*0.5,h*0.8); } else if(type==='circle'){ ctx.ellipse(w*0.5,h*0.5,w*0.3,w*0.3,0,0,2*Math.PI); } else if(type==='infinity'){ ctx.moveTo(w*0.3,h*0.5); ctx.bezierCurveTo(w*0.2,h*0.3,w*0.4,h*0.2,w*0.5,h*0.5); ctx.bezierCurveTo(w*0.6,h*0.8,w*0.8,h*0.7,w*0.7,h*0.5); ctx.bezierCurveTo(w*0.6,h*0.3,w*0.4,h*0.2,w*0.3,h*0.5); } ctx.stroke(); ctx.restore(); },
+        nextRepeat(){ this.currentRepeat=0; this.calibPointsTouched=0; if(this.step<4){ this.step++; this.stepName=this.step+1+"/5 · "+['Точки','Крест','Круг','Бесконечность','Подпись'][this.step]; this.instruction=`Обведите фигуру`; this.randomPoints=[]; this.gesturePoints=[]; this.drawCanvas(); } else if(this.step===4){ if(this.freeSignatures.length<3){ this.instruction=`Свободная подпись (${this.freeSignatures.length+1}/3)`; this.gesturePoints=[]; this.drawCanvas(); this.logEvent(`Сбор подписи ${this.freeSignatures.length+1}`); } else { this.calibrated=true; this.accessLevel=4; this.logEvent('Калибровка завершена, уровень ПЕЧАТЬ'); this.initSystem(); } } else { this.calibrated=true; this.accessLevel=Math.min(this.step,4); this.initSystem(); } },
+        skipCalibration(){ this.calibrated=true; this.accessLevel=4; this.initSystem(); this.logEvent('Калибровка пропущена (dev)'); },
+        resetCalibration(){ this.step=0; this.currentRepeat=0; this.calibPointsTouched=0; this.randomPoints=this.generateRandomPoints(5); this.gesturePoints=[]; this.freeSignatures=[]; this.logEvent('Сброс калибровки'); },
+        // === Инициализация сети ===
+        async initSystem(){
+            // запрос разрешения на гироскоп (для эмпатии)
+            if(typeof DeviceMotionEvent!=='undefined' && typeof DeviceMotionEvent.requestPermission==='function'){
+                try{ await DeviceMotionEvent.requestPermission(); }catch(e){ this.logEvent('Гироскоп не разрешён',{error:e}); }
+            }
+            this.myId = 'id_'+Math.random().toString(36).substr(2,8);
+            this.mqtt = new MQTTBridge((s)=>{ this.mqttOnline=s; this.logEvent(`MQTT ${s?'коннект':'офлайн'}`); }, this.onMqttMessage, this.myId);
             this.mqtt.connect([`polis108/node/${this.myId}`]);
             this.loadData();
         },
-        loadData(){ let saved=localStorage.getItem('hram_data'); if(saved){ try{ let d=JSON.parse(saved); this.feedItems=d.feed||[]; this.slots=d.slots||[]; this.artels=d.artels||[]; this.myId=d.myId||this.myId; this.logEvent('Данные загружены'); }catch(e){} } },
-        saveData(){ localStorage.setItem('hram_data', JSON.stringify({feed:this.feedItems, slots:this.slots, artels:this.artels, myId:this.myId})); this.logEvent('Данные сохранены'); },
-        onMqttMessage(payload, topic){ try{ let raw=cry.resonate(payload,0); let parts=raw.split('|'); if(parts[0]==='MSG'){ let sender=parts[1],name=parts[2],text=parts.slice(4).join('|'); if(sender===this.myId) return; this.feedItems.unshift({id:Date.now(),type:'message',text,isMe:false,senderName:name,time:new Date().toLocaleTimeString().slice(0,5)}); this.saveData(); this.logEvent(`Сообщение от ${sender}`); } else if(parts[0]==='SLOT'){ let slot={id:parts[2], title:parts[3], desc:parts[4], price:parts[5], location:parts[6], authorId:parts[1], authorName:parts[7], time:new Date().toLocaleTimeString().slice(0,5)}; this.slots.unshift(slot); this.saveData(); this.logEvent(`Новый слот: ${slot.title}`); } else if(parts[0]==='ARTEL'){ let artel={id:parts[2], name:parts[3], desc:parts[4], masterId:parts[1], members:[parts[1]], rep:0, time:new Date().toLocaleTimeString().slice(0,5)}; this.artels.unshift(artel); this.saveData(); } else if(parts[0]==='JOIN'){ let artelId=parts[2], userId=parts[1]; let artel=this.artels.find(a=>a.id===artelId); if(artel && !artel.members.includes(userId)) artel.members.push(userId); this.saveData(); } }catch(e){ this.logEvent(`Ошибка MQTT: ${e}`); } },
-        processUniversal(){
-            if(!this.universalInput) return;
-            let val=this.universalInput.trim();
-            if(this.activeTab==='chat'){
-                if(this.accessLevel>=1) this.sendMessage(val);
-                else alert('Недостаточно уровня: нужен Крест');
-            } else if(this.activeTab==='market'){
-                if(this.accessLevel>=2) this.createSlotFromInput(val);
-                else alert('Уровень 2 (Круг) для создания слота');
-            } else if(this.activeTab==='artel'){
-                if(this.accessLevel>=3) this.artelCommand(val);
-                else alert('Уровень 3 (Бесконечность) для управления артелью');
-            }
-            this.universalInput='';
-        },
-        sendMessage(txt){ let msgId=Date.now(); let code=cry.collapse(`MSG|${this.myId}|${this.myName}|${msgId}|${txt}`,0); this.mqtt.send(`polis108/node/${this.myId}`,code); this.feedItems.unshift({id:Date.now(),type:'message',text:txt,isMe:true,senderName:'Я',time:new Date().toLocaleTimeString().slice(0,5)}); this.saveData(); this.logEvent(`Отправлено сообщение: ${txt.slice(0,30)}`); },
-        createSlotFromInput(raw){ let parts=raw.split('|'); if(parts.length>=3){ let title=parts[0], price=parts[1], desc=parts.slice(2).join('|'); this.createSlotObj(title,desc,price,''); } else alert('Формат: Название | Цена (XMR) | Описание'); },
-        createSlotObj(title,desc,price,loc){ let slotId=Math.random().toString(36).substr(2,10); let slotMsg=`SLOT|${this.myId}|${slotId}|${title}|${desc}|${price}|${loc||''}|${this.myName}`; let code=cry.collapse(slotMsg,0); this.mqtt.send(`polis108/node/${this.myId}`,code); this.slots.unshift({id:slotId, title, desc, price, location:loc, authorId:this.myId, authorName:this.myName, time:new Date().toLocaleTimeString().slice(0,5)}); this.saveData(); this.showCreateSlot=false; this.logEvent(`Слот создан: ${title}`); },
-        applySlot(slot){ alert(`Отклик на слот "${slot.title}" отправлен. Свяжитесь с автором для оплаты по XMR.\nСсылка: monero:${slot.authorId.slice(0,8)}...`); },
-        createArtel(){ let artelId=Math.random().toString(36).substr(2,10); let artelMsg=`ARTEL|${this.myId}|${artelId}|${this.newArtelName}|${this.newArtelDesc}`; let code=cry.collapse(artelMsg,0); this.mqtt.send(`polis108/node/${this.myId}`,code); let artel={id:artelId, name:this.newArtelName, desc:this.newArtelDesc, masterId:this.myId, members:[this.myId], rep:0, time:new Date().toLocaleTimeString().slice(0,5)}; this.artels.unshift(artel); this.saveData(); this.showCreateArtel=false; this.newArtelName=''; this.newArtelDesc=''; this.logEvent(`Артель создана: ${artel.name}`); },
-        joinArtel(artel){ let joinMsg=`JOIN|${this.myId}|${artel.id}`; let code=cry.collapse(joinMsg,0); this.mqtt.send(`polis108/node/${this.myId}`,code); if(!artel.members.includes(this.myId)) artel.members.push(this.myId); this.saveData(); this.logEvent(`Вступление в артель ${artel.name}`); alert(`Вы вступили в артель ${artel.name}`); },
-        manageArtel(artel){ alert(`Управление артелью ${artel.name}\nУчастники: ${artel.members.join(', ')}\n(в разработке)`); },
-        artelCommand(cmd){ if(cmd.startsWith('rep+')){ let val=parseInt(cmd.substring(4)); let artel=this.artels.find(a=>a.masterId===this.myId); if(artel){ artel.rep+=val; this.saveData(); alert(`Репутация артели +${val}`); } else alert('Вы не мастер артели'); } else alert('Команда артели: rep+<число>'); },
-        recalibrate(){ this.calibrated=false; this.stepIndex=0; this.currentRepeat=0; this.gesturePoints=[]; this.accessLevel=0; this.logEvent('Перекалибровка'); },
-        wipeIdentity(){ if(confirm('Уничтожить личность и все данные?')){ localStorage.clear(); sg.wipe(); window.location.reload(); } }
+        loadData(){ let saved=localStorage.getItem('hram63'); if(saved){ let d=JSON.parse(saved); this.feedMessages=d.feed||[]; this.slots=d.slots||[]; this.artels=d.artels||[]; this.myId=d.myId||this.myId; this.logEvent('Данные загружены'); } },
+        saveData(){ localStorage.setItem('hram63', JSON.stringify({feed:this.feedMessages, slots:this.slots, artels:this.artels, myId:this.myId})); },
+        onMqttMessage(payload, topic){ try{ let raw=cry.resonate(payload,0); let parts=raw.split('|'); if(parts[0]==='MSG'){ let sender=parts[1], name=parts[2], text=parts.slice(4).join('|'); if(sender===this.myId) return; this.feedMessages.unshift({id:Date.now(),text,isMe:false,senderName:name,time:new Date().toLocaleTimeString().slice(0,5)}); this.saveData(); this.logEvent(`Сообщение от ${sender}`); } else if(parts[0]==='SLOT'){ let slot={id:parts[2], title:parts[3], desc:parts[4], price:parts[5], location:parts[6], authorId:parts[1], authorName:parts[7], time:new Date().toLocaleTimeString().slice(0,5)}; this.slots.unshift(slot); this.saveData(); } else if(parts[0]==='ARTEL'){ let artel={id:parts[2], name:parts[3], desc:parts[4], masterId:parts[1], members:[parts[1]], rep:0, time:new Date().toLocaleTimeString().slice(0,5)}; this.artels.unshift(artel); this.saveData(); } else if(parts[0]==='JOIN'){ let artelId=parts[2], userId=parts[1]; let artel=this.artels.find(a=>a.id===artelId); if(artel && !artel.members.includes(userId)) artel.members.push(userId); this.saveData(); } }catch(e){ this.logEvent('MQTT ошибка'); } },
+        processUniversal(){ let val=this.universalInput.trim(); if(!val) return; if(this.activeTab=='chat' && this.accessLevel>=1) this.sendMessage(val); else if(this.activeTab=='market' && this.accessLevel>=2) this.parseSlotFromInput(val); else if(this.activeTab=='artel' && this.accessLevel>=3) this.artelCommand(val); else alert('Недостаточно уровня доступа'); this.universalInput=''; },
+        sendMessage(txt){ let msgId=Date.now(); let code=cry.collapse(`MSG|${this.myId}|${this.myName}|${msgId}|${txt}`,0); this.mqtt.send(`polis108/node/${this.myId}`,code); this.feedMessages.unshift({id:Date.now(),text:txt,isMe:true,senderName:'Я',time:new Date().toLocaleTimeString().slice(0,5)}); this.saveData(); this.logEvent(`Отправлено: ${txt.slice(0,30)}`); },
+        parseSlotFromInput(raw){ let parts=raw.split('|'); if(parts.length>=3){ let title=parts[0], price=parts[1], desc=parts.slice(2).join('|'); this.createSlot(title,price,desc,''); } else alert('Формат: Название | Цена (XMR) | Описание'); },
+        createSlot(title,price,desc,loc){ let slotId=Math.random().toString(36).substr(2,10); let msg=`SLOT|${this.myId}|${slotId}|${title}|${desc}|${price}|${loc}|${this.myName}`; let code=cry.collapse(msg,0); this.mqtt.send(`polis108/node/${this.myId}`,code); this.slots.unshift({id:slotId,title,desc,price,location:loc,authorId:this.myId,authorName:this.myName,time:new Date().toLocaleTimeString().slice(0,5)}); this.saveData(); this.showSlotModal=false; this.logEvent(`Слот создан: ${title}`); },
+        acceptSlot(slot){ alert(`Отклик на слот "${slot.title}". Свяжитесь с автором для оплаты XMR.`); },
+        createArtel(){ let artelId=Math.random().toString(36).substr(2,10); let msg=`ARTEL|${this.myId}|${artelId}|${this.newArtelName}|${this.newArtelDesc}`; let code=cry.collapse(msg,0); this.mqtt.send(`polis108/node/${this.myId}`,code); this.artels.unshift({id:artelId,name:this.newArtelName,desc:this.newArtelDesc,masterId:this.myId,members:[this.myId],rep:0,time:new Date().toLocaleTimeString().slice(0,5)}); this.saveData(); this.showArtelModal=false; this.newArtelName=''; this.newArtelDesc=''; this.logEvent(`Артель создана`); },
+        joinArtel(artel){ let msg=`JOIN|${this.myId}|${artel.id}`; let code=cry.collapse(msg,0); this.mqtt.send(`polis108/node/${this.myId}`,code); if(!artel.members.includes(this.myId)) artel.members.push(this.myId); this.saveData(); alert(`Вы вступили в артель ${artel.name}`); },
+        artelCommand(cmd){ if(cmd.startsWith('rep+')){ let val=parseInt(cmd.substring(4)); let artel=this.artels.find(a=>a.masterId===this.myId); if(artel){ artel.rep+=val; this.saveData(); alert(`Репутация +${val}`); } else alert('Вы не мастер'); } else alert('Команда: rep+<число>'); },
+        recalibrate(){ this.calibrated=false; this.step=0; this.currentRepeat=0; this.randomPoints=this.generateRandomPoints(5); this.accessLevel=0; this.freeSignatures=[]; this.logEvent('Перекалибровка'); },
+        wipeIdentity(){ if(confirm('Сжечь личность?')){ localStorage.clear(); sg.wipe(); window.location.reload(); } },
+        openSlotModal(){ this.showSlotModal=true; this.newSlotTitle=''; this.newSlotPrice=''; this.newSlotDesc=''; },
+        openArtelModal(){ this.showArtelModal=true; this.newArtelName=''; this.newArtelDesc=''; },
+        // для мыши (dev)
+        startGestureMouse(e){ e.preventDefault(); this.isDrawing=true; this.gesturePoints=[]; let rect=this.$refs.gestureCanvas.getBoundingClientRect(); this.gesturePoints.push({x:e.clientX-rect.left, y:e.clientY-rect.top}); },
+        trackGestureMouse(e){ if(!this.isDrawing) return; e.preventDefault(); let rect=this.$refs.gestureCanvas.getBoundingClientRect(); this.gesturePoints.push({x:e.clientX-rect.left, y:e.clientY-rect.top}); this.drawCanvas(); },
+        endGestureMouse(e){ if(this.step===0) return; this.isDrawing=false; this.endGesture(); }
     }
 });
 </script>
