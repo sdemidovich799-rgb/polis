@@ -6,36 +6,34 @@
     <meta name="theme-color" content="#0b141a">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="108">
+    <meta name="apple-mobile-web-app-title" content="ХРАМ 6.2">
     <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23000'/%3E%3Ccircle cx='50' cy='50' r='35' stroke='%2300a884' stroke-width='6' fill='none'/%3E%3Ccircle cx='50' cy='50' r='10' fill='%2300a884'/%3E%3C/svg%3E">
-    <title>ХРАМ 6.1</title>
+    <title>ХРАМ 6.2</title>
     <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.min.js"></script>
     <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; user-select: none; }
         input, button { user-select: auto; }
-        html, body { position: fixed; inset: 0; width: 100%; height: 100dvh; height: -webkit-fill-available; background: #0b141a; color: #e9edef; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; overflow: hidden; }
-        #app { width: 100%; max-width: 800px; margin: 0 auto; height: 100dvh; height: -webkit-fill-available; display: flex; flex-direction: column; background: #0b141a; position: relative; }
+        html, body { position: fixed; inset: 0; width: 100%; height: 100dvh; background: #0b141a; color: #e9edef; font-family: system-ui, 'Segoe UI', Roboto, sans-serif; overflow: hidden; }
+        #app { width: 100%; max-width: 700px; margin: 0 auto; height: 100dvh; display: flex; flex-direction: column; background: #0b141a; position: relative; }
         
-        /* Safe areas */
+        /* safe areas */
         .safe-top { padding-top: env(safe-area-inset-top); }
         .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
         
-        .monad { width: 32px; height: 32px; border: 2px solid rgba(255,255,255,0.05); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-        .monad-dot { width: 8px; height: 8px; background: #ea0038; border-radius: 50%; }
-        .monad.pulse { border-color: rgba(0,168,132,0.3); } .monad.pulse .monad-dot { background: #00a884; animation: pulseDot 2s infinite alternate; }
-        @keyframes pulseDot { 0% { transform: scale(0.8); } 100% { transform: scale(1.4); } }
+        .monad { width: 48px; height: 48px; border: 2px solid rgba(0,168,132,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.3s; }
+        .monad-dot { width: 12px; height: 12px; background: #00a884; border-radius: 50%; box-shadow: 0 0 12px #00a884; animation: pulseDot 2s infinite alternate; }
+        @keyframes pulseDot { 0% { transform: scale(0.8); opacity: 0.8; } 100% { transform: scale(1.4); opacity: 1; } }
         
         .header { padding: calc(env(safe-area-inset-top) + 12px) 16px 12px; background: #202c33; border-bottom: 1px solid #2d3f4b; display: flex; align-items: center; justify-content: space-between; z-index: 20; }
-        .id-badge { background: transparent; border: 1px solid #00a884; color: #00a884; padding: 4px 12px; border-radius: 16px; font-size: 12px; cursor: pointer; }
+        .id-badge { background: transparent; border: 1px solid #00a884; color: #00a884; padding: 4px 12px; border-radius: 20px; font-size: 12px; cursor: pointer; }
         
-        .thread-item { padding: 12px 16px; border-bottom: 1px solid #2d3f4b; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
-        .t-id { font-size: 11px; color: #8f9ca3; }
-        
-        .messages-box { flex: 1; overflow-y: auto; padding: 16px 12px; display: flex; flex-direction: column; gap: 8px; -webkit-overflow-scrolling: touch; }
-        .message { padding: 8px 12px; border-radius: 16px; max-width: 85%; word-wrap: break-word; font-size: 15px; }
-        .my-message { align-self: flex-end; background: #005c4b; border-bottom-right-radius: 4px; }
-        .other-message { align-self: flex-start; background: #202c33; border-top-left-radius: 4px; }
+        /* лента сообщений / сделок */
+        .feed { flex: 1; overflow-y: auto; padding: 16px 12px; display: flex; flex-direction: column; gap: 12px; -webkit-overflow-scrolling: touch; }
+        .card { background: #111b21; border-radius: 20px; padding: 12px 16px; border-left: 4px solid #00a884; }
+        .card-meta { font-size: 11px; color: #8f9ca3; display: flex; justify-content: space-between; margin-bottom: 6px; }
+        .deal-badge { color: #00a884; font-weight: bold; }
+        .pay-btn { background: #00a884; color: #111b21; border: none; padding: 6px 12px; border-radius: 20px; font-size: 12px; margin-top: 8px; cursor: pointer; }
         
         .input-area { padding: 8px 16px calc(env(safe-area-inset-bottom) + 8px); background: #202c33; display: flex; gap: 8px; align-items: center; border-top: 1px solid #2d3f4b; }
         .input-wrapper { flex: 1; }
@@ -43,111 +41,80 @@
         .send-btn { background: #00a884; border: none; width: 44px; height: 44px; border-radius: 50%; color: #111b21; font-size: 20px; cursor: pointer; }
         
         .modal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(3px); z-index: 50; display: flex; align-items: center; justify-content: center; padding: 20px; }
-        .modal-content { background: #111b21; padding: 24px; border-radius: 16px; width: 100%; max-width: 340px; display: flex; flex-direction: column; gap: 16px; border: 1px solid #2d3f4b; }
-        .btn-row { display: flex; justify-content: flex-end; gap: 12px; margin-top: 8px; }
-        .btn-confirm { background: #00a884; color: #111b21; padding: 12px 16px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .modal-content { background: #111b21; padding: 24px; border-radius: 20px; width: 100%; max-width: 340px; display: flex; flex-direction: column; gap: 16px; border: 1px solid #2d3f4b; }
+        .gesture-canvas { background: #000; border-radius: 24px; width: 100%; height: 200px; margin-bottom: 16px; touch-action: none; }
+        .gesture-dot { width: 12px; height: 12px; background: #00a884; border-radius: 50%; position: absolute; }
+        .breathing { animation: breathe 2s infinite alternate; }
+        @keyframes breathe { 0% { opacity: 0.3; transform: scale(0.95); } 100% { opacity: 1; transform: scale(1.05); } }
+        
+        .btn-confirm { background: #00a884; color: #111b21; padding: 12px 16px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; }
         .btn-cancel { background: transparent; color: #8f9ca3; padding: 10px; border: none; cursor: pointer; }
-        
-        .truth-pulse { width: 100%; height: 4px; background: #2a3942; border-radius: 2px; margin: 12px 0; transition: background 0.1s; }
         .logs-overlay { position: absolute; inset:0; background: rgba(0,0,0,0.95); z-index: 200; display: flex; flex-direction: column; padding: calc(env(safe-area-inset-top) + 20px) 20px calc(env(safe-area-inset-bottom) + 20px); }
-        .logs-box { flex:1; background:#000; color:#00a884; font-family:monospace; font-size:11px; overflow-y:auto; padding:10px; border-radius:8px; white-space:pre-wrap; }
-        
-        .safe-panel { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; gap: 32px; padding: 20px; }
+        .logs-box { flex:1; background:#000; color:#00a884; font-family:monospace; font-size:11px; overflow-y:auto; padding:10px; border-radius:8px; }
     </style>
 </head>
 <body>
 <div id="app">
-    <!-- PWA гейт -->
+    <!-- Гейт PWA -->
     <div v-if="!isPWAInstalled" class="modal" style="background:#0b141a;">
-        <div class="modal-content"><div class="monad pulse" style="margin:0 auto;"></div><p>Нажми «Поделиться» → «На экран «Домой»</p><button class="btn-confirm" @click="isPWAInstalled=true">Установлено</button></div>
+        <div class="modal-content"><div class="monad" style="margin:0 auto;"></div><p>Нажми «Поделиться» → «На экран «Домой»</p><button class="btn-confirm" @click="isPWAInstalled=true">Установлено</button></div>
     </div>
-    <!-- Вход -->
-    <div v-else-if="!loggedIn" class="safe-panel">
-        <div class="monad pulse" style="width:64px; height:64px;"><div class="monad-dot" style="width:16px; height:16px;"></div></div>
-        <button class="btn-confirm" @click="loginByEntropy">🔑 Вход (Гироскоп / Биометрия)</button>
-        <p style="color:#8f9ca3; font-size:12px;">Калибровка: удерживайте телефон неподвижно 3 сек</p>
+    <!-- 5 ступеней калибровки (жесты) -->
+    <div v-else-if="!calibrated" class="modal" @click.self="false">
+        <div class="modal-content">
+            <h3>🔐 Калибровка жестов</h3>
+            <p>{{ calibrationStepNames[calibrationStep] }} ({{ calibrationStep+1 }}/5)</p>
+            <canvas ref="gestureCanvas" class="gesture-canvas" @touchstart="startGesture" @touchmove="trackGesture" @touchend="endGesture"></canvas>
+            <div class="breathing" style="text-align:center; font-size:12px; color:#8f9ca3;">{{ breathMessage }}</div>
+            <div class="btn-row" style="margin-top:8px;"><button class="btn-cancel" @click="resetCalibration">↺ Сброс</button></div>
+        </div>
     </div>
-    <!-- Основной интерфейс -->
+    <!-- Основной интерфейс – лента "Сретение" (маркетплейс + чат) -->
     <div v-else style="display:flex; flex-direction:column; height:100%;">
         <div class="header"><div class="id-badge" @click="copy(myId)">ID: {{ myId.slice(0,8) }}</div><div><button class="id-badge" @click="showSettings=true">⚙️</button></div></div>
-        <!-- Список чатов -->
-        <div style="flex:1; overflow-y:auto;">
-            <div v-for="th in threads" :key="th.peerId" class="thread-item" @click="activeThread=th; checkFieldLock();">
-                <span :style="th.type==='citadel'?'color:#00a884':''">{{ th.name }}</span>
-                <span class="t-id">{{ th.type === 'citadel' ? 'Чертог' : (th.type==='personal'?'Тет-а-тет':'Группа') }}</span>
-            </div>
-            <div style="padding:16px;"><button class="btn-confirm" style="width:100%;" @click="showAddModal=true">+ Новая связь (ID)</button></div>
-        </div>
-        <!-- Окно чата / чертога -->
-        <div v-if="activeThread" style="flex:1; display:flex; flex-direction:column; overflow:hidden;">
-            <div class="header" style="padding:8px 16px;"><button class="btn-cancel" @click="activeThread=null">‹ Назад</button><span>{{ activeThread.name }}</span><button class="btn-cancel" @click="deleteThread">🗑</button></div>
-            <div class="messages-box" ref="msgBox">
-                <div v-for="msg in (messages[activeThread.peerId]||[])" :key="msg.id" :class="['message', msg.isMe?'my-message':'other-message']">{{ msg.text }}<div style="font-size:9px; color:#8f9ca3;">{{ msg.time }} <span v-if="msg.status===2">⏳</span><span v-else-if="msg.status===3">✅</span></div></div>
-            </div>
-            <!-- Универсальный слот (работает и для Чертога) -->
-            <div class="input-area">
-                <div class="input-wrapper"><input v-model="inputText" @keyup.enter="universalCommand" placeholder="Сумма, текст, описание..."></div>
-                <button class="send-btn" @click="universalCommand">➤</button>
+        <!-- Единая лента -->
+        <div class="feed" ref="feed">
+            <div v-for="item in feedItems" :key="item.id" :class="['card', item.type==='message'?'':'deal-card']">
+                <div class="card-meta"><span>{{ item.senderName || (item.isMe ? 'Я' : 'Контакт') }}</span><span>{{ item.time }}</span></div>
+                <div v-if="item.type === 'message'">{{ item.text }}</div>
+                <div v-else-if="item.type === 'deal'">
+                    <span class="deal-badge">📦 Сделка</span>
+                    <div style="margin-top:4px;">{{ item.description }}</div>
+                    <div v-if="!item.closed && item.senderId !== myId" class="pay-btn" @click="acceptDeal(item)">💰 Оплатить / Принять</div>
+                    <div v-if="item.closed" style="color:#8f9ca3; font-size:11px;">✅ Завершена</div>
+                </div>
             </div>
         </div>
-        <!-- Модалка настроек -->
-        <div class="modal" v-if="showSettings" @click.self="showSettings=false">
-            <div class="modal-content"><h3>Щит</h3><button class="btn-confirm" @click="genEntropyKey">🌀 Биометрический ключ</button><button class="btn-confirm" @click="startEmpathyTest">🧠 Эмпатия (Детектор правды)</button><button class="btn-cancel" @click="wipeIdentity">🗑 Сжечь личность</button><button class="btn-confirm" @click="toggleLogs">📜 Логи</button><div class="btn-row"><button class="btn-confirm" @click="showSettings=false">Закрыть</button></div></div>
+        <!-- Универсальный слот -->
+        <div class="input-area">
+            <div class="input-wrapper"><input v-model="universalInput" @keyup.enter="processUniversal" placeholder="Сумма, текст, товар..."></div>
+            <button class="send-btn" @click="processUniversal">➤</button>
         </div>
-        <!-- Модалка новой связи -->
-        <div class="modal" v-if="showAddModal" @click.self="showAddModal=false"><div class="modal-content"><input v-model="newName" placeholder="Имя"><input v-model="newId" placeholder="ID (вставьте)"><div class="btn-row"><button class="btn-cancel" @click="showAddModal=false">Отмена</button><button class="btn-confirm" @click="createThread">Создать</button></div></div></div>
-        <!-- Эмпатия -->
-        <div class="modal" v-if="empathyActive" @click.self="cancelEmpathy">
-            <div class="modal-content" style="max-width:380px;">
-                <h3>🧠 Эмпатия</h3>
-                <div v-if="empathyStage==='calibrate'"><div>Калибровка {{calibIdx+1}}/{{controlQuestions.length}}</div><div class="question-text">{{currentControlQuestion}}</div><div class="truth-pulse" :style="{background:pulseGrad}"></div><div class="btn-row"><button class="btn-confirm" @click="answerControl('Да')">✅ Да</button><button class="btn-confirm" @click="answerControl('Нет')">❌ Нет</button></div></div>
-                <div v-if="empathyStage==='ask'"><div>Целевой вопрос:</div><div class="question-text">{{ targetQuestion }}</div><div class="truth-pulse" :style="{background:pulseGrad}"></div><div class="btn-row"><button class="btn-confirm" @click="answerTarget('Да')">✅ Да</button><button class="btn-confirm" @click="answerTarget('Нет')">❌ Нет</button></div></div>
-                <div v-if="empathyStage==='result'"><div>Ответ: {{ targetAnswer }}</div><div>Правдивость: {{ truthProb }}%</div><div>{{ verdict }}</div><div class="btn-row"><button class="btn-confirm" @click="closeEmpathy">Закрыть</button></div></div>
-            </div>
-        </div>
-        <!-- Логи -->
-        <div v-if="showLogs" class="logs-overlay"><div class="logs-box"><div v-for="l in sysLogs" :key="l">{{ l }}</div></div><button class="btn-confirm" @click="showLogs=false">Закрыть</button></div>
     </div>
+    <!-- Модалка настроек -->
+    <div class="modal" v-if="showSettings" @click.self="showSettings=false">
+        <div class="modal-content"><h3>Щит</h3><button class="btn-confirm" @click="recalibrate">🌀 Перекалибровка жестов</button><button class="btn-cancel" @click="wipeIdentity">🗑 Сжечь личность</button><button class="btn-cancel" @click="showLogs=true">📜 Логи</button><div class="btn-row"><button class="btn-confirm" @click="showSettings=false">Закрыть</button></div></div>
+    </div>
+    <div v-if="showLogs" class="logs-overlay"><div class="logs-box"><div v-for="l in sysLogs" :key="l">{{ l }}</div></div><button class="btn-confirm" @click="showLogs=false">Закрыть</button></div>
 </div>
 <script>
-// ========== КРИСТАЛЛ 108 ==========
+// ========== КРИСТАЛЛ 108 (без изменений) ==========
 class Crystal108 {
-    constructor(){
-        this.alphabet=' abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZабвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ0123456789_-/:;().,?!|~@#$%^&*=+<>\n';
-        this.char={}; for(let i=0;i<this.alphabet.length;i++) this.char[this.alphabet[i]]=i;
-        this.base=BigInt(this.alphabet.length); this.PI=Math.PI; this.PHI=(1+Math.sqrt(5))/2;
-    }
+    constructor(){ this.alphabet=' abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZабвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ0123456789-/:;().,!?|~@#$%^&*=+<>'; this.char={}; for(let i=0;i<this.alphabet.length;i++) this.char[this.alphabet[i]]=i; this.base=BigInt(this.alphabet.length); this.PI=Math.PI; this.PHI=(1+Math.sqrt(5))/2; }
     _prng(seed){ return function(){ seed|=0; seed=(seed+0x6D2B79F5)|0; let t=Math.imul(seed^seed>>>15,1|seed); t=(t+Math.imul(t^t>>>7,61|t))^t; return ((t^t>>>14)>>>0)/4294967296; }; }
     _norm(t){ let r=''; for(let i=0;i<t.length;i++) r+=this.char.hasOwnProperty(t[i])?t[i]:' '; return r; }
-    collapse(text,astro=0){
-        let clean=this._norm(text); if(!clean.length) throw 'Пусто';
-        let num=0n; for(let i=0;i<clean.length;i++) num=num*this.base+BigInt(this.char[clean[i]]);
-        let plain=clean.length.toString().padStart(4,'0')+num.toString(); let len=plain.length;
-        let r=this._prng(Math.floor(astro*this.PI*this.PHI*10000)); let mask='', enc='';
-        for(let i=0;i<len;i++) mask+=Math.floor(r()*10).toString();
-        for(let i=0;i<len;i++) enc+=((parseInt(plain[i],10)+parseInt(mask[i],10))%10).toString();
-        return enc;
-    }
-    resonate(code,astro=0){
-        let len=code.length; if(len<5) throw 'Сбой';
-        let r=this._prng(Math.floor(astro*this.PI*this.PHI*10000)); let mask='', plain='';
-        for(let i=0;i<len;i++) mask+=Math.floor(r()*10).toString();
-        for(let i=0;i<len;i++) plain+=((parseInt(code[i],10)-parseInt(mask[i],10)+10)%10).toString();
-        let cnt=parseInt(plain.slice(0,4),10); let n=BigInt(plain.slice(4).replace(/^0+/,'')||'0');
-        let digs=[]; while(n>0n){ digs.unshift(Number(n%this.base)); n/=this.base; }
-        while(digs.length<cnt) digs.unshift(0);
-        return digs.map(i=>Object.keys(this.char).find(k=>this.char[k]===i)).join('');
-    }
+    collapse(text,astro=0){ let clean=this._norm(text); if(!clean.length) throw 'Пусто'; let num=0n; for(let i=0;i<clean.length;i++) num=num*this.base+BigInt(this.char[clean[i]]); let plain=clean.length.toString().padStart(4,'0')+num.toString(); let len=plain.length; let r=this._prng(Math.floor(astro*this.PI*this.PHI*10000)); let mask='', enc=''; for(let i=0;i<len;i++) mask+=Math.floor(r()*10).toString(); for(let i=0;i<len;i++) enc+=((parseInt(plain[i],10)+parseInt(mask[i],10))%10).toString(); return enc; }
+    resonate(code,astro=0){ let len=code.length; if(len<5) throw 'Сбой'; let r=this._prng(Math.floor(astro*this.PI*this.PHI*10000)); let mask='', plain=''; for(let i=0;i<len;i++) mask+=Math.floor(r()*10).toString(); for(let i=0;i<len;i++) plain+=((parseInt(code[i],10)-parseInt(mask[i],10)+10)%10).toString(); let cnt=parseInt(plain.slice(0,4),10); let n=BigInt(plain.slice(4).replace(/^0+/,'')||'0'); let digs=[]; while(n>0n){ digs.unshift(Number(n%this.base)); n/=this.base; } while(digs.length<cnt) digs.unshift(0); return digs.map(i=>Object.keys(this.char).find(k=>this.char[k]===i)).join(''); }
 }
-// ========== Шлюз памяти ==========
+// ========== SHADOW ==========
 class Shadow { constructor(){ this.key=null; }
     async enter(pin){ let h=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(pin+"_p108_salt")); let arr=Array.from(new Uint8Array(h)); this.key='p108_'+arr.map(b=>b.toString(16).padStart(2,'0')).join('').slice(0,32); let data=localStorage.getItem(this.key); return data?JSON.parse(data):null; }
     save(d){ if(this.key) localStorage.setItem(this.key,JSON.stringify(d)); }
     wipe(){ if(this.key) localStorage.removeItem(this.key); this.key=null; }
 }
-// ========== MQTT ==========
+// ========== MQTT (только для сообщений и сделок) ==========
 class MQTTBridge {
-    constructor(onStatus,onMsg,id){ this.onStatus=onStatus; this.onMsg=onMsg; this.client=null; this.url='wss://broker.emqx.io:8084/mqtt'; this.clientId='hram_'+id; }
+    constructor(onStatus,onMsg,id){ this.onStatus=onStatus; this.onMsg=onMsg; this.client=null; this.url='wss://broker.emqx.io:8084/mqtt'; this.clientId='hram62_'+id; }
     connect(topics){ if(this.client) this.client.end(true); this.client=mqtt.connect(this.url,{clientId:this.clientId,keepalive:45,reconnectPeriod:3000,clean:false}); this.client.on('connect',()=>{ this.onStatus(true); topics.forEach(t=>this.client.subscribe(t,{qos:1})); }); this.client.on('close',()=>this.onStatus(false)); this.client.on('message',(t,p)=>this.onMsg(p.toString(),t)); }
     send(t,m){ if(this.client&&this.client.connected) this.client.publish(t,m,{qos:1,retain:false}); }
     disconnect(){ if(this.client) this.client.end(true); this.onStatus(false); }
@@ -157,40 +124,50 @@ const cry=new Crystal108(); const sg=new Shadow();
 new Vue({
     el:'#app',
     data:{
-        isPWAInstalled:false, loggedIn:false, myId:'', myName:'', threads:[], messages:{}, activeThread:null, inputText:'', mqtt:null, mqttOnline:false, mqttReady:false,
-        showSettings:false, showAddModal:false, newName:'', newId:'', sysLogs:[], showLogs:false,
-        empathyActive:false, empathyStage:'calibrate', calibIdx:0, controlQuestions:["Вы живы?","Сейчас день?","1+1=2?","Вы не робот?","Земля круглая?"], calibFeatures:[], calibAnswers:[], currentControlQuestion:"", targetQuestion:"Действительно ли вы хотите совершить действие?", targetAnswer:"", truthProb:0, verdict:"", pulseGrad:"linear-gradient(90deg, #00a884 0%, #2a3942 100%)"
+        isPWAInstalled:false, loggedIn:false, calibrated:false, calibrationStep:0, calibrationStepNames:["Точка","Крест","Круг","Бесконечность","Личная Печать"], gesturePoints:[], breathMessage:"Прикоснитесь и выполните жест", gestureTemplate:[], gestureName:"",
+        myId:'', myName:'Хранитель', mqtt:null, mqttOnline:false, contacts:[], feedItems:[], universalInput:'', showSettings:false, showLogs:false, sysLogs:[]
     },
     mounted(){ setTimeout(()=>{ this.isPWAInstalled=window.matchMedia('(display-mode:standalone)').matches||window.navigator.standalone; },100); },
     methods:{
         log(s){ let t=new Date().toLocaleTimeString().slice(0,8); this.sysLogs.unshift(`[${t}] ${s}`); if(this.sysLogs.length>60) this.sysLogs.pop(); },
         copy(t){ let ta=document.createElement('textarea'); ta.value=t; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); alert('Скопировано'); },
-        async requestGyro(){ if(typeof DeviceMotionEvent!=='undefined'&&typeof DeviceMotionEvent.requestPermission==='function'){ try{ let r=await DeviceMotionEvent.requestPermission(); return r==='granted'; }catch(e){ return false; } } return true; },
-        async genEntropyKey(){ let perm=await this.requestGyro(); if(!perm){ alert('Нет доступа к гироскопу'); return; } alert('Удерживайте телефон неподвижно 3 секунды'); let samples=[]; let start=Date.now(); let handler=(e)=>{ let a=e.accelerationIncludingGravity; if(a) samples.push([a.x,a.y,a.z,Date.now()]); }; window.addEventListener('devicemotion',handler); await new Promise(r=>{ let t=setInterval(()=>{ if(Date.now()-start>=3000){ window.removeEventListener('devicemotion',handler); clearInterval(t); r(); } },100); }); if(samples.length<5){ alert('Недостаточно данных'); return; } let diffs=[]; for(let i=1;i<samples.length;i++){ let dx=samples[i][0]-samples[i-1][0], dy=samples[i][1]-samples[i-1][1], dz=samples[i][2]-samples[i-1][2], dt=(samples[i][3]-samples[i-1][3])/1000; let sp=Math.sqrt(dx*dx+dy*dy+dz*dz)/Math.max(dt,0.01); diffs.push(sp); } let sum=diffs.reduce((a,b)=>a+b,0), mean=sum/diffs.length, var_=diffs.reduce((a,b)=>a+(b-mean)**2,0)/diffs.length, std=Math.sqrt(var_); let seed=Math.floor((sum*1000+std*10000)%0xFFFFFFFF); let key=seed.toString(16).padStart(8,'0'); if(window.crypto) key=(parseInt(key,16)^crypto.getRandomValues(new Uint32Array(1))[0]).toString(16).padStart(8,'0'); localStorage.setItem('entropyKey',key); this.log(`[BIOM] ключ ${key}`); alert(`Ключ создан: ${key}`); },
-        async loginByEntropy(){ let key=localStorage.getItem('entropyKey'); if(!key){ let c=confirm('Биометрический ключ не найден. Создать?'); if(c) await this.genEntropyKey(); else return; key=localStorage.getItem('entropyKey'); if(!key) return; } this.myId='id_'+Math.random().toString(36).substr(2,8); this.threads=[{name:'Мой Чертог',peerId:'citadel',type:'citadel',unread:0}]; this.messages={citadel:[]}; this.loggedIn=true; this.mqtt=new MQTTBridge((s)=>{ this.mqttOnline=s; if(s) this.mqttReady=true; else this.mqttReady=false; }, this.handleMsg, this.myId); this.mqtt.connect(this.getAllTopics()); this.save(); },
-        getAllTopics(){ return [`polis108/node/${this.myId}`].concat(this.threads.filter(t=>t.type!=='citadel').map(t=>t.type==='group'?`polis108/group/${t.peerId}`:`polis108/link/${[this.myId,t.peerId].sort().join('_')}`)); },
-        save(){ sg.save({t:this.threads,m:this.messages,myId:this.myId,myName:this.myName}); },
-        createThread(){ let id=this.newId.trim(); if(!id){ alert('Введите ID'); return; } if(this.threads.some(t=>t.peerId===id)){ alert('Уже есть'); return; } let name=this.newName||'Контакт'; this.threads.push({name,peerId:id,type:'personal',unread:0}); this.$set(this.messages,id,[]); this.save(); if(this.mqtt) this.mqtt.connect(this.getAllTopics()); this.showAddModal=false; this.activeThread=this.threads[this.threads.length-1]; },
-        deleteThread(){ if(this.activeThread&&this.activeThread.type!=='citadel'&&confirm('Удалить?')){ this.threads=this.threads.filter(t=>t.peerId!==this.activeThread.peerId); this.$delete(this.messages,this.activeThread.peerId); this.activeThread=null; this.save(); } },
-        // УНИВЕРСАЛЬНЫЙ СЛОТ (работает для Чертога)
-        universalCommand(){ let val=this.inputText.trim(); if(!val) return; if(this.activeThread.type==='citadel'){ this.saveToCitadel(val); return; } if(/^\d+(\.\d+)?$/.test(val)){ let amount=parseFloat(val); if(this.activeThread.type==='personal') this.makePayment(amount); else alert('Не выбран личный чат для платежа'); }else if(val.toLowerCase().startsWith('товар ')){ let desc=val.substring(5); this.publishDeal(desc); }else{ this.sendMsg(val); } this.inputText=''; },
-        saveToCitadel(txt){ let msgObj={id:Date.now(),text:txt,isMe:true,time:new Date().toLocaleTimeString().slice(0,5),status:0}; this.messages.citadel=this.messages.citadel||[]; this.$set(this.messages,'citadel',[...this.messages.citadel,msgObj]); this.save(); this.scrollBot(); this.log('[CIT] Заметка сохранена'); },
-        makePayment(amount){ let th=this.activeThread; if(!th.xmr&&!th.usdt){ alert('У контакта нет адреса кошелька'); return; } let url=th.xmr?`monero:${th.xmr}?tx_amount=${amount}`:`trust://send?asset=c195&address=${th.usdt}&amount=${amount}`; let iframe=document.createElement('iframe'); iframe.style.display='none'; iframe.src=url; document.body.appendChild(iframe); setTimeout(()=>{ document.body.removeChild(iframe); alert('Если кошелёк не открылся, установите Cake/Trust Wallet'); },1200); },
-        publishDeal(desc){ let dealId=Math.random().toString(36).substr(2,10); let msg=`DEAL|${this.myId}|${dealId}|${desc}`; let code=cry.collapse(msg,0); let topic=`polis108/escrow/${dealId}`; if(this.mqttOnline) this.mqtt.send(topic,code); this.log(`[DEAL] Опубликована сделка ${dealId}`); },
-        sendMsg(txt){ if(!this.activeThread||this.activeThread.type==='citadel') return; let msgId=Date.now(); let code=cry.collapse(`MSG|${this.myId}|${this.myName}|${msgId}|${txt}`,0); let topic=this.activeThread.type==='group'?`polis108/group/${this.activeThread.peerId}`:`polis108/link/${[this.myId,this.activeThread.peerId].sort().join('_')}`; if(this.mqttOnline) this.mqtt.send(topic,code); this.addLocalMessage(txt,msgId,true); },
-        addLocalMessage(text,id,isMe){ let msgs=this.messages[this.activeThread.peerId]||[]; this.$set(this.messages,this.activeThread.peerId,[...msgs,{id,text,isMe,time:new Date().toLocaleTimeString().slice(0,5),status:2}]); this.scrollBot(); this.save(); },
-        handleMsg(payload,topic){ try{ let raw=cry.resonate(payload,0); let parts=raw.split('|'); if(parts[0]==='MSG'){ let sender=parts[1],name=parts[2],msgId=parseInt(parts[3]),text=parts.slice(4).join('|'); if(sender===this.myId) return; let thr=this.threads.find(t=>t.peerId===sender); if(!thr) return; let msgs=this.messages[sender]||[]; if(msgs.some(m=>!m.isMe&&m.originalId===msgId)) return; let msgObj={id:Date.now(),originalId:msgId,text:text,isMe:false,time:new Date().toLocaleTimeString().slice(0,5),status:3,senderName:name}; this.$set(this.messages,sender,[...msgs,msgObj]); if(this.activeThread?.peerId!==sender) thr.unread=(thr.unread||0)+1; this.save(); this.scrollBot(); this.log(`[MSG] от ${sender}`); } else if(parts[0]==='ACK'){ let msgId=parseInt(parts[2]),target=parts[1]; if(this.messages[target]){ let upd=this.messages[target].map(m=>{ if(m.id===msgId&&m.isMe) return {...m,status:3}; return m; }); this.$set(this.messages,target,upd); this.checkFieldLock(); } } else if(parts[0]==='DEAL'){ this.log(`[DEAL] Сделка ${parts[2]} доступна`); } }catch(e){ this.log('[ERR] пакет'); } },
-        checkFieldLock(){ if(!this.activeThread||this.activeThread.type==='citadel'){ this.fieldLocked=false; return; } let msgs=this.messages[this.activeThread.peerId]||[]; let lastMy=msgs.filter(m=>m.isMe).slice(-1)[0]; this.fieldLocked=!!(lastMy&&lastMy.status===2); },
-        scrollBot(){ this.$nextTick(()=>{ let b=this.$refs.msgBox; if(b) b.scrollTop=b.scrollHeight; }); },
-        // Эмпатия 2.0
-        async startEmpathyTest(){ if(!await this.requestGyro()){ alert('Нет гироскопа'); return; } this.empathyActive=true; this.empathyStage='calibrate'; this.calibIdx=0; this.calibFeatures=[]; this.calibAnswers=[]; this.currentControlQuestion=this.controlQuestions[0]; },
-        async recordGesture(){ return new Promise(res=>{ let samples=[]; let start=Date.now(); let h=(e)=>{ let a=e.accelerationIncludingGravity; if(a) samples.push([Date.now(),a.x,a.y,a.z]); }; window.addEventListener('devicemotion',h); setTimeout(()=>{ window.removeEventListener('devicemotion',h); let features={amp:0,freq:0}; if(samples.length<3) res(null); else { let amps=[]; for(let i=1;i<samples.length;i++){ let dt=(samples[i][0]-samples[i-1][0])/1000; let dx=samples[i][1]-samples[i-1][1]; let dy=samples[i][2]-samples[i-1][2]; let dz=samples[i][3]-samples[i-1][3]; let sp=Math.sqrt(dx*dx+dy*dy+dz*dz)/Math.max(dt,0.01); amps.push(sp); } let sum=amps.reduce((a,b)=>a+b,0); features.amp=sum/amps.length; let fft=0; for(let i=0;i<amps.length-1;i++) fft+=Math.abs(amps[i+1]-amps[i]); features.freq=fft/(amps.length-1); } res(features); }, 900); }); },
-        async answerControl(ans){ this.pulseGrad='linear-gradient(90deg, #00a884 10%, #2a3942 100%)'; let feat=await this.recordGesture(); if(!feat){ alert('Ошибка сбора, повторите'); return; } this.calibFeatures.push(feat); this.calibAnswers.push(ans); this.calibIdx++; if(this.calibIdx>=this.controlQuestions.length){ this.empathyStage='ask'; }else{ this.currentControlQuestion=this.controlQuestions[this.calibIdx]; } },
-        async answerTarget(ans){ let feat=await this.recordGesture(); if(!feat){ alert('Ошибка'); return; } let avgAmp=this.calibFeatures.reduce((a,b)=>a+b.amp,0)/this.calibFeatures.length; let avgFreq=this.calibFeatures.reduce((a,b)=>a+b.freq,0)/this.calibFeatures.length; let diff=Math.abs(feat.amp-avgAmp)/avgAmp+Math.abs(feat.freq-avgFreq)/avgFreq; let prob=Math.max(0,Math.min(100,Math.round(100*(1-diff)))); this.truthProb=prob; this.targetAnswer=ans; this.verdict=prob>70?'Правдиво вероятно':(prob<40?'Неискренне':'Неопределённо'); this.empathyStage='result'; this.log(`[EMP] Результат: ${prob}%`); let note=`🧠 Эмпатия: ${this.targetQuestion} -> ${ans} (правдивость ${prob}%)`; this.messages.citadel.push({id:Date.now(),text:note,isMe:true,time:new Date().toLocaleTimeString().slice(0,5),status:0}); this.save(); },
-        cancelEmpathy(){ this.empathyActive=false; },
-        closeEmpathy(){ this.empathyActive=false; },
+        async requestGyro(){ if(typeof DeviceMotionEvent!=='undefined'&&typeof DeviceMotionEvent.requestPermission==='function'){ try{ return await DeviceMotionEvent.requestPermission()==='granted'; }catch(e){ return false; } } return true; },
+        // Генерация мастер-ключа (не используется в жестах, но оставлено для биометрии)
+        async genEntropyKey(){ let perm=await this.requestGyro(); if(!perm){ alert('Нет гироскопа'); return; } alert('Держите телефон неподвижно 3 сек'); let samples=[]; let start=Date.now(); let handler=(e)=>{ let a=e.accelerationIncludingGravity; if(a) samples.push([a.x,a.y,a.z,Date.now()]); }; window.addEventListener('devicemotion',handler); await new Promise(r=>{ let t=setInterval(()=>{ if(Date.now()-start>=3000){ window.removeEventListener('devicemotion',handler); clearInterval(t); r(); } },100); }); if(samples.length<5){ alert('Недостаточно'); return; } let diffs=[]; for(let i=1;i<samples.length;i++){ let dt=(samples[i][3]-samples[i-1][3])/1000; let sp=Math.hypot(samples[i][0]-samples[i-1][0],samples[i][1]-samples[i-1][1],samples[i][2]-samples[i-1][2])/Math.max(dt,0.01); diffs.push(sp); } let sum=diffs.reduce((a,b)=>a+b,0), mean=sum/diffs.length, var_=diffs.reduce((a,b)=>a+(b-mean)**2,0)/diffs.length, std=Math.sqrt(var_); let seed=Math.floor((sum*1000+std*10000)%0xFFFFFFFF); let key=seed.toString(16).padStart(8,'0'); if(window.crypto) key=(parseInt(key,16)^crypto.getRandomValues(new Uint32Array(1))[0]).toString(16).padStart(8,'0'); localStorage.setItem('entropyKey',key); this.log(`[BIOM] ключ ${key}`); },
+        // Калибровка жестов (5 ступеней)
+        startGesture(e){ e.preventDefault(); this.gesturePoints=[]; this.breathMessage="Рисуйте..."; let rect=this.$refs.gestureCanvas.getBoundingClientRect(); let touch=e.touches[0]; this.gesturePoints.push({x:touch.clientX-rect.left, y:touch.clientY-rect.top}); },
+        trackGesture(e){ e.preventDefault(); let rect=this.$refs.gestureCanvas.getBoundingClientRect(); let touch=e.touches[0]; let x=touch.clientX-rect.left, y=touch.clientY-rect.top; this.gesturePoints.push({x,y}); this.drawCanvas(); },
+        drawCanvas(){ let canvas=this.$refs.gestureCanvas; if(!canvas) return; let ctx=canvas.getContext('2d'); ctx.fillStyle='#000'; ctx.fillRect(0,0,canvas.width,canvas.height); ctx.strokeStyle='#00a884'; ctx.lineWidth=3; ctx.beginPath(); for(let i=0;i<this.gesturePoints.length;i++){ if(i===0) ctx.moveTo(this.gesturePoints[i].x,this.gesturePoints[i].y); else ctx.lineTo(this.gesturePoints[i].x,this.gesturePoints[i].y); } ctx.stroke(); },
+        endGesture(){ this.breathMessage="Анализ..."; let gestureHash=this.hashGesture(this.gesturePoints); let expected=this.getExpectedGesture(this.calibrationStep); if(this.calibrationStep===4){ // свободная печать – три повторения
+            if(!this.tempFreeGestures) this.tempFreeGestures=[];
+            this.tempFreeGestures.push(gestureHash);
+            if(this.tempFreeGestures.length===3){
+                let avg=this.averageHashes(this.tempFreeGestures);
+                localStorage.setItem('freeGesture',avg);
+                this.calibrationStep++;
+                this.tempFreeGestures=null;
+                this.nextStep();
+            } else { this.breathMessage=`Повторите свободный жест (${3-this.tempFreeGestures.length}/3)`; this.gesturePoints=[]; this.drawCanvas(); }
+        } else if(Math.abs(gestureHash-expected)<0.1){
+            this.calibrationStep++;
+            this.nextStep();
+        } else { alert('Жест не распознан, попробуйте снова'); this.gesturePoints=[]; this.drawCanvas(); this.breathMessage="Повторите жест"; }
+        },
+        hashGesture(points){ if(points.length<10) return 0; let sumX=0,sumY=0,sumD=0; for(let i=1;i<points.length;i++){ let dx=points[i].x-points[i-1].x, dy=points[i].y-points[i-1].y; sumX+=dx; sumY+=dy; sumD+=Math.hypot(dx,dy); } let avgD=sumD/points.length; let length=points.length; return (sumX/length+sumY/length+avgD*0.5+points.length/100)%1; },
+        getExpectedGesture(step){ if(step===0) return 0.15; if(step===1) return 0.38; if(step===2) return 0.62; if(step===3) return 0.84; return 0; },
+        averageHashes(arr){ let sum=arr.reduce((a,b)=>a+b,0); return (sum/arr.length).toString(); },
+        async nextStep(){ if(this.calibrationStep>=5){ this.calibrated=true; this.log('[CALIB] Жесты пройдены'); this.enterSystem(); } else { this.gesturePoints=[]; this.drawCanvas(); this.breathMessage=`Выполните жест: ${this.calibrationStepNames[this.calibrationStep]}`; setTimeout(()=>{ this.breathMessage="Прикоснитесь и выполните жест"; }, 1000); } },
+        resetCalibration(){ this.calibrationStep=0; this.tempFreeGestures=null; this.gesturePoints=[]; this.drawCanvas(); this.breathMessage=`Выполните жест: ${this.calibrationStepNames[0]}`; },
+        async enterSystem(){ this.myId='id_'+Math.random().toString(36).substr(2,8); this.contacts=[{name:'Хранитель',peerId:'citadel',type:'citadel'}]; this.feedItems=[]; this.loggedIn=true; this.mqtt=new MQTTBridge((s)=>this.mqttOnline=s, this.onMqttMessage, this.myId); this.mqtt.connect([`polis108/node/${this.myId}`]); this.save(); },
+        onMqttMessage(payload,topic){ try{ let raw=cry.resonate(payload,0); let parts=raw.split('|'); if(parts[0]==='MSG'){ let sender=parts[1], name=parts[2], msgId=parts[3], text=parts.slice(4).join('|'); if(sender===this.myId) return; this.feedItems.unshift({id:Date.now(),type:'message',text,isMe:false,senderName:name,time:new Date().toLocaleTimeString().slice(0,5)}); this.save(); } else if(parts[0]==='DEAL'){ let deal={id:parts[2],description:parts[3],senderId:parts[1],closed:false,type:'deal',time:new Date().toLocaleTimeString().slice(0,5)}; this.feedItems.unshift(deal); this.save(); } else if(parts[0]==='ACCEPT'){ let dealId=parts[2]; let deal=this.feedItems.find(i=>i.type==='deal'&&i.id===dealId); if(deal) deal.closed=true; this.save(); } }catch(e){ this.log('[ERR] MQTT'); } },
+        processUniversal(){ let val=this.universalInput.trim(); if(!val) return; if(/^\d+(\.\d+)?$/.test(val)){ let amount=parseFloat(val); this.paymentRequest(amount); }else if(val.toLowerCase().startsWith('товар ')){ let desc=val.substring(5); this.createDeal(desc); }else{ this.sendMessage(val); } this.universalInput=''; },
+        sendMessage(txt){ if(!txt) return; let msgId=Date.now(); let code=cry.collapse(`MSG|${this.myId}|${this.myName}|${msgId}|${txt}`,0); this.mqtt.send(`polis108/node/${this.myId}`,code); this.feedItems.unshift({id:Date.now(),type:'message',text:txt,isMe:true,senderName:this.myName,time:new Date().toLocaleTimeString().slice(0,5)}); this.save(); },
+        createDeal(desc){ let dealId=Math.random().toString(36).substr(2,10); let code=cry.collapse(`DEAL|${this.myId}|${dealId}|${desc}`,0); this.mqtt.send(`polis108/node/${this.myId}`,code); this.feedItems.unshift({id:Date.now(),type:'deal',id:dealId,description:desc,senderId:this.myId,closed:false,time:new Date().toLocaleTimeString().slice(0,5)}); this.save(); },
+        acceptDeal(deal){ let code=cry.collapse(`ACCEPT|${this.myId}|${deal.id}`,0); this.mqtt.send(`polis108/node/${deal.senderId}`,code); deal.closed=true; this.save(); alert('Сделка принята, свяжитесь для оплаты'); },
+        paymentRequest(amount){ alert(`Запрос платежа на ${amount} (в разработке)`); },
+        save(){ sg.save({t:this.contacts, feed:this.feedItems, myId:this.myId, myName:this.myName}); },
         wipeIdentity(){ if(confirm('Сжечь личность?')){ localStorage.clear(); sg.wipe(); window.location.reload(); } },
-        toggleLogs(){ this.showLogs=!this.showLogs; }
+        recalibrate(){ this.calibrated=false; this.calibrationStep=0; this.tempFreeGestures=null; this.gesturePoints=[]; this.drawCanvas(); this.breathMessage=`Выполните жест: ${this.calibrationStepNames[0]}`; }
     }
 });
 </script>
